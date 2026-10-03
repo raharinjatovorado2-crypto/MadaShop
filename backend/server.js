@@ -1,3 +1,4 @@
+```javascript
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -283,6 +284,53 @@ db.prepare(`
     WHERE seller_name IS NULL
        OR seller_name = ''
 `).run();
+
+
+/* ============================================================
+   REPAIR / BACKFILL MISSING SHOPS
+============================================================ */
+
+/*
+   This repairs old users who already have an account
+   but do not have a corresponding row inside "shops".
+
+   It does NOT create duplicate shops because we only insert
+   users whose user_id does not already exist in shops.
+*/
+
+const repairMissingShops =
+    db.prepare(`
+        INSERT INTO shops (
+            user_id,
+            seller_name,
+            shop_name,
+            description,
+            phone,
+            whatsapp,
+            address,
+            logo
+        )
+        SELECT
+            users.id,
+            users.seller_name,
+            users.shop_name,
+            '',
+            users.phone,
+            '',
+            '',
+            ''
+        FROM users
+        LEFT JOIN shops
+            ON shops.user_id = users.id
+        WHERE shops.user_id IS NULL
+    `);
+
+const missingShopsResult =
+    repairMissingShops.run();
+
+console.log(
+    `Missing shops repaired: ${missingShopsResult.changes}`
+);
 
 
 db.prepare(`
@@ -1574,7 +1622,25 @@ app.get(
                 Number(req.params.userId);
 
 
-            const shop =
+            if (
+                !userId ||
+                !Number.isInteger(userId) ||
+                userId <= 0
+            ) {
+
+                return res.status(400).json({
+
+                    success: false,
+
+                    message:
+                        "User ID invalide."
+
+                });
+
+            }
+
+
+            let shop =
                 db.prepare(`
                     SELECT *
                     FROM shops
@@ -1582,6 +1648,80 @@ app.get(
                 `).get(
                     userId
                 );
+
+
+            /*
+            ----------------------------------------------------
+               EXTRA SAFETY REPAIR
+               If an old user somehow still has no shop,
+               create it automatically here.
+            ----------------------------------------------------
+            */
+
+            if (!shop) {
+
+                const user =
+                    db.prepare(`
+                        SELECT
+                            id,
+                            seller_name,
+                            shop_name,
+                            phone
+                        FROM users
+                        WHERE id = ?
+                    `).get(
+                        userId
+                    );
+
+
+                if (!user) {
+
+                    return res.status(404).json({
+
+                        success: false,
+
+                        message:
+                            "Utilisateur introuvable."
+
+                    });
+
+                }
+
+
+                db.prepare(`
+                    INSERT OR IGNORE INTO shops (
+                        user_id,
+                        seller_name,
+                        shop_name,
+                        description,
+                        phone,
+                        whatsapp,
+                        address,
+                        logo
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `).run(
+                    Number(user.id),
+                    String(user.seller_name || ""),
+                    String(user.shop_name || ""),
+                    "",
+                    String(user.phone || ""),
+                    "",
+                    "",
+                    ""
+                );
+
+
+                shop =
+                    db.prepare(`
+                        SELECT *
+                        FROM shops
+                        WHERE user_id = ?
+                    `).get(
+                        userId
+                    );
+
+            }
 
 
             if (!shop) {
@@ -3645,3 +3785,4 @@ server.listen(
 
     }
 );
+```
