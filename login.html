@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Connexion</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            color: #111827;
+        }
+
+        .logo span {
+            color: #2563eb;
+        }
+
+        .logo p {
+            color: #6b7280;
+            margin-top: 7px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .password-box {
+            position: relative;
+        }
+
+        .password-box input {
+            padding-right: 50px;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 14px;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            display: block;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.success {
+            display: block;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .register-link a {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .back-home a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-home a:hover {
+            color: #2563eb;
+        }
+
+        @media (max-width: 500px) {
+
+            .card {
+                padding: 22px;
+            }
+
+            .logo h1 {
+                font-size: 27px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+
+        <h1>
+            Mada<span>Shop</span>
+        </h1>
+
+        <p>
+            Espace vendeur
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Connexion
+        </h2>
+
+        <p class="subtitle">
+            Connectez-vous à votre espace vendeur.
+        </p>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="exemple@email.com"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Mot de passe
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Votre mot de passe"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword()"
+                        aria-label="Afficher le mot de passe"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                id="loginBtn"
+                class="submit-btn"
+            >
+                Se connecter
+            </button>
+
+        </form>
+
+
+        <div class="register-link">
+
+            Vous n'avez pas encore de compte ?
+
+            <a href="register.html">
+                Créer un compte
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="back-home">
+
+        <a href="index.html">
+            ← Retour à l'accueil
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const API_URL = "/api";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const form =
+    document.getElementById("loginForm");
+
+const message =
+    document.getElementById("message");
+
+const loginBtn =
+    document.getElementById("loginBtn");
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
+
+}
+
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+function togglePassword() {
+
+    const input =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".show-password");
+
+
+    if (input.type === "password") {
+
+        input.type = "text";
+
+        button.textContent = "🙈";
+
+    } else {
+
+        input.type = "password";
+
+        button.textContent = "👁️";
+
+    }
+
+}
+
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim()
+                .toLowerCase();
+
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        if (!email || !password) {
+
+            showMessage(
+                "Veuillez entrer votre email et votre mot de passe.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        loginBtn.disabled = true;
+
+        loginBtn.textContent =
+            "⏳ Connexion...";
+
+
+        try {
+
+            /* =========================================
+               API LOGIN
+            ========================================= */
+
+            const response =
+                await fetch(
+                    `${API_URL}/login`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            email: email,
+                            password: password
+                        })
+                    }
+                );
+
+
+            /* =========================================
+               RESPONSE
+            ========================================= */
+
+            const contentType =
+                response.headers.get(
+                    "content-type"
+                ) || "";
+
+
+            let data;
+
+
+            if (
+                contentType.includes(
+                    "application/json"
+                )
+            ) {
+
+                data =
+                    await response.json();
+
+            } else {
+
+                const serverText =
+                    await response.text();
+
+                console.error(
+                    "Réponse serveur:",
+                    serverText
+                );
+
+                throw new Error(
+                    "Le serveur a retourné une réponse invalide."
+                );
+
+            }
+
+
+            console.log(
+                "Réponse login:",
+                data
+            );
+
+
+            /* =========================================
+               HTTP ERROR
+            ========================================= */
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data &&
+                    data.message
+                        ? data.message
+                        : "Email ou mot de passe incorrect."
+                );
+
+            }
+
+
+            /* =========================================
+               RECUPERATION UTILISATEUR
+            =========================================
+            
+            On accepte plusieurs formats :
+
+            data.user
+            data.data
+            data
+            ========================================= */
+
+            let user =
+                data &&
+                data.user
+                    ? data.user
+                    : (
+                        data &&
+                        data.data
+                            ? data.data
+                            : data
+                    );
+
+
+            /* =========================================
+               VERIFIER USER
+            ========================================= */
+
+            if (
+                !user ||
+                typeof user !== "object"
+            ) {
+
+                throw new Error(
+                    "Les informations utilisateur reçues sont invalides."
+                );
+
+            }
+
+
+            /* =========================================
+               RECUPERER ID
+            ========================================= */
+
+            const rawUserId =
+                user.id ??
+                user.userId ??
+                user.user_id;
+
+
+            const userId =
+                Number(rawUserId);
+
+
+            if (
+                !Number.isInteger(userId) ||
+                userId <= 0
+            ) {
+
+                console.error(
+                    "Utilisateur reçu:",
+                    user
+                );
+
+                throw new Error(
+                    "L'identifiant utilisateur est invalide."
+                );
+
+            }
+
+
+            /* =========================================
+               NORMALISER USER
+            ========================================= */
+
+            const normalizedUser = {
+
+                id: userId,
+
+                seller_name:
+                    user.seller_name ||
+                    user.sellerName ||
+                    "",
+
+                shop_name:
+                    user.shop_name ||
+                    user.shopName ||
+                    "",
+
+                phone:
+                    user.phone ||
+                    "",
+
+                email:
+                    user.email ||
+                    email
+
+            };
+
+
+            /* =========================================
+               VERIFICATION MINIMALE
+            ========================================= */
+
+            if (
+                !normalizedUser.seller_name &&
+                !normalizedUser.shop_name &&
+                !normalizedUser.email
+            ) {
+
+                console.error(
+                    "Utilisateur incomplet:",
+                    user
+                );
+
+            }
+
+
+            /* =========================================
+               NETTOYER ANCIENNE SESSION
+            ========================================= */
+
+            localStorage.removeItem(
+                "madaShopUser"
+            );
+
+            localStorage.removeItem(
+                "madaShopLoggedIn"
+            );
+
+
+            /* =========================================
+               SAUVEGARDER NOUVELLE SESSION
+            ========================================= */
+
+            localStorage.setItem(
+                "madaShopUser",
+                JSON.stringify(
+                    normalizedUser
+                )
+            );
+
+
+            localStorage.setItem(
+                "madaShopLoggedIn",
+                "true"
+            );
+
+
+            /* =========================================
+               MESSAGE SUCCES
+            ========================================= */
+
+            showMessage(
+                "✅ Connexion réussie ! Redirection...",
+                "success"
+            );
+
+
+            /* =========================================
+               REDIRECTION
+            ========================================= */
+
+            setTimeout(
+                function() {
+
+                    window.location.replace(
+                        "dashboard.html"
+                    );
+
+                },
+                500
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Login error:",
+                error
+            );
+
+
+            if (
+                error instanceof TypeError
+            ) {
+
+                showMessage(
+                    "❌ Impossible de contacter le serveur MadaShop. Vérifiez que server.js est bien lancé.",
+                    "error"
+                );
+
+            } else {
+
+                showMessage(
+                    "❌ " +
+                    (
+                        error.message ||
+                        "Une erreur est survenue pendant la connexion."
+                    ),
+                    "error"
+                );
+
+            }
+
+
+        } finally {
+
+            loginBtn.disabled = false;
+
+            loginBtn.textContent =
+                "Se connecter";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

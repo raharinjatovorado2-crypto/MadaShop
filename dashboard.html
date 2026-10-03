@@ -1,0 +1,2553 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --green: #16a34a;
+            --orange: #f59e0b;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --dark: #111827;
+            --text: #374151;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --bg: #f5f7fb;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ================= HEADER ================= */
+
+        header {
+            height: 72px;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--dark);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .connection-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        .connection-dot.offline {
+            background: var(--red);
+        }
+
+        .notification-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            color: white;
+            font-size: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .logout-btn {
+            border: none;
+            background: transparent;
+            color: var(--red);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* ================= LAYOUT ================= */
+
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 72px);
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            width: 240px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            padding: 22px 14px;
+            flex-shrink: 0;
+        }
+
+        .menu-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #9ca3af;
+            font-weight: 700;
+            margin: 10px 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 13px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .menu-link:hover {
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .menu-link.active {
+            background: #dbeafe;
+            color: var(--primary);
+        }
+
+        .menu-icon {
+            width: 24px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        /* ================= MAIN ================= */
+
+        main {
+            flex: 1;
+            padding: 30px;
+            min-width: 0;
+        }
+
+        .page-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-bottom: 28px;
+        }
+
+        .page-title h1 {
+            color: var(--dark);
+            font-size: 29px;
+            margin-bottom: 6px;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            border: none;
+            padding: 11px 16px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-light {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        /* ================= STATS ================= */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 21px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-value {
+            margin-top: 8px;
+            font-size: 25px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .stat-icon {
+            width: 43px;
+            height: 43px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+        }
+
+        .icon-orange {
+            background: #fef3c7;
+        }
+
+        .icon-purple {
+            background: #ede9fe;
+        }
+
+        .icon-red {
+            background: #fee2e2;
+        }
+
+        .icon-cyan {
+            background: #cffafe;
+        }
+
+        .stat-description {
+            margin-top: 9px;
+            color: #9ca3af;
+            font-size: 11px;
+        }
+
+        /* ================= CONTENT GRID ================= */
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.45fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 21px;
+            min-width: 0;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .card-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ================= SALES CHART ================= */
+
+        .chart-container {
+            height: 260px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chart-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-total {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .chart-subtitle {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .chart {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 9px;
+            border-bottom: 1px solid var(--border);
+            padding: 0 5px;
+            min-height: 150px;
+        }
+
+        .chart-bar-wrapper {
+            height: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .chart-bar {
+            width: 100%;
+            max-width: 32px;
+            background: linear-gradient(to top, #2563eb, #60a5fa);
+            border-radius: 6px 6px 0 0;
+            min-height: 4px;
+            transition: 0.3s;
+        }
+
+        .chart-bar:hover {
+            opacity: 0.8;
+        }
+
+        .chart-label {
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 7px;
+            white-space: nowrap;
+        }
+
+        /* ================= TOP PRODUCTS ================= */
+
+        .product-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .product-row:last-child {
+            border-bottom: none;
+        }
+
+        .product-rank {
+            width: 29px;
+            height: 29px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: var(--primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-sales {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .product-revenue {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--green);
+            white-space: nowrap;
+        }
+
+        /* ================= ORDERS ================= */
+
+        .order-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .order-row:last-child {
+            border-bottom: none;
+        }
+
+        .order-icon {
+            width: 39px;
+            height: 39px;
+            border-radius: 10px;
+            background: #eff6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 17px;
+        }
+
+        .order-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .order-customer {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .order-product {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .order-right {
+            text-align: right;
+        }
+
+        .order-total {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--dark);
+        }
+
+        .order-date {
+            font-size: 10px;
+            color: #9ca3af;
+            margin-top: 3px;
+        }
+
+        /* ================= BADGES ================= */
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .status-new {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-accepted {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-processing {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .status-rejected,
+        .status-cancelled {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* ================= LOW STOCK ================= */
+
+        .stock-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stock-item:last-child {
+            border-bottom: none;
+        }
+
+        .stock-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .stock-name {
+            color: var(--dark);
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .stock-bar {
+            height: 5px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            margin-top: 7px;
+            overflow: hidden;
+        }
+
+        .stock-progress {
+            height: 100%;
+            border-radius: 10px;
+            background: var(--orange);
+        }
+
+        .stock-number {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--red);
+            white-space: nowrap;
+        }
+
+        /* ================= EMPTY ================= */
+
+        .empty {
+            text-align: center;
+            padding: 35px 15px;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+
+        .empty p {
+            font-size: 13px;
+        }
+
+        /* ================= LOADING ================= */
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 35px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #e5e7eb;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 9px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ================= NOTIFICATION ================= */
+
+        .notification-popup {
+            position: fixed;
+            right: 25px;
+            top: 85px;
+            width: 330px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+            padding: 17px;
+            z-index: 3000;
+            display: none;
+        }
+
+        .notification-popup.show {
+            display: block;
+            animation: slideIn 0.25s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-title {
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 7px;
+        }
+
+        .notification-text {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        .notification-close {
+            float: right;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 17px;
+            color: var(--muted);
+        }
+
+        /* ================= TOAST ================= */
+
+        .toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            background: #111827;
+            color: white;
+            padding: 13px 17px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+            z-index: 5000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+        }
+
+        .toast.show {
+            display: block;
+            animation: toastIn 0.25s ease;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ================= RESPONSIVE ================= */
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 800px) {
+            header {
+                padding: 0 15px;
+            }
+
+            .sidebar {
+                width: 70px;
+                padding: 15px 8px;
+            }
+
+            .menu-title,
+            .menu-text {
+                display: none;
+            }
+
+            .menu-link {
+                justify-content: center;
+                padding: 13px 5px;
+            }
+
+            .menu-icon {
+                width: auto;
+            }
+
+            main {
+                padding: 20px 15px;
+            }
+
+            .user-name,
+            .connection {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                height: 64px;
+            }
+
+            .layout {
+                min-height: calc(100vh - 64px);
+            }
+
+            .logo {
+                font-size: 20px;
+            }
+
+            .avatar {
+                width: 34px;
+                height: 34px;
+            }
+
+            .notification-btn {
+                width: 36px;
+                height: 36px;
+            }
+
+            main {
+                padding: 18px 12px 30px;
+            }
+
+            .page-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .page-title h1 {
+                font-size: 24px;
+            }
+
+            .top-actions {
+                width: 100%;
+            }
+
+            .top-actions .btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-value {
+                font-size: 20px;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 17px;
+            }
+
+            .stat-label {
+                font-size: 11px;
+            }
+
+            .content-grid {
+                gap: 12px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .chart {
+                gap: 5px;
+            }
+
+            .notification-popup {
+                left: 12px;
+                right: 12px;
+                width: auto;
+                top: 73px;
+            }
+
+            .sidebar {
+                width: 58px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .page-title h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <a href="dashboard.html" class="logo">
+        Mada<span>Shop</span>
+    </a>
+
+    <div class="header-right">
+
+        <div class="connection">
+            <span class="connection-dot" id="connectionDot"></span>
+            <span id="connectionText">Connexion...</span>
+        </div>
+
+        <button class="notification-btn" id="notificationBtn" title="Notifications">
+            🔔
+            <span class="notification-badge" id="notificationBadge">0</span>
+        </button>
+
+        <div class="user-menu">
+            <div class="avatar" id="avatar">U</div>
+
+            <div>
+                <div class="user-name" id="userName">Utilisateur</div>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div class="menu-title">Menu</div>
+
+        <a href="dashboard.html" class="menu-link active">
+            <span class="menu-icon">📊</span>
+            <span class="menu-text">Dashboard</span>
+        </a>
+
+        <a href="orders.html" class="menu-link">
+            <span class="menu-icon">🛒</span>
+            <span class="menu-text">Commandes</span>
+        </a>
+
+        <a href="add-product.html" class="menu-link">
+            <span class="menu-icon">➕</span>
+            <span class="menu-text">Ajouter produit</span>
+        </a>
+
+        <a href="shop.html" class="menu-link">
+            <span class="menu-icon">🏪</span>
+            <span class="menu-text">Ma boutique</span>
+        </a>
+
+        <div class="menu-title" style="margin-top:28px;">Compte</div>
+
+        <a href="create-shop.html" class="menu-link">
+            <span class="menu-icon">⚙️</span>
+            <span class="menu-text">Paramètres boutique</span>
+        </a>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main>
+
+        <div class="page-top">
+
+            <div class="page-title">
+                <h1>Bonjour, <span id="welcomeName">vendeur</span> 👋</h1>
+                <p>Voici un aperçu de l'activité de votre boutique.</p>
+            </div>
+
+            <div class="top-actions">
+
+                <button class="btn btn-light" onclick="loadDashboard()">
+                    🔄 Actualiser
+                </button>
+
+                <a href="add-product.html" class="btn btn-primary">
+                    ➕ Ajouter produit
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= STATS ================= -->
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Chiffre d'affaires</div>
+                        <div class="stat-value" id="salesValue">0 Ar</div>
+                    </div>
+
+                    <div class="stat-icon icon-green">
+                        💰
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Commandes terminées
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Commandes</div>
+                        <div class="stat-value" id="ordersValue">0</div>
+                    </div>
+
+                    <div class="stat-icon icon-blue">
+                        🛒
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Toutes les commandes
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Produits</div>
+                        <div class="stat-value" id="productsValue">0</div>
+                    </div>
+
+                    <div class="stat-icon icon-purple">
+                        📦
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Produits dans votre boutique
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Commandes terminées</div>
+                        <div class="stat-value" id="completedValue">0</div>
+                    </div>
+
+                    <div class="stat-icon icon-green">
+                        🟢
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Commandes finalisées
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Commandes en attente</div>
+                        <div class="stat-value" id="pendingValue">0</div>
+                    </div>
+
+                    <div class="stat-icon icon-orange">
+                        ⏳
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Nouvelles commandes
+                </div>
+
+            </div>
+
+
+            <div class="stat-card">
+
+                <div class="stat-top">
+
+                    <div>
+                        <div class="stat-label">Paiements reçus</div>
+                        <div class="stat-value" id="paidValue">0</div>
+                    </div>
+
+                    <div class="stat-icon icon-cyan">
+                        💳
+                    </div>
+
+                </div>
+
+                <div class="stat-description">
+                    Commandes marquées comme payées
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= SALES + TOP PRODUCTS ================= -->
+
+        <div class="content-grid">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        📈 Évolution des ventes
+                    </div>
+
+                    <span style="font-size:11px;color:#9ca3af;">
+                        7 derniers jours
+                    </span>
+
+                </div>
+
+                <div class="chart-container">
+
+                    <div class="chart-summary">
+
+                        <div>
+                            <div class="chart-total" id="chartTotal">
+                                0 Ar
+                            </div>
+
+                            <div class="chart-subtitle">
+                                Ventes terminées
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="chart" id="salesChart">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            Chargement...
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        🏆 Produits les plus vendus
+                    </div>
+
+                    <a href="shop.html" class="card-link">
+                        Voir boutique
+                    </a>
+
+                </div>
+
+                <div id="topProducts">
+
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= RECENT ORDERS + LOW STOCK ================= -->
+
+        <div class="content-grid">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        🔔 Dernières commandes
+                    </div>
+
+                    <a href="orders.html" class="card-link">
+                        Voir toutes
+                    </a>
+
+                </div>
+
+                <div id="recentOrders">
+
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement...
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="card-title">
+                        ⚠️ Stock faible
+                    </div>
+
+                    <a href="add-product.html" class="card-link">
+                        Ajouter
+                    </a>
+
+                </div>
+
+                <div id="lowStock">
+
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        Chargement...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+</div>
+
+
+<!-- NOTIFICATION POPUP -->
+
+<div class="notification-popup" id="notificationPopup">
+
+    <button class="notification-close" onclick="closeNotification()">
+        ×
+    </button>
+
+    <div class="notification-title">
+        🔔 Nouvelle notification
+    </div>
+
+    <div class="notification-text" id="notificationText">
+        Vous avez une nouvelle commande.
+    </div>
+
+</div>
+
+
+<!-- TOAST -->
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+    /* =========================================================
+       AUTHENTICATION
+    ========================================================= */
+
+    const savedUser = localStorage.getItem("madaShopUser");
+
+    if (!savedUser) {
+        window.location.href = "login.html";
+    }
+
+    let user = null;
+    let userId = null;
+
+    try {
+        user = JSON.parse(savedUser);
+
+        userId =
+            user.id ||
+            user.userId ||
+            user.user_id;
+
+    } catch (error) {
+
+        console.error("Erreur utilisateur:", error);
+
+        localStorage.removeItem("madaShopUser");
+
+        window.location.href = "login.html";
+    }
+
+
+    if (!userId) {
+
+        localStorage.removeItem("madaShopUser");
+
+        window.location.href = "login.html";
+    }
+
+
+    /* =========================================================
+       USER INFORMATION
+    ========================================================= */
+
+    const sellerName =
+        user.seller_name ||
+        user.sellerName ||
+        user.name ||
+        "Utilisateur";
+
+    document.getElementById("userName").textContent = sellerName;
+
+    document.getElementById("welcomeName").textContent = sellerName;
+
+    document.getElementById("avatar").textContent =
+        sellerName.charAt(0).toUpperCase();
+
+
+    /* =========================================================
+       FORMAT MONEY
+    ========================================================= */
+
+    function formatMoney(value) {
+
+        const number = Number(value || 0);
+
+        return number.toLocaleString("fr-FR") + " Ar";
+    }
+
+
+    /* =========================================================
+       FORMAT DATE
+    ========================================================= */
+
+    function formatDate(dateValue) {
+
+        if (!dateValue) {
+            return "-";
+        }
+
+        const date = new Date(dateValue);
+
+        if (isNaN(date.getTime())) {
+            return "-";
+        }
+
+        return date.toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+        });
+    }
+
+
+    /* =========================================================
+       STATUS LABEL
+    ========================================================= */
+
+    function statusLabel(status) {
+
+        const labels = {
+
+            new: "Nouvelle",
+
+            accepted: "Acceptée",
+
+            rejected: "Refusée",
+
+            processing: "En traitement",
+
+            completed: "Terminée",
+
+            cancelled: "Annulée"
+
+        };
+
+        return labels[status] || status || "-";
+    }
+
+
+    /* =========================================================
+       LOAD DASHBOARD
+    ========================================================= */
+
+    async function loadDashboard() {
+
+        try {
+
+            const [
+                dashboardResponse,
+                ordersResponse,
+                productsResponse
+            ] = await Promise.all([
+
+                fetch(`/api/dashboard/${userId}`),
+
+                fetch(`/api/orders/${userId}`),
+
+                fetch(`/api/products/${userId}`)
+
+            ]);
+
+
+            if (!dashboardResponse.ok) {
+                throw new Error("Impossible de charger les statistiques.");
+            }
+
+
+            const dashboardData =
+                await dashboardResponse.json();
+
+            const ordersData =
+                await ordersResponse.json();
+
+            const productsData =
+                await productsResponse.json();
+
+
+            const stats =
+                dashboardData.stats ||
+                dashboardData ||
+                {};
+
+
+            const orders =
+                Array.isArray(ordersData)
+                    ? ordersData
+                    : (
+                        ordersData.orders ||
+                        []
+                    );
+
+
+            const products =
+                Array.isArray(productsData)
+                    ? productsData
+                    : (
+                        productsData.products ||
+                        []
+                    );
+
+
+            /* ================= STATS ================= */
+
+            document.getElementById("salesValue").textContent =
+                formatMoney(stats.sales);
+
+            document.getElementById("ordersValue").textContent =
+                Number(stats.orders || 0);
+
+            document.getElementById("productsValue").textContent =
+                Number(stats.products || products.length || 0);
+
+            document.getElementById("completedValue").textContent =
+                Number(stats.completedOrders || 0);
+
+            document.getElementById("pendingValue").textContent =
+                Number(stats.pendingOrders || 0);
+
+            document.getElementById("paidValue").textContent =
+                Number(stats.paidOrders || 0);
+
+
+            /* ================= CHART ================= */
+
+            renderSalesChart(orders);
+
+
+            /* ================= TOP PRODUCTS ================= */
+
+            renderTopProducts(orders);
+
+
+            /* ================= RECENT ORDERS ================= */
+
+            renderRecentOrders(orders);
+
+
+            /* ================= LOW STOCK ================= */
+
+            renderLowStock(products);
+
+        } catch (error) {
+
+            console.error("Dashboard error:", error);
+
+            showToast(
+                "Impossible de charger certaines données."
+            );
+
+            document.getElementById("topProducts").innerHTML =
+                emptyState(
+                    "📦",
+                    "Impossible de charger les produits."
+                );
+
+            document.getElementById("recentOrders").innerHTML =
+                emptyState(
+                    "🛒",
+                    "Impossible de charger les commandes."
+                );
+
+            document.getElementById("lowStock").innerHTML =
+                emptyState(
+                    "📦",
+                    "Impossible de charger le stock."
+                );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       SALES CHART
+    ========================================================= */
+
+    function renderSalesChart(orders) {
+
+        const chart =
+            document.getElementById("salesChart");
+
+        const completedOrders =
+            orders.filter(
+                order =>
+                    String(order.status).toLowerCase() ===
+                    "completed"
+            );
+
+
+        const days = [];
+
+        const today = new Date();
+
+        for (let i = 6; i >= 0; i--) {
+
+            const date = new Date(today);
+
+            date.setHours(0, 0, 0, 0);
+
+            date.setDate(
+                today.getDate() - i
+            );
+
+            days.push(date);
+
+        }
+
+
+        const salesByDay =
+            days.map(day => {
+
+                let total = 0;
+
+                completedOrders.forEach(order => {
+
+                    const orderDate =
+                        new Date(order.created_at);
+
+                    if (isNaN(orderDate.getTime())) {
+                        return;
+                    }
+
+                    if (
+                        orderDate.getFullYear() ===
+                        day.getFullYear() &&
+
+                        orderDate.getMonth() ===
+                        day.getMonth() &&
+
+                        orderDate.getDate() ===
+                        day.getDate()
+                    ) {
+
+                        total += Number(
+                            order.total || 0
+                        );
+
+                    }
+
+                });
+
+                return {
+                    date: day,
+                    total
+                };
+
+            });
+
+
+        const maximum =
+            Math.max(
+                ...salesByDay.map(
+                    item => item.total
+                ),
+                1
+            );
+
+
+        const totalSales =
+            salesByDay.reduce(
+                (sum, item) =>
+                    sum + item.total,
+                0
+            );
+
+
+        document.getElementById("chartTotal").textContent =
+            formatMoney(totalSales);
+
+
+        chart.innerHTML = "";
+
+
+        salesByDay.forEach(item => {
+
+            const wrapper =
+                document.createElement("div");
+
+            wrapper.className =
+                "chart-bar-wrapper";
+
+
+            const bar =
+                document.createElement("div");
+
+            bar.className =
+                "chart-bar";
+
+
+            const height =
+                Math.max(
+                    4,
+                    (item.total / maximum) * 100
+                );
+
+
+            bar.style.height =
+                height + "%";
+
+
+            bar.title =
+                formatMoney(item.total);
+
+
+            const label =
+                document.createElement("div");
+
+            label.className =
+                "chart-label";
+
+            label.textContent =
+                item.date.toLocaleDateString(
+                    "fr-FR",
+                    {
+                        weekday: "short"
+                    }
+                ).replace(".", "");
+
+
+            wrapper.appendChild(bar);
+
+            wrapper.appendChild(label);
+
+            chart.appendChild(wrapper);
+
+        });
+
+    }
+
+
+    /* =========================================================
+       TOP PRODUCTS
+    ========================================================= */
+
+    function renderTopProducts(orders) {
+
+        const container =
+            document.getElementById("topProducts");
+
+
+        const completedOrders =
+            orders.filter(
+                order =>
+                    String(order.status).toLowerCase() ===
+                    "completed"
+            );
+
+
+        const productMap = {};
+
+
+        completedOrders.forEach(order => {
+
+            const productName =
+                order.product_name ||
+                "Produit";
+
+
+            if (!productMap[productName]) {
+
+                productMap[productName] = {
+                    name: productName,
+                    quantity: 0,
+                    revenue: 0
+                };
+
+            }
+
+
+            productMap[productName].quantity +=
+                Number(order.quantity || 1);
+
+
+            productMap[productName].revenue +=
+                Number(order.total || 0);
+
+        });
+
+
+        const products =
+            Object.values(productMap)
+                .sort(
+                    (a, b) =>
+                        b.quantity - a.quantity
+                )
+                .slice(0, 5);
+
+
+        if (products.length === 0) {
+
+            container.innerHTML =
+                emptyState(
+                    "🏆",
+                    "Aucune vente terminée pour le moment."
+                );
+
+            return;
+        }
+
+
+        container.innerHTML = "";
+
+
+        products.forEach(
+            (product, index) => {
+
+                const row =
+                    document.createElement("div");
+
+                row.className =
+                    "product-row";
+
+
+                row.innerHTML = `
+
+                    <div class="product-rank">
+                        ${index + 1}
+                    </div>
+
+                    <div class="product-info">
+
+                        <div class="product-name"
+                             title="${escapeHtml(product.name)}">
+                            ${escapeHtml(product.name)}
+                        </div>
+
+                        <div class="product-sales">
+                            ${product.quantity}
+                            unité${product.quantity > 1 ? "s" : ""}
+                        </div>
+
+                    </div>
+
+                    <div class="product-revenue">
+                        ${formatMoney(product.revenue)}
+                    </div>
+
+                `;
+
+
+                container.appendChild(row);
+
+            }
+        );
+
+    }
+
+
+    /* =========================================================
+       RECENT ORDERS
+    ========================================================= */
+
+    function renderRecentOrders(orders) {
+
+        const container =
+            document.getElementById("recentOrders");
+
+
+        const recent =
+            [...orders]
+                .sort(
+                    (a, b) =>
+                        new Date(b.created_at) -
+                        new Date(a.created_at)
+                )
+                .slice(0, 5);
+
+
+        if (recent.length === 0) {
+
+            container.innerHTML =
+                emptyState(
+                    "🛒",
+                    "Aucune commande pour le moment."
+                );
+
+            return;
+        }
+
+
+        container.innerHTML = "";
+
+
+        recent.forEach(order => {
+
+            const row =
+                document.createElement("div");
+
+            row.className =
+                "order-row";
+
+
+            const status =
+                String(order.status || "new")
+                    .toLowerCase();
+
+
+            row.innerHTML = `
+
+                <div class="order-icon">
+                    🛍️
+                </div>
+
+                <div class="order-info">
+
+                    <div class="order-customer">
+                        ${escapeHtml(
+                            order.customer_name ||
+                            "Client"
+                        )}
+                    </div>
+
+                    <div class="order-product">
+                        ${escapeHtml(
+                            order.product_name ||
+                            "Produit"
+                        )}
+                        ×
+                        ${Number(
+                            order.quantity || 1
+                        )}
+                    </div>
+
+                    <span class="status-badge status-${status}">
+                        ${statusLabel(status)}
+                    </span>
+
+                </div>
+
+                <div class="order-right">
+
+                    <div class="order-total">
+                        ${formatMoney(order.total)}
+                    </div>
+
+                    <div class="order-date">
+                        ${formatDate(order.created_at)}
+                    </div>
+
+                </div>
+
+            `;
+
+
+            container.appendChild(row);
+
+        });
+
+    }
+
+
+    /* =========================================================
+       LOW STOCK
+    ========================================================= */
+
+    function renderLowStock(products) {
+
+        const container =
+            document.getElementById("lowStock");
+
+
+        /*
+            Stock faible = 5 ou moins.
+            Vous pouvez modifier cette valeur ici.
+        */
+
+        const LOW_STOCK_LIMIT = 5;
+
+
+        const lowStock =
+            products
+                .filter(
+                    product =>
+                        Number(product.stock || 0) <=
+                        LOW_STOCK_LIMIT
+                )
+                .sort(
+                    (a, b) =>
+                        Number(a.stock || 0) -
+                        Number(b.stock || 0)
+                )
+                .slice(0, 6);
+
+
+        if (lowStock.length === 0) {
+
+            container.innerHTML =
+                emptyState(
+                    "✅",
+                    "Aucun produit avec un stock faible."
+                );
+
+            return;
+        }
+
+
+        container.innerHTML = "";
+
+
+        lowStock.forEach(product => {
+
+            const stock =
+                Number(product.stock || 0);
+
+
+            const percentage =
+                Math.min(
+                    100,
+                    Math.max(
+                        5,
+                        (stock / LOW_STOCK_LIMIT) * 100
+                    )
+                );
+
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "stock-item";
+
+
+            item.innerHTML = `
+
+                <div class="stock-info">
+
+                    <div class="stock-name"
+                         title="${escapeHtml(product.name)}">
+                        ${escapeHtml(product.name)}
+                    </div>
+
+                    <div class="stock-bar">
+
+                        <div class="stock-progress"
+                             style="width:${percentage}%">
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="stock-number">
+                    ${stock} restant${stock > 1 ? "s" : ""}
+                </div>
+
+            `;
+
+
+            container.appendChild(item);
+
+        });
+
+    }
+
+
+    /* =========================================================
+       EMPTY STATE
+    ========================================================= */
+
+    function emptyState(icon, message) {
+
+        return `
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ${icon}
+                </div>
+
+                <p>
+                    ${escapeHtml(message)}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /* =========================================================
+       ESCAPE HTML
+    ========================================================= */
+
+    function escapeHtml(value) {
+
+        return String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+
+    }
+
+
+    /* =========================================================
+       TOAST
+    ========================================================= */
+
+    let toastTimer = null;
+
+
+    function showToast(message) {
+
+        const toast =
+            document.getElementById("toast");
+
+
+        toast.textContent = message;
+
+        toast.classList.add("show");
+
+
+        clearTimeout(toastTimer);
+
+
+        toastTimer =
+            setTimeout(
+                () => {
+                    toast.classList.remove("show");
+                },
+                3500
+            );
+
+    }
+
+
+    /* =========================================================
+       NOTIFICATION
+    ========================================================= */
+
+    const notificationBtn =
+        document.getElementById(
+            "notificationBtn"
+        );
+
+
+    const notificationPopup =
+        document.getElementById(
+            "notificationPopup"
+        );
+
+
+    notificationBtn.addEventListener(
+        "click",
+        () => {
+
+            notificationPopup.classList.toggle(
+                "show"
+            );
+
+            document
+                .getElementById("notificationBadge")
+                .style.display = "none";
+
+        }
+    );
+
+
+    function closeNotification() {
+
+        notificationPopup.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    /* =========================================================
+       WEBSOCKET
+    ========================================================= */
+
+    let socket = null;
+
+
+    function connectWebSocket() {
+
+        try {
+
+            const protocol =
+                window.location.protocol === "https:"
+                    ? "wss:"
+                    : "ws:";
+
+
+            const wsUrl =
+                `${protocol}//${window.location.host}/?userId=${encodeURIComponent(userId)}`;
+
+
+            socket =
+                new WebSocket(wsUrl);
+
+
+            socket.onopen = function() {
+
+                setConnectionStatus(
+                    true
+                );
+
+            };
+
+
+            socket.onclose = function() {
+
+                setConnectionStatus(
+                    false
+                );
+
+
+                /*
+                    Reconnect automatically.
+                */
+
+                setTimeout(
+                    connectWebSocket,
+                    5000
+                );
+
+            };
+
+
+            socket.onerror = function(error) {
+
+                console.error(
+                    "WebSocket error:",
+                    error
+                );
+
+                setConnectionStatus(
+                    false
+                );
+
+            };
+
+
+            socket.onmessage = function(event) {
+
+                try {
+
+                    const data =
+                        JSON.parse(
+                            event.data
+                        );
+
+
+                    handleWebSocketMessage(
+                        data
+                    );
+
+                } catch (error) {
+
+                    console.error(
+                        "WebSocket message error:",
+                        error
+                    );
+
+                }
+
+            };
+
+        } catch (error) {
+
+            console.error(
+                "WebSocket connection error:",
+                error
+            );
+
+            setConnectionStatus(
+                false
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       WEBSOCKET MESSAGE
+    ========================================================= */
+
+    function handleWebSocketMessage(data) {
+
+        console.log(
+            "WebSocket:",
+            data
+        );
+
+
+        if (
+            data.type === "new_order" ||
+            data.type === "payment_status_updated" ||
+            data.type === "order_status_updated"
+        ) {
+
+            loadDashboard();
+
+        }
+
+
+        if (data.type === "new_order") {
+
+            const customer =
+                data.order?.customer_name ||
+                "Un client";
+
+
+            const total =
+                data.order?.total;
+
+
+            const message =
+                `Nouvelle commande de ${customer}` +
+                (
+                    total
+                        ? ` — ${formatMoney(total)}`
+                        : ""
+                );
+
+
+            document.getElementById(
+                "notificationText"
+            ).textContent =
+                message;
+
+
+            notificationPopup.classList.add(
+                "show"
+            );
+
+
+            const badge =
+                document.getElementById(
+                    "notificationBadge"
+                );
+
+
+            badge.style.display =
+                "flex";
+
+
+            badge.textContent = "1";
+
+
+            showToast(
+                "🔔 Nouvelle commande reçue !"
+            );
+
+
+            playNotificationSound();
+
+        }
+
+    }
+
+
+    /* =========================================================
+       CONNECTION STATUS
+    ========================================================= */
+
+    function setConnectionStatus(connected) {
+
+        const dot =
+            document.getElementById(
+                "connectionDot"
+            );
+
+
+        const text =
+            document.getElementById(
+                "connectionText"
+            );
+
+
+        if (connected) {
+
+            dot.classList.remove(
+                "offline"
+            );
+
+            text.textContent =
+                "En ligne";
+
+        } else {
+
+            dot.classList.add(
+                "offline"
+            );
+
+            text.textContent =
+                "Hors ligne";
+
+        }
+
+    }
+
+
+    /* =========================================================
+       NOTIFICATION SOUND
+    ========================================================= */
+
+    function playNotificationSound() {
+
+        try {
+
+            const AudioContext =
+                window.AudioContext ||
+                window.webkitAudioContext;
+
+
+            if (!AudioContext) {
+                return;
+            }
+
+
+            const audioContext =
+                new AudioContext();
+
+
+            const oscillator =
+                audioContext.createOscillator();
+
+
+            const gain =
+                audioContext.createGain();
+
+
+            oscillator.type =
+                "sine";
+
+
+            oscillator.frequency.value =
+                800;
+
+
+            gain.gain.value =
+                0.08;
+
+
+            oscillator.connect(
+                gain
+            );
+
+
+            gain.connect(
+                audioContext.destination
+            );
+
+
+            oscillator.start();
+
+
+            setTimeout(
+                () => {
+
+                    oscillator.frequency.value =
+                        1000;
+
+                },
+                100
+            );
+
+
+            setTimeout(
+                () => {
+
+                    oscillator.stop();
+
+                    audioContext.close();
+
+                },
+                220
+            );
+
+        } catch (error) {
+
+            console.log(
+                "Sound unavailable."
+            );
+
+        }
+
+    }
+
+
+    /* =========================================================
+       LOGOUT
+    ========================================================= */
+
+    function logout() {
+
+        if (socket) {
+
+            try {
+                socket.close();
+            } catch (error) {
+                console.error(error);
+            }
+
+        }
+
+
+        localStorage.removeItem(
+            "madaShopUser"
+        );
+
+
+        window.location.href =
+            "login.html";
+
+    }
+
+
+    /* =========================================================
+       INITIAL LOAD
+    ========================================================= */
+
+    loadDashboard();
+
+    connectWebSocket();
+
+
+    /* =========================================================
+       AUTO REFRESH
+    ========================================================= */
+
+    setInterval(
+        () => {
+
+            loadDashboard();
+
+        },
+        30000
+    );
+
+</script>
+
+</body>
+</html>

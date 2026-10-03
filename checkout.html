@@ -1,0 +1,1829 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Commander</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .topbar {
+            background: #111827;
+            color: white;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+        }
+
+        .logo {
+            color: white;
+            text-decoration: none;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: #f59e0b;
+        }
+
+        .back-btn {
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .page {
+            width: min(1180px, 92%);
+            margin: 35px auto 60px;
+        }
+
+        .page-title {
+            margin-bottom: 28px;
+        }
+
+        .page-title h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .page-title p {
+            color: #6b7280;
+        }
+
+        .checkout-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 0.8fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+        }
+
+        .card-header {
+            padding: 22px 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .card-header h2 {
+            font-size: 20px;
+            color: #111827;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* FORM */
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            outline: none;
+            background: white;
+            color: #111827;
+            transition: 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+        }
+
+        .form-group textarea {
+            min-height: 105px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* PAYMENT */
+
+        .payment-option {
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .payment-option input {
+            margin-top: 4px;
+            accent-color: #f59e0b;
+        }
+
+        .payment-title {
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .payment-description {
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* CART */
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 76px 1fr auto;
+            gap: 14px;
+            padding: 16px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .cart-image {
+            width: 76px;
+            height: 76px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+        }
+
+        .cart-info h3 {
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: #111827;
+        }
+
+        .cart-price {
+            color: #f59e0b;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+        .cart-stock {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quantity-control button {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #d1d5db;
+            background: white;
+            border-radius: 7px;
+            font-weight: 700;
+        }
+
+        .quantity-control button:hover {
+            background: #f3f4f6;
+        }
+
+        .quantity-value {
+            min-width: 28px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .cart-item-total {
+            text-align: right;
+            font-weight: 800;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .remove-btn {
+            display: block;
+            margin-top: 8px;
+            margin-left: auto;
+            border: none;
+            background: transparent;
+            color: #ef4444;
+            font-size: 12px;
+        }
+
+        .remove-btn:hover {
+            text-decoration: underline;
+        }
+
+        /* SUMMARY */
+
+        .summary {
+            position: sticky;
+            top: 92px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 10px 0;
+            color: #4b5563;
+        }
+
+        .summary-row.total {
+            margin-top: 8px;
+            padding-top: 18px;
+            border-top: 1px solid #e5e7eb;
+            color: #111827;
+            font-size: 21px;
+            font-weight: 800;
+        }
+
+        .summary-total {
+            color: #f59e0b;
+        }
+
+        .order-btn {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            background: #f59e0b;
+            color: #111827;
+            padding: 15px 18px;
+            font-size: 16px;
+            font-weight: 800;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+
+        .order-btn:hover {
+            background: #d97706;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .order-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secure-note {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        /* EMPTY */
+
+        .empty {
+            text-align: center;
+            padding: 55px 20px;
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+        }
+
+        .empty h2 {
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .empty p {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .empty-btn {
+            display: inline-block;
+            text-decoration: none;
+            background: #f59e0b;
+            color: #111827;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        /* ERROR */
+
+        .stock-warning {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* LOADING */
+
+        .loading {
+            padding: 40px;
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #f59e0b;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* TOAST */
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #111827;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
+            max-width: 360px;
+            font-size: 14px;
+            transform: translateY(100px);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid #22c55e;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 850px) {
+            .checkout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary {
+                position: static;
+            }
+
+            .page-title h1 {
+                font-size: 27px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .topbar {
+                padding: 0 4%;
+                height: 62px;
+            }
+
+            .logo {
+                font-size: 21px;
+            }
+
+            .back-btn {
+                padding: 8px 11px;
+                font-size: 13px;
+            }
+
+            .page {
+                width: 94%;
+                margin-top: 25px;
+            }
+
+            .card-header,
+            .card-body {
+                padding: 18px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .cart-item {
+                grid-template-columns: 62px 1fr;
+            }
+
+            .cart-image {
+                width: 62px;
+                height: 62px;
+            }
+
+            .cart-item-total {
+                grid-column: 2;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="topbar">
+        <a href="index.html" class="logo">
+            Mada<span>Shop</span>
+        </a>
+
+        <a href="shop.html" class="back-btn">
+            ← Retour à la boutique
+        </a>
+    </header>
+
+    <main class="page">
+
+        <div class="page-title">
+            <h1>Finaliser ma commande</h1>
+            <p>Vérifiez votre panier et renseignez vos informations.</p>
+        </div>
+
+        <div id="loading" class="card loading">
+            <div class="spinner"></div>
+            Chargement de votre commande...
+        </div>
+
+        <div id="emptyState" class="card empty" style="display:none;">
+            <div class="empty-icon">🛒</div>
+
+            <h2>Votre panier est vide</h2>
+
+            <p>
+                Ajoutez au moins un produit avant de passer commande.
+            </p>
+
+            <a href="shop.html" class="empty-btn">
+                Voir les produits
+            </a>
+        </div>
+
+        <div id="checkoutContent" class="checkout-grid" style="display:none;">
+
+            <!-- LEFT -->
+            <section>
+
+                <div class="card">
+
+                    <div class="card-header">
+                        <h2>🛍️ Votre panier</h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div id="stockWarning" class="stock-warning"></div>
+
+                        <div id="cartItems"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="card" style="margin-top:25px;">
+
+                    <div class="card-header">
+                        <h2>👤 Informations client</h2>
+                    </div>
+
+                    <div class="card-body">
+
+                        <form id="checkoutForm">
+
+                            <div class="form-row">
+
+                                <div class="form-group">
+                                    <label for="customerName">
+                                        Nom complet <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="customerName"
+                                        placeholder="Ex: Jean Rakoto"
+                                        autocomplete="name"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="phone">
+                                        Téléphone <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        type="tel"
+                                        id="phone"
+                                        placeholder="Ex: 034 12 345 67"
+                                        autocomplete="tel"
+                                        required
+                                    >
+                                </div>
+
+                            </div>
+
+                            <div class="form-group">
+                                <label for="address">
+                                    Adresse de livraison <span class="required">*</span>
+                                </label>
+
+                                <textarea
+                                    id="address"
+                                    placeholder="Ex: Antananarivo, Analakely, près de..."
+                                    autocomplete="street-address"
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="note">
+                                    Note pour le vendeur
+                                </label>
+
+                                <textarea
+                                    id="note"
+                                    placeholder="Ex: Appelez-moi avant la livraison..."
+                                ></textarea>
+                            </div>
+
+                            <div class="form-group">
+
+                                <label>
+                                    Mode de paiement
+                                </label>
+
+                                <div class="payment-option">
+
+                                    <input
+                                        type="radio"
+                                        id="cashPayment"
+                                        name="paymentMethod"
+                                        value="cash_on_delivery"
+                                        checked
+                                    >
+
+                                    <div>
+                                        <div class="payment-title">
+                                            💵 Paiement à la livraison
+                                        </div>
+
+                                        <div class="payment-description">
+                                            Vous payez directement lors de la réception
+                                            de votre commande.
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- RIGHT -->
+            <aside class="card summary">
+
+                <div class="card-header">
+                    <h2>📋 Résumé</h2>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="summary-row">
+                        <span>Produits</span>
+                        <strong id="summaryQuantity">0</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Sous-total</span>
+                        <strong id="summarySubtotal">0 Ar</strong>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Livraison</span>
+                        <strong>À confirmer</strong>
+                    </div>
+
+                    <div class="summary-row total">
+                        <span>Total</span>
+                        <span class="summary-total" id="summaryTotal">
+                            0 Ar
+                        </span>
+                    </div>
+
+                    <button
+                        type="button"
+                        id="confirmOrderBtn"
+                        class="order-btn"
+                    >
+                        Confirmer la commande
+                    </button>
+
+                    <div class="secure-note">
+                        🔒 Vos informations sont utilisées uniquement
+                        pour traiter votre commande.
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </main>
+
+    <div id="toast" class="toast"></div>
+
+
+    <script>
+
+        const API_BASE = "";
+
+        let cart = [];
+        let sellerUserId = null;
+        let submitting = false;
+
+
+        /* =========================
+           HELPERS
+        ========================= */
+
+        function formatPrice(value) {
+
+            const number = Number(value) || 0;
+
+            return new Intl.NumberFormat("fr-FR").format(number) + " Ar";
+        }
+
+
+        function escapeHtml(value) {
+
+            if (value === null || value === undefined) {
+                return "";
+            }
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        function showToast(message, type = "success") {
+
+            const toast = document.getElementById("toast");
+
+            toast.textContent = message;
+
+            toast.className = "toast show " + type;
+
+            setTimeout(() => {
+                toast.className = "toast";
+            }, 3500);
+        }
+
+
+        function getCart() {
+
+            try {
+
+                const saved = localStorage.getItem("madaShopCart");
+
+                if (!saved) {
+                    return [];
+                }
+
+                const parsed = JSON.parse(saved);
+
+                return Array.isArray(parsed) ? parsed : [];
+
+            } catch (error) {
+
+                console.error("Erreur panier:", error);
+
+                return [];
+            }
+        }
+
+
+        function saveCart() {
+
+            localStorage.setItem(
+                "madaShopCart",
+                JSON.stringify(cart)
+            );
+        }
+
+
+        function getSellerUserId() {
+
+            /*
+             * Plusieurs possibilités sont supportées :
+             *
+             * 1. URL:
+             *    checkout.html?userId=2
+             *
+             * 2. Panier:
+             *    item.userId
+             *
+             * 3. madaShopUser:
+             *    { id: 2 }
+             */
+
+            const params = new URLSearchParams(
+                window.location.search
+            );
+
+            const urlUserId = params.get("userId");
+
+            if (urlUserId) {
+                return Number(urlUserId);
+            }
+
+
+            if (cart.length > 0) {
+
+                const itemUserId =
+                    cart[0].userId ||
+                    cart[0].sellerId ||
+                    cart[0].shopUserId;
+
+                if (itemUserId) {
+                    return Number(itemUserId);
+                }
+            }
+
+
+            try {
+
+                const savedUser =
+                    localStorage.getItem("madaShopUser");
+
+                if (savedUser) {
+
+                    const user = JSON.parse(savedUser);
+
+                    if (user && user.id) {
+                        return Number(user.id);
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+
+            return null;
+        }
+
+
+        /* =========================
+           LOAD
+        ========================= */
+
+        async function initCheckout() {
+
+            cart = getCart();
+
+            document.getElementById("loading").style.display = "none";
+
+
+            if (!cart.length) {
+
+                document.getElementById("emptyState").style.display =
+                    "block";
+
+                return;
+            }
+
+
+            sellerUserId = getSellerUserId();
+
+
+            if (!sellerUserId) {
+
+                document.getElementById("checkoutContent").style.display =
+                    "grid";
+
+                renderCart();
+
+                showStockWarning(
+                    "Impossible d'identifier la boutique. Retournez à la boutique et ajoutez le produit au panier.",
+                    true
+                );
+
+                document.getElementById("confirmOrderBtn").disabled =
+                    true;
+
+                return;
+            }
+
+
+            document.getElementById("checkoutContent").style.display =
+                "grid";
+
+
+            renderCart();
+
+            await refreshStock();
+        }
+
+
+        /* =========================
+           RENDER CART
+        ========================= */
+
+        function renderCart() {
+
+            const container =
+                document.getElementById("cartItems");
+
+            if (!cart.length) {
+
+                document.getElementById("checkoutContent").style.display =
+                    "none";
+
+                document.getElementById("emptyState").style.display =
+                    "block";
+
+                return;
+            }
+
+
+            let html = "";
+
+
+            cart.forEach((item, index) => {
+
+                const image =
+                    item.image ||
+                    "https://via.placeholder.com/150?text=Produit";
+
+                const name =
+                    item.name ||
+                    "Produit";
+
+                const price =
+                    Number(item.price) || 0;
+
+                const quantity =
+                    Number(item.quantity) || 1;
+
+                const stock =
+                    Number(item.stock);
+
+
+                html += `
+                    <div class="cart-item">
+
+                        <img
+                            class="cart-image"
+                            src="${escapeHtml(image)}"
+                            alt="${escapeHtml(name)}"
+                            onerror="this.src='https://via.placeholder.com/150?text=Produit'"
+                        >
+
+                        <div class="cart-info">
+
+                            <h3>
+                                ${escapeHtml(name)}
+                            </h3>
+
+                            <div class="cart-price">
+                                ${formatPrice(price)}
+                            </div>
+
+                            <div class="cart-stock">
+                                ${
+                                    Number.isFinite(stock)
+                                    ? "Stock disponible : " + stock
+                                    : "Stock : vérification..."
+                                }
+                            </div>
+
+                            <div class="quantity-control">
+
+                                <button
+                                    type="button"
+                                    onclick="changeQuantity(${index}, -1)"
+                                >
+                                    −
+                                </button>
+
+                                <span class="quantity-value">
+                                    ${quantity}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onclick="changeQuantity(${index}, 1)"
+                                >
+                                    +
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <div class="cart-item-total">
+
+                            ${formatPrice(price * quantity)}
+
+                            <button
+                                type="button"
+                                class="remove-btn"
+                                onclick="removeItem(${index})"
+                            >
+                                Supprimer
+                            </button>
+
+                        </div>
+
+                    </div>
+                `;
+            });
+
+
+            container.innerHTML = html;
+
+            updateSummary();
+        }
+
+
+        /* =========================
+           QUANTITY
+        ========================= */
+
+        function changeQuantity(index, amount) {
+
+            if (!cart[index]) {
+                return;
+            }
+
+
+            let newQuantity =
+                Number(cart[index].quantity || 1) + amount;
+
+
+            const stock =
+                Number(cart[index].stock);
+
+
+            if (newQuantity < 1) {
+                newQuantity = 1;
+            }
+
+
+            if (
+                Number.isFinite(stock) &&
+                stock >= 0 &&
+                newQuantity > stock
+            ) {
+
+                showToast(
+                    "La quantité dépasse le stock disponible.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            cart[index].quantity = newQuantity;
+
+            saveCart();
+
+            renderCart();
+        }
+
+
+        function removeItem(index) {
+
+            if (!cart[index]) {
+                return;
+            }
+
+
+            cart.splice(index, 1);
+
+            saveCart();
+
+            renderCart();
+
+
+            if (!cart.length) {
+
+                document.getElementById("checkoutContent").style.display =
+                    "none";
+
+                document.getElementById("emptyState").style.display =
+                    "block";
+            }
+        }
+
+
+        /* =========================
+           SUMMARY
+        ========================= */
+
+        function updateSummary() {
+
+            let quantity = 0;
+            let subtotal = 0;
+
+
+            cart.forEach(item => {
+
+                const price =
+                    Number(item.price) || 0;
+
+                const itemQuantity =
+                    Number(item.quantity) || 0;
+
+                quantity += itemQuantity;
+
+                subtotal += price * itemQuantity;
+            });
+
+
+            document.getElementById("summaryQuantity").textContent =
+                quantity;
+
+
+            document.getElementById("summarySubtotal").textContent =
+                formatPrice(subtotal);
+
+
+            document.getElementById("summaryTotal").textContent =
+                formatPrice(subtotal);
+        }
+
+
+        /* =========================
+           STOCK
+        ========================= */
+
+        async function refreshStock() {
+
+            if (!sellerUserId || !cart.length) {
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `${API_BASE}/api/products/${sellerUserId}`
+                );
+
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la vérification du stock.");
+                }
+
+
+                const products = await response.json();
+
+
+                let hasProblem = false;
+
+
+                cart.forEach(item => {
+
+                    const product = products.find(
+                        p => Number(p.id) === Number(item.id)
+                    );
+
+
+                    if (!product) {
+
+                        item.stock = 0;
+
+                        hasProblem = true;
+
+                        return;
+                    }
+
+
+                    item.stock = Number(product.stock) || 0;
+
+
+                    if (
+                        Number(item.quantity) >
+                        Number(item.stock)
+                    ) {
+
+                        hasProblem = true;
+                    }
+                });
+
+
+                saveCart();
+
+                renderCart();
+
+
+                if (hasProblem) {
+
+                    showStockWarning(
+                        "Un ou plusieurs produits n'ont plus assez de stock. Veuillez ajuster les quantités avant de confirmer."
+                    );
+
+                } else {
+
+                    hideStockWarning();
+                }
+
+            } catch (error) {
+
+                console.error(error);
+
+                showStockWarning(
+                    "Impossible de vérifier le stock pour le moment. Veuillez réessayer."
+                );
+            }
+        }
+
+
+        function showStockWarning(message, permanent = false) {
+
+            const warning =
+                document.getElementById("stockWarning");
+
+            warning.textContent = "⚠️ " + message;
+
+            warning.style.display = "block";
+
+            if (!permanent) {
+
+                setTimeout(() => {
+
+                    if (warning.textContent.includes(message)) {
+                        warning.style.display = "none";
+                    }
+
+                }, 5000);
+            }
+        }
+
+
+        function hideStockWarning() {
+
+            document.getElementById("stockWarning").style.display =
+                "none";
+        }
+
+
+        function validateStock() {
+
+            for (const item of cart) {
+
+                const stock =
+                    Number(item.stock);
+
+                const quantity =
+                    Number(item.quantity);
+
+
+                if (!Number.isFinite(stock)) {
+
+                    return {
+                        valid: false,
+                        message:
+                            "Le stock de " +
+                            item.name +
+                            " n'a pas pu être vérifié."
+                    };
+                }
+
+
+                if (stock <= 0) {
+
+                    return {
+                        valid: false,
+                        message:
+                            `"${item.name}" est actuellement en rupture de stock.`
+                    };
+                }
+
+
+                if (quantity > stock) {
+
+                    return {
+                        valid: false,
+                        message:
+                            `Le stock disponible pour "${item.name}" est de ${stock}, mais vous avez sélectionné ${quantity}.`
+                    };
+                }
+            }
+
+
+            return {
+                valid: true
+            };
+        }
+
+
+        /* =========================
+           FORM VALIDATION
+        ========================= */
+
+        function validateForm() {
+
+            const name =
+                document.getElementById("customerName")
+                    .value.trim();
+
+            const phone =
+                document.getElementById("phone")
+                    .value.trim();
+
+            const address =
+                document.getElementById("address")
+                    .value.trim();
+
+
+            if (!name) {
+
+                showToast(
+                    "Veuillez saisir votre nom complet.",
+                    "error"
+                );
+
+                document.getElementById("customerName").focus();
+
+                return false;
+            }
+
+
+            if (name.length < 2) {
+
+                showToast(
+                    "Veuillez saisir un nom valide.",
+                    "error"
+                );
+
+                document.getElementById("customerName").focus();
+
+                return false;
+            }
+
+
+            if (!phone) {
+
+                showToast(
+                    "Veuillez saisir votre numéro de téléphone.",
+                    "error"
+                );
+
+                document.getElementById("phone").focus();
+
+                return false;
+            }
+
+
+            const phoneClean =
+                phone.replace(/[\s\-().]/g, "");
+
+
+            if (phoneClean.length < 7) {
+
+                showToast(
+                    "Veuillez saisir un numéro de téléphone valide.",
+                    "error"
+                );
+
+                document.getElementById("phone").focus();
+
+                return false;
+            }
+
+
+            if (!address) {
+
+                showToast(
+                    "Veuillez saisir votre adresse de livraison.",
+                    "error"
+                );
+
+                document.getElementById("address").focus();
+
+                return false;
+            }
+
+
+            if (address.length < 5) {
+
+                showToast(
+                    "Veuillez saisir une adresse plus précise.",
+                    "error"
+                );
+
+                document.getElementById("address").focus();
+
+                return false;
+            }
+
+
+            return true;
+        }
+
+
+        /* =========================
+           CREATE ORDERS
+           =========================
+           
+           Le backend actuel possède :
+
+           POST /api/orders
+
+           Payload attendu :
+
+           {
+               userId,
+               productId,
+               customerName,
+               phone,
+               address,
+               note,
+               quantity,
+               paymentMethod
+           }
+
+           Comme la table orders contient un seul
+           product_id par commande, nous créons
+           une commande par produit du panier.
+        */
+
+        async function submitOrder() {
+
+            if (submitting) {
+                return;
+            }
+
+
+            if (!cart.length) {
+
+                showToast(
+                    "Votre panier est vide.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!sellerUserId) {
+
+                showToast(
+                    "Boutique introuvable. Retournez à la boutique.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            if (!validateForm()) {
+                return;
+            }
+
+
+            const stockCheck = validateStock();
+
+
+            if (!stockCheck.valid) {
+
+                showToast(
+                    stockCheck.message,
+                    "error"
+                );
+
+                showStockWarning(
+                    stockCheck.message
+                );
+
+                return;
+            }
+
+
+            const confirmed =
+                confirm(
+                    "Voulez-vous confirmer cette commande ?"
+                );
+
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            submitting = true;
+
+
+            const button =
+                document.getElementById("confirmOrderBtn");
+
+
+            button.disabled = true;
+
+            button.textContent =
+                "Traitement de la commande...";
+
+
+            const customerName =
+                document.getElementById("customerName")
+                    .value.trim();
+
+            const phone =
+                document.getElementById("phone")
+                    .value.trim();
+
+            const address =
+                document.getElementById("address")
+                    .value.trim();
+
+            const note =
+                document.getElementById("note")
+                    .value.trim();
+
+            const paymentMethod =
+                document.querySelector(
+                    'input[name="paymentMethod"]:checked'
+                )?.value || "cash_on_delivery";
+
+
+            const createdOrders = [];
+
+
+            try {
+
+                /*
+                 * Vérification finale du stock juste avant
+                 * l'envoi des commandes.
+                 */
+
+                await refreshStock();
+
+
+                const finalStockCheck =
+                    validateStock();
+
+
+                if (!finalStockCheck.valid) {
+
+                    throw new Error(
+                        finalStockCheck.message
+                    );
+                }
+
+
+                /*
+                 * Une commande par produit.
+                 */
+
+                for (const item of cart) {
+
+                    const payload = {
+
+                        userId: Number(sellerUserId),
+
+                        productId: Number(item.id),
+
+                        customerName: customerName,
+
+                        phone: phone,
+
+                        address: address,
+
+                        note: note,
+
+                        quantity: Number(item.quantity),
+
+                        paymentMethod: paymentMethod
+                    };
+
+
+                    const response = await fetch(
+                        `${API_BASE}/api/orders`,
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+
+                    let data = {};
+
+                    try {
+                        data = await response.json();
+                    } catch (jsonError) {
+                        data = {};
+                    }
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            data.message ||
+                            data.error ||
+                            `Erreur HTTP ${response.status}`
+                        );
+                    }
+
+
+                    /*
+                     * Le backend peut retourner
+                     * différents formats.
+                     */
+
+                    const orderId =
+                        data.orderId ||
+                        data.id ||
+                        data.order?.id ||
+                        data.order?.orderId ||
+                        null;
+
+
+                    createdOrders.push({
+
+                        orderId: orderId,
+
+                        productId:
+                            Number(item.id),
+
+                        productName:
+                            item.name,
+
+                        quantity:
+                            Number(item.quantity),
+
+                        price:
+                            Number(item.price) || 0,
+
+                        total:
+                            (Number(item.price) || 0) *
+                            Number(item.quantity)
+                    });
+                }
+
+
+                /*
+                 * Panier vidé après réussite.
+                 */
+
+                saveLastOrder(
+                    createdOrders,
+                    customerName,
+                    phone
+                );
+
+
+                localStorage.removeItem(
+                    "madaShopCart"
+                );
+
+
+                /*
+                 * On garde le premier orderId
+                 * pour order-success.html.
+                 */
+
+                const firstOrderId =
+                    createdOrders.find(
+                        order => order.orderId
+                    )?.orderId;
+
+
+                if (firstOrderId) {
+
+                    window.location.href =
+                        `order-success.html?orderId=${encodeURIComponent(firstOrderId)}&phone=${encodeURIComponent(phone)}`;
+
+                } else {
+
+                    window.location.href =
+                        "order-success.html";
+                }
+
+
+            } catch (error) {
+
+                console.error(
+                    "Erreur création commande:",
+                    error
+                );
+
+
+                showToast(
+                    error.message ||
+                    "Impossible de créer la commande.",
+                    "error"
+                );
+
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Confirmer la commande";
+
+
+                submitting = false;
+            }
+        }
+
+
+        /* =========================
+           SAVE LAST ORDER
+        ========================= */
+
+        function saveLastOrder(
+            orders,
+            customerName,
+            phone
+        ) {
+
+            let total = 0;
+
+            orders.forEach(order => {
+                total += Number(order.total) || 0;
+            });
+
+
+            const firstOrder =
+                orders[0] || {};
+
+
+            const data = {
+
+                orderId:
+                    firstOrder.orderId || null,
+
+                orderIds:
+                    orders
+                        .map(order => order.orderId)
+                        .filter(Boolean),
+
+                customerName:
+                    customerName,
+
+                phone:
+                    phone,
+
+                total:
+                    total,
+
+                orders:
+                    orders,
+
+                createdAt:
+                    new Date().toISOString()
+            };
+
+
+            localStorage.setItem(
+                "madaShopLastOrder",
+                JSON.stringify(data)
+            );
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        document
+            .getElementById("confirmOrderBtn")
+            .addEventListener(
+                "click",
+                submitOrder
+            );
+
+
+        /* =========================
+           START
+        ========================= */
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            initCheckout
+        );
+
+
+        /*
+         * Vérifie à nouveau le stock périodiquement.
+         */
+
+        setInterval(
+            refreshStock,
+            30000
+        );
+
+    </script>
+
+</body>
+</html>

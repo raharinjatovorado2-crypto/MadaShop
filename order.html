@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>MadaShop - Commander</title>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f4f7fb;
+      color: #333;
+    }
+
+    header {
+      background: white;
+      border-bottom: 1px solid #eee;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: bold;
+      color: #1877f2;
+    }
+
+    .back-btn {
+      text-decoration: none;
+      background: #e8f1ff;
+      color: #1877f2;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px 20px;
+    }
+
+    .order-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #eee;
+      margin-bottom: 20px;
+    }
+
+    .product-name {
+      font-size: 25px;
+      margin-bottom: 10px;
+    }
+
+    .price {
+      color: #1877f2;
+      font-size: 23px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .description {
+      color: #777;
+      line-height: 1.5;
+      margin-bottom: 15px;
+    }
+
+    .stock {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 7px;
+      background: #e8f8ee;
+      color: #16833b;
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .stock.empty {
+      background: #fdeaea;
+      color: #c62828;
+    }
+
+    .stock.low {
+      background: #fff4d6;
+      color: #a66a00;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 7px;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #1877f2;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .quantity-box {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .quantity-box button {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 8px;
+      background: #1877f2;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .quantity-box button:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+    #quantity {
+      width: 60px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+
+    .total-box {
+      background: #f4f7fb;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-label {
+      font-weight: bold;
+    }
+
+    .total-price {
+      color: #1877f2;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 9px;
+      background: #1877f2;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .submit-btn:disabled {
+      background: #bbb;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+      line-height: 1.5;
+    }
+
+    .message.success {
+      display: block;
+      background: #e8f8ee;
+      color: #16833b;
+    }
+
+    .message.error {
+      display: block;
+      background: #fdeaea;
+      color: #c62828;
+    }
+
+    .success-actions {
+      display: none;
+      margin-top: 15px;
+      gap: 10px;
+      flex-direction: column;
+    }
+
+    .whatsapp-btn,
+    .shop-btn {
+      display: block;
+      text-align: center;
+      padding: 12px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .whatsapp-btn {
+      background: #25D366;
+      color: white;
+    }
+
+    .shop-btn {
+      background: #e8f1ff;
+      color: #1877f2;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 50px;
+      color: #777;
+    }
+
+    @media (max-width: 750px) {
+
+      .order-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .product-image {
+        height: 250px;
+      }
+
+      header {
+        padding: 13px;
+      }
+
+      .logo {
+        font-size: 22px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<header>
+
+  <div class="logo">
+    MadaShop
+  </div>
+
+  <a
+    href="shop.html"
+    class="back-btn"
+  >
+    ← Boutique
+  </a>
+
+</header>
+
+<main class="container">
+
+  <div
+    id="loading"
+    class="loading"
+  >
+    Chargement du produit...
+  </div>
+
+  <div
+    id="message"
+    class="message"
+  ></div>
+
+  <div
+    id="orderLayout"
+    class="order-layout"
+    style="display:none;"
+  >
+
+    <!-- PRODUIT -->
+
+    <div class="card">
+
+      <img
+        id="productImage"
+        class="product-image"
+        src=""
+        alt="Produit"
+      >
+
+      <h1
+        id="productName"
+        class="product-name"
+      >
+        Produit
+      </h1>
+
+      <div
+        id="productPrice"
+        class="price"
+      >
+        0 Ar
+      </div>
+
+      <div
+        id="productDescription"
+        class="description"
+      ></div>
+
+      <div
+        id="productStock"
+        class="stock"
+      >
+        Stock
+      </div>
+
+    </div>
+
+    <!-- FORMULAIRE COMMANDE -->
+
+    <div class="card">
+
+      <h2>
+        🛒 Passer la commande
+      </h2>
+
+      <div class="form-group">
+
+        <label for="customerName">
+          Nom complet *
+        </label>
+
+        <input
+          type="text"
+          id="customerName"
+          placeholder="Votre nom"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="customerPhone">
+          Téléphone *
+        </label>
+
+        <input
+          type="tel"
+          id="customerPhone"
+          placeholder="Ex: 034 00 000 00"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="customerAddress">
+          Adresse *
+        </label>
+
+        <textarea
+          id="customerAddress"
+          placeholder="Votre adresse de livraison"
+        ></textarea>
+
+      </div>
+
+      <div class="form-group">
+
+        <label for="customerNote">
+          Note
+        </label>
+
+        <textarea
+          id="customerNote"
+          placeholder="Une précision pour le vendeur..."
+        ></textarea>
+
+      </div>
+
+      <label
+        style="
+          display:block;
+          font-weight:bold;
+          margin-bottom:10px;
+        "
+      >
+        Quantité
+      </label>
+
+      <div class="quantity-box">
+
+        <button
+          type="button"
+          id="minusBtn"
+          onclick="decreaseQuantity()"
+        >
+          −
+        </button>
+
+        <input
+          type="text"
+          id="quantity"
+          value="1"
+          readonly
+        >
+
+        <button
+          type="button"
+          id="plusBtn"
+          onclick="increaseQuantity()"
+        >
+          +
+        </button>
+
+      </div>
+
+      <div class="total-box">
+
+        <span class="total-label">
+          Total
+        </span>
+
+        <span
+          id="totalPrice"
+          class="total-price"
+        >
+          0 Ar
+        </span>
+
+      </div>
+
+      <button
+        id="submitBtn"
+        class="submit-btn"
+        onclick="submitOrder()"
+      >
+        Confirmer la commande
+      </button>
+
+      <div
+        id="successActions"
+        class="success-actions"
+      >
+
+        <a
+          id="whatsappBtn"
+          class="whatsapp-btn"
+          href="#"
+          target="_blank"
+        >
+          💬 Contacter le vendeur sur WhatsApp
+        </a>
+
+        <a
+          href="shop.html"
+          class="shop-btn"
+        >
+          ← Retour à la boutique
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+
+/* =====================================
+   API
+===================================== */
+
+const API_URL = "/api";
+
+
+/* =====================================
+   PRODUCT ID
+===================================== */
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const productId =
+  params.get("product");
+
+
+/* =====================================
+   VARIABLES
+===================================== */
+
+let product = null;
+let shop = null;
+let quantity = 1;
+
+
+/* =====================================
+   LOAD PRODUCT
+===================================== */
+
+async function loadProduct() {
+
+  if (!productId) {
+
+    hideLoading();
+
+    showError(
+      "Produit introuvable."
+    );
+
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `${API_URL}/product/${encodeURIComponent(productId)}`
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.message ||
+        "Impossible de charger le produit."
+      );
+    }
+
+    if (
+      !data.success ||
+      !data.product
+    ) {
+
+      throw new Error(
+        "Les informations du produit sont introuvables."
+      );
+    }
+
+    product =
+      data.product;
+
+
+    /* =================================
+       CHECK PRODUCT OWNER
+    ================================= */
+
+    if (!product.user_id) {
+
+      throw new Error(
+        "Le vendeur de ce produit est introuvable."
+      );
+    }
+
+
+    /* =================================
+       LOAD SHOP
+    ================================= */
+
+    try {
+
+      const shopResponse =
+        await fetch(
+          `${API_URL}/shop/${product.user_id}`
+        );
+
+      const shopData =
+        await shopResponse.json();
+
+      if (
+        shopResponse.ok &&
+        shopData.success &&
+        shopData.shop
+      ) {
+
+        shop =
+          shopData.shop;
+      }
+
+    } catch (error) {
+
+      console.log(
+        "Informations boutique non disponibles.",
+        error
+      );
+
+    }
+
+
+    /* =================================
+       DISPLAY
+    ================================= */
+
+    displayProduct();
+
+  } catch (error) {
+
+    console.error(
+      "Erreur chargement produit:",
+      error
+    );
+
+    hideLoading();
+
+    showError(
+      error.message ||
+      "Impossible de charger le produit."
+    );
+  }
+}
+
+
+/* =====================================
+   DISPLAY PRODUCT
+===================================== */
+
+function displayProduct() {
+
+  hideLoading();
+
+  document.getElementById(
+    "orderLayout"
+  ).style.display = "grid";
+
+
+  const image =
+    product.image ||
+    "https://via.placeholder.com/500x350?text=Produit";
+
+
+  document.getElementById(
+    "productImage"
+  ).src = image;
+
+
+  document.getElementById(
+    "productImage"
+  ).alt =
+    product.name || "Produit";
+
+
+  document.getElementById(
+    "productName"
+  ).textContent =
+    product.name || "Produit";
+
+
+  document.getElementById(
+    "productPrice"
+  ).textContent =
+    formatPrice(product.price);
+
+
+  document.getElementById(
+    "productDescription"
+  ).textContent =
+    product.description || "";
+
+
+  quantity = 1;
+
+  document.getElementById(
+    "quantity"
+  ).value = "1";
+
+
+  updateStockDisplay();
+
+  updateTotal();
+}
+
+
+/* =====================================
+   PRICE
+===================================== */
+
+function formatPrice(price) {
+
+  return (
+    Number(price || 0)
+      .toLocaleString("fr-FR") +
+    " Ar"
+  );
+}
+
+
+/* =====================================
+   STOCK
+===================================== */
+
+function updateStockDisplay() {
+
+  if (!product) {
+    return;
+  }
+
+  const stock =
+    Number(product.stock) || 0;
+
+  const stockElement =
+    document.getElementById(
+      "productStock"
+    );
+
+  const submitBtn =
+    document.getElementById(
+      "submitBtn"
+    );
+
+  const minusBtn =
+    document.getElementById(
+      "minusBtn"
+    );
+
+  const plusBtn =
+    document.getElementById(
+      "plusBtn"
+    );
+
+
+  if (stock <= 0) {
+
+    stockElement.className =
+      "stock empty";
+
+    stockElement.textContent =
+      "Produit épuisé";
+
+    submitBtn.disabled = true;
+    minusBtn.disabled = true;
+    plusBtn.disabled = true;
+
+    return;
+  }
+
+
+  if (stock <= 3) {
+
+    stockElement.className =
+      "stock low";
+
+    stockElement.textContent =
+      stock +
+      " restant(s)";
+
+  } else {
+
+    stockElement.className =
+      "stock";
+
+    stockElement.textContent =
+      stock +
+      " en stock";
+  }
+
+
+  submitBtn.disabled = false;
+
+  updateQuantityButtons();
+}
+
+
+/* =====================================
+   INCREASE QUANTITY
+===================================== */
+
+function increaseQuantity() {
+
+  if (!product) {
+    return;
+  }
+
+  const stock =
+    Number(product.stock) || 0;
+
+  if (quantity < stock) {
+
+    quantity++;
+
+    updateQuantityDisplay();
+  }
+}
+
+
+/* =====================================
+   DECREASE QUANTITY
+===================================== */
+
+function decreaseQuantity() {
+
+  if (quantity > 1) {
+
+    quantity--;
+
+    updateQuantityDisplay();
+  }
+}
+
+
+/* =====================================
+   QUANTITY DISPLAY
+===================================== */
+
+function updateQuantityDisplay() {
+
+  document.getElementById(
+    "quantity"
+  ).value =
+    quantity;
+
+  updateQuantityButtons();
+
+  updateTotal();
+}
+
+
+/* =====================================
+   QUANTITY BUTTONS
+===================================== */
+
+function updateQuantityButtons() {
+
+  if (!product) {
+    return;
+  }
+
+  const stock =
+    Number(product.stock) || 0;
+
+
+  document.getElementById(
+    "minusBtn"
+  ).disabled =
+    quantity <= 1;
+
+
+  document.getElementById(
+    "plusBtn"
+  ).disabled =
+    quantity >= stock;
+}
+
+
+/* =====================================
+   TOTAL
+===================================== */
+
+function updateTotal() {
+
+  if (!product) {
+    return;
+  }
+
+  const total =
+    Number(product.price || 0) *
+    quantity;
+
+  document.getElementById(
+    "totalPrice"
+  ).textContent =
+    formatPrice(total);
+}
+
+
+/* =====================================
+   SUBMIT ORDER
+===================================== */
+
+async function submitOrder() {
+
+  if (!product) {
+
+    showError(
+      "Produit introuvable."
+    );
+
+    return;
+  }
+
+
+  const customerName =
+    document.getElementById(
+      "customerName"
+    ).value.trim();
+
+
+  const phone =
+    document.getElementById(
+      "customerPhone"
+    ).value.trim();
+
+
+  const address =
+    document.getElementById(
+      "customerAddress"
+    ).value.trim();
+
+
+  const note =
+    document.getElementById(
+      "customerNote"
+    ).value.trim();
+
+
+  /* =================================
+     VALIDATION
+  ================================= */
+
+  if (!customerName) {
+
+    showError(
+      "Veuillez entrer votre nom."
+    );
+
+    return;
+  }
+
+
+  if (!phone) {
+
+    showError(
+      "Veuillez entrer votre numéro de téléphone."
+    );
+
+    return;
+  }
+
+
+  if (!address) {
+
+    showError(
+      "Veuillez entrer votre adresse."
+    );
+
+    return;
+  }
+
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+
+    showError(
+      "Quantité invalide."
+    );
+
+    return;
+  }
+
+
+  const currentStock =
+    Number(product.stock) || 0;
+
+
+  if (currentStock <= 0) {
+
+    showError(
+      "Ce produit est épuisé."
+    );
+
+    updateStockDisplay();
+
+    return;
+  }
+
+
+  if (quantity > currentStock) {
+
+    showError(
+      `Stock insuffisant. Il reste seulement ${currentStock} produit(s).`
+    );
+
+    return;
+  }
+
+
+  const sellerId =
+    Number(product.user_id);
+
+
+  const finalProductId =
+    Number(product.id);
+
+
+  if (!Number.isInteger(sellerId) || sellerId <= 0) {
+
+    showError(
+      "Impossible d'identifier le vendeur."
+    );
+
+    return;
+  }
+
+
+  if (!Number.isInteger(finalProductId) || finalProductId <= 0) {
+
+    showError(
+      "Identifiant du produit invalide."
+    );
+
+    return;
+  }
+
+
+  /* =================================
+     DISABLE BUTTON
+  ================================= */
+
+  const submitBtn =
+    document.getElementById(
+      "submitBtn"
+    );
+
+  submitBtn.disabled = true;
+
+  submitBtn.textContent =
+    "Traitement...";
+
+  hideMessage();
+
+
+  /* =================================
+     ORDER DATA
+  ================================= */
+
+  const orderData = {
+
+    userId:
+      sellerId,
+
+    productId:
+      finalProductId,
+
+    customerName:
+      customerName,
+
+    phone:
+      phone,
+
+    address:
+      address,
+
+    note:
+      note,
+
+    quantity:
+      quantity
+  };
+
+
+  console.log(
+    "Données commande:",
+    orderData
+  );
+
+
+  try {
+
+    /* =================================
+       SEND ORDER
+    ================================= */
+
+    const response =
+      await fetch(
+        `${API_URL}/orders`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify(
+              orderData
+            )
+        }
+      );
+
+
+    /* =================================
+       READ RESPONSE
+    ================================= */
+
+    let data = null;
+
+    try {
+
+      data =
+        await response.json();
+
+    } catch (jsonError) {
+
+      throw new Error(
+        "Le serveur a retourné une réponse invalide."
+      );
+    }
+
+
+    console.log(
+      "Réponse serveur:",
+      data
+    );
+
+
+    /* =================================
+       BACKEND ERROR
+    ================================= */
+
+    if (!response.ok || data.success === false) {
+
+      throw new Error(
+        data.message ||
+        "Impossible de créer la commande."
+      );
+    }
+
+
+    /* =================================
+       SUCCESS
+    ================================= */
+
+    const order =
+      data.order || null;
+
+
+    showSuccess(
+      "Votre commande a été enregistrée avec succès !"
+    );
+
+
+    /* =================================
+       UPDATE LOCAL STOCK
+    ================================= */
+
+    product.stock =
+      currentStock -
+      quantity;
+
+
+    updateStockDisplay();
+
+
+    document.getElementById(
+      "submitBtn"
+    ).style.display =
+      "none";
+
+
+    document.getElementById(
+      "successActions"
+    ).style.display =
+      "flex";
+
+
+    /* =================================
+       WHATSAPP
+    ================================= */
+
+    createWhatsAppLink(
+      order
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Erreur création commande:",
+      error
+    );
+
+
+    showError(
+      error.message ||
+      "Impossible de créer la commande."
+    );
+
+
+    submitBtn.disabled =
+      false;
+
+    submitBtn.textContent =
+      "Confirmer la commande";
+  }
+}
+
+
+/* =====================================
+   WHATSAPP
+===================================== */
+
+function createWhatsAppLink(order) {
+
+  const whatsappButton =
+    document.getElementById(
+      "whatsappBtn"
+    );
+
+
+  if (!shop) {
+
+    whatsappButton.style.display =
+      "none";
+
+    return;
+  }
+
+
+  const sellerPhone =
+    shop.whatsapp ||
+    shop.phone ||
+    "";
+
+
+  if (!sellerPhone) {
+
+    whatsappButton.style.display =
+      "none";
+
+    return;
+  }
+
+
+  let phone =
+    String(sellerPhone)
+      .replace(/\D/g, "");
+
+
+  if (phone.startsWith("0")) {
+
+    phone =
+      "261" +
+      phone.substring(1);
+  }
+
+
+  const total =
+    Number(product.price || 0) *
+    quantity;
+
+
+  const message =
+    `Bonjour, je viens de passer une commande sur MadaShop.
+
+Produit : ${product.name}
+Quantité : ${quantity}
+Total : ${formatPrice(total)}
+Nom : ${document.getElementById("customerName").value.trim()}
+Téléphone : ${document.getElementById("customerPhone").value.trim()}
+Adresse : ${document.getElementById("customerAddress").value.trim()}`;
+
+
+  whatsappButton.href =
+    "https://wa.me/" +
+    phone +
+    "?text=" +
+    encodeURIComponent(message);
+
+
+  whatsappButton.style.display =
+    "block";
+}
+
+
+/* =====================================
+   MESSAGE ERROR
+===================================== */
+
+function showError(message) {
+
+  const element =
+    document.getElementById(
+      "message"
+    );
+
+
+  element.className =
+    "message error";
+
+
+  element.textContent =
+    "❌ " + message;
+
+
+  element.style.display =
+    "block";
+}
+
+
+/* =====================================
+   MESSAGE SUCCESS
+===================================== */
+
+function showSuccess(message) {
+
+  const element =
+    document.getElementById(
+      "message"
+    );
+
+
+  element.className =
+    "message success";
+
+
+  element.textContent =
+    "✅ " + message;
+
+
+  element.style.display =
+    "block";
+}
+
+
+/* =====================================
+   HIDE MESSAGE
+===================================== */
+
+function hideMessage() {
+
+  const element =
+    document.getElementById(
+      "message"
+    );
+
+
+  element.style.display =
+    "none";
+}
+
+
+/* =====================================
+   HIDE LOADING
+===================================== */
+
+function hideLoading() {
+
+  document.getElementById(
+    "loading"
+  ).style.display =
+    "none";
+}
+
+
+/* =====================================
+   START
+===================================== */
+
+loadProduct();
+
+</script>
+
+</body>
+</html>

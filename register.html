@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Créer un compte</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f3f6fb;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 32px;
+            color: #111827;
+        }
+
+        .logo span {
+            color: #2563eb;
+        }
+
+        .logo p {
+            color: #6b7280;
+            margin-top: 7px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: #111827;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        .password-box {
+            position: relative;
+        }
+
+        .password-box input {
+            padding-right: 50px;
+        }
+
+        .show-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 14px;
+            border-radius: 9px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .submit-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .message {
+            display: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.error {
+            display: block;
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.success {
+            display: block;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .login-link a {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 18px;
+        }
+
+        .back-home a {
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-home a:hover {
+            color: #2563eb;
+        }
+
+        @media (max-width: 500px) {
+
+            .card {
+                padding: 22px;
+            }
+
+            .logo h1 {
+                font-size: 27px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="logo">
+
+        <h1>
+            Mada<span>Shop</span>
+        </h1>
+
+        <p>
+            Créez votre boutique en ligne
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <h2>
+            Créer un compte
+        </h2>
+
+        <p class="subtitle">
+            Inscrivez-vous comme vendeur sur MadaShop.
+        </p>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+
+        <form id="registerForm">
+
+            <!-- NOM VENDEUR -->
+            <div class="form-group">
+
+                <label for="sellerName">
+                    Nom du vendeur *
+                </label>
+
+                <input
+                    type="text"
+                    id="sellerName"
+                    placeholder="Ex: Rado"
+                    autocomplete="name"
+                    required
+                >
+
+            </div>
+
+
+            <!-- NOM BOUTIQUE -->
+            <div class="form-group">
+
+                <label for="shopName">
+                    Nom de la boutique *
+                </label>
+
+                <input
+                    type="text"
+                    id="shopName"
+                    placeholder="Ex: Drou Shop"
+                    autocomplete="organization"
+                    required
+                >
+
+            </div>
+
+
+            <!-- TELEPHONE -->
+            <div class="form-group">
+
+                <label for="phone">
+                    Téléphone *
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    placeholder="034 XX XXX XX"
+                    autocomplete="tel"
+                    required
+                >
+
+            </div>
+
+
+            <!-- EMAIL -->
+            <div class="form-group">
+
+                <label for="email">
+                    Email *
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="exemple@email.com"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+
+                <label for="password">
+                    Mot de passe *
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Minimum 6 caractères"
+                        minlength="6"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('password', this)"
+                        aria-label="Afficher le mot de passe"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group">
+
+                <label for="confirmPassword">
+                    Confirmer le mot de passe *
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Retapez votre mot de passe"
+                        minlength="6"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('confirmPassword', this)"
+                        aria-label="Afficher le mot de passe"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- BUTTON -->
+            <button
+                type="submit"
+                id="registerBtn"
+                class="submit-btn"
+            >
+                Créer mon compte
+            </button>
+
+        </form>
+
+
+        <div class="login-link">
+
+            Vous avez déjà un compte ?
+
+            <a href="login.html">
+                Se connecter
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="back-home">
+
+        <a href="index.html">
+            ← Retour à l'accueil
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const API_URL = "/api";
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const form =
+    document.getElementById("registerForm");
+
+const message =
+    document.getElementById("message");
+
+const registerBtn =
+    document.getElementById("registerBtn");
+
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+function showMessage(text, type) {
+
+    message.textContent = text;
+
+    message.className =
+        "message " + type;
+
+}
+
+
+/* =========================================================
+   PASSWORD SHOW / HIDE
+========================================================= */
+
+function togglePassword(inputId, button) {
+
+    const input =
+        document.getElementById(inputId);
+
+    if (input.type === "password") {
+
+        input.type = "text";
+
+        button.textContent = "🙈";
+
+    } else {
+
+        input.type = "password";
+
+        button.textContent = "👁️";
+
+    }
+
+}
+
+
+/* =========================================================
+   REGISTER
+========================================================= */
+
+form.addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+
+        /* =========================
+           GET VALUES
+        ========================= */
+
+        const sellerName =
+            document
+                .getElementById("sellerName")
+                .value
+                .trim();
+
+
+        const shopName =
+            document
+                .getElementById("shopName")
+                .value
+                .trim();
+
+
+        const phone =
+            document
+                .getElementById("phone")
+                .value
+                .trim();
+
+
+        const email =
+            document
+                .getElementById("email")
+                .value
+                .trim()
+                .toLowerCase();
+
+
+        const password =
+            document
+                .getElementById("password")
+                .value;
+
+
+        const confirmPassword =
+            document
+                .getElementById("confirmPassword")
+                .value;
+
+
+        /* =========================
+           VALIDATION
+        ========================= */
+
+        if (
+            !sellerName ||
+            !shopName ||
+            !phone ||
+            !email ||
+            !password ||
+            !confirmPassword
+        ) {
+
+            showMessage(
+                "Veuillez remplir tous les champs.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (sellerName.length < 2) {
+
+            showMessage(
+                "Le nom du vendeur doit contenir au moins 2 caractères.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (shopName.length < 2) {
+
+            showMessage(
+                "Le nom de la boutique doit contenir au moins 2 caractères.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (password.length < 6) {
+
+            showMessage(
+                "Le mot de passe doit contenir au moins 6 caractères.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (password !== confirmPassword) {
+
+            showMessage(
+                "Les deux mots de passe ne correspondent pas.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        /* =========================
+           DISABLE BUTTON
+        ========================= */
+
+        registerBtn.disabled = true;
+
+        registerBtn.textContent =
+            "⏳ Création du compte...";
+
+
+        try {
+
+            /* =========================
+               API REGISTER
+            ========================= */
+
+            const response =
+                await fetch(
+                    `${API_URL}/register`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            sellerName:
+                                sellerName,
+
+                            shopName:
+                                shopName,
+
+                            phone:
+                                phone,
+
+                            email:
+                                email,
+
+                            password:
+                                password
+
+                        })
+                    }
+                );
+
+
+            /* =========================
+               CHECK RESPONSE TYPE
+            ========================= */
+
+            const contentType =
+                response.headers.get(
+                    "content-type"
+                ) || "";
+
+
+            let data = null;
+
+
+            if (
+                contentType.includes(
+                    "application/json"
+                )
+            ) {
+
+                data =
+                    await response.json();
+
+            } else {
+
+                const serverText =
+                    await response.text();
+
+                console.error(
+                    "Server response:",
+                    serverText
+                );
+
+                throw new Error(
+                    "Le serveur a retourné une réponse invalide."
+                );
+
+            }
+
+
+            /* =========================
+               CHECK HTTP STATUS
+            ========================= */
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data &&
+                    data.message
+                        ? data.message
+                        : "Impossible de créer le compte."
+                );
+
+            }
+
+
+            /* =========================
+               CHECK SUCCESS
+            ========================= */
+
+            if (
+                !data ||
+                data.success !== true
+            ) {
+
+                throw new Error(
+                    data &&
+                    data.message
+                        ? data.message
+                        : "La création du compte a échoué."
+                );
+
+            }
+
+
+            /* =========================
+               SUCCESS
+            ========================= */
+
+            showMessage(
+                "✅ Compte créé avec succès ! Redirection vers la connexion...",
+                "success"
+            );
+
+
+            /*
+             * Nettoyer le formulaire
+             */
+            form.reset();
+
+
+            /*
+             * Redirection
+             */
+            setTimeout(
+                function() {
+
+                    window.location.replace(
+                        "login.html"
+                    );
+
+                },
+                1200
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Register error:",
+                error
+            );
+
+
+            /* =========================
+               NETWORK ERROR
+            ========================= */
+
+            if (
+                error instanceof TypeError &&
+                error.message.includes("fetch")
+            ) {
+
+                showMessage(
+                    "❌ Impossible de contacter le serveur MadaShop. Vérifiez que server.js est bien lancé.",
+                    "error"
+                );
+
+            } else {
+
+                showMessage(
+                    "❌ " +
+                    (
+                        error.message ||
+                        "Une erreur est survenue pendant l'inscription."
+                    ),
+                    "error"
+                );
+
+            }
+
+        } finally {
+
+            /*
+             * Réactiver le bouton
+             */
+            registerBtn.disabled = false;
+
+            registerBtn.textContent =
+                "Créer mon compte";
+
+        }
+
+    }
+);
+
+</script>
+
+</body>
+</html>

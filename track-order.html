@@ -1,0 +1,3322 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Suivre ma commande - MadaShop</title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #222;
+        }
+
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 18px 20px;
+        }
+
+
+        header .container {
+            max-width: 850px;
+            margin: auto;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+
+        header a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+
+        /* =====================================================
+           MAIN
+        ===================================================== */
+
+        main {
+            max-width: 850px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+
+            box-shadow:
+                0 5px 20px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 20px;
+        }
+
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+
+        /* =====================================================
+           FORM
+        ===================================================== */
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+
+
+        input {
+            width: 100%;
+            padding: 13px;
+
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+
+            font-size: 15px;
+            outline: none;
+        }
+
+
+        input:focus {
+            border-color: #2563eb;
+
+            box-shadow:
+                0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+
+        button {
+            width: 100%;
+            padding: 14px;
+
+            border: none;
+            border-radius: 9px;
+
+            background: #2563eb;
+            color: white;
+
+            font-size: 16px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.2s;
+        }
+
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+
+        .hidden {
+            display: none !important;
+        }
+
+
+        /* =====================================================
+           MESSAGE
+        ===================================================== */
+
+        .message {
+            padding: 13px;
+            border-radius: 9px;
+            margin-top: 15px;
+            display: none;
+            line-height: 1.5;
+        }
+
+
+        .message.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        .message.success {
+            display: block;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+
+        /* =====================================================
+           STATUS
+        ===================================================== */
+
+        .status-box {
+            text-align: center;
+
+            padding: 28px;
+
+            border-radius: 14px;
+
+            background: #f3f4f6;
+
+            margin-bottom: 25px;
+
+            transition:
+                background 0.3s ease,
+                transform 0.3s ease;
+        }
+
+
+        .status-box.updated {
+            transform: scale(1.01);
+        }
+
+
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+
+        .status-title {
+            font-size: 25px;
+            font-weight: bold;
+            margin-bottom: 7px;
+
+            transition:
+                transform 0.25s ease;
+        }
+
+
+        .status-description {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           LIVE STATUS
+        ===================================================== */
+
+        .live-status {
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            gap: 8px;
+
+            margin-top: 18px;
+
+            font-size: 13px;
+
+            color: #16a34a;
+        }
+
+
+        .live-dot {
+            width: 9px;
+            height: 9px;
+
+            background: #22c55e;
+
+            border-radius: 50%;
+
+            animation: pulse 1.5s infinite;
+        }
+
+
+        @keyframes pulse {
+
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.4;
+                transform: scale(1.3);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+        }
+
+
+        /* =====================================================
+           DETAILS
+        ===================================================== */
+
+        .details {
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 15px;
+        }
+
+
+        .detail-item {
+            background: #f9fafb;
+
+            padding: 15px;
+
+            border-radius: 10px;
+        }
+
+
+        .detail-label {
+            font-size: 13px;
+
+            color: #6b7280;
+
+            margin-bottom: 5px;
+        }
+
+
+        .detail-value {
+            font-weight: bold;
+
+            font-size: 15px;
+
+            word-break: break-word;
+        }
+
+
+        /* =====================================================
+           PAYMENT
+        ===================================================== */
+
+        .payment-method {
+            color: #374151;
+        }
+
+
+        .payment-status {
+            display: inline-block;
+
+            padding: 6px 10px;
+
+            border-radius: 8px;
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+
+        .payment-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+
+        .payment-paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+
+        .payment-failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        .payment-info-box {
+            margin-top: 20px;
+
+            padding: 16px;
+
+            border-radius: 12px;
+
+            background: #eff6ff;
+
+            border: 1px solid #bfdbfe;
+        }
+
+
+        .payment-info-title {
+            font-weight: bold;
+
+            color: #1e40af;
+
+            margin-bottom: 6px;
+        }
+
+
+        .payment-info-text {
+            font-size: 14px;
+
+            color: #4b5563;
+
+            line-height: 1.5;
+        }
+
+
+        /* =====================================================
+           UPDATED
+        ===================================================== */
+
+        .updated {
+            text-align: center;
+
+            margin-top: 15px;
+
+            color: #6b7280;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           NOTIFICATION OVERLAY
+        ===================================================== */
+
+        .notification-overlay {
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                rgba(0, 0, 0, 0.65);
+
+            display: flex;
+
+            justify-content: center;
+            align-items: center;
+
+            padding: 20px;
+
+            opacity: 0;
+
+            visibility: hidden;
+
+            transition:
+                opacity 0.3s ease,
+                visibility 0.3s ease;
+
+            z-index: 9999;
+        }
+
+
+        .notification-overlay.show {
+            opacity: 1;
+
+            visibility: visible;
+        }
+
+
+        /* =====================================================
+           NOTIFICATION BOX
+        ===================================================== */
+
+        .notification-box {
+            width: 100%;
+
+            max-width: 500px;
+
+            background: white;
+
+            border-radius: 24px;
+
+            padding: 35px 25px;
+
+            text-align: center;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.3);
+
+            transform: scale(0.75);
+
+            transition:
+                transform
+                0.35s
+                cubic-bezier(.17,.67,.35,1.3);
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+
+        .notification-overlay.show
+        .notification-box {
+            transform: scale(1);
+        }
+
+
+        /* =====================================================
+           NOTIFICATION ICON
+        ===================================================== */
+
+        .notification-icon {
+            width: 100px;
+            height: 100px;
+
+            margin: 0 auto 20px;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+            justify-content: center;
+
+            font-size: 55px;
+
+            background: #dcfce7;
+
+            animation:
+                notificationIcon
+                0.6s
+                ease;
+        }
+
+
+        @keyframes notificationIcon {
+
+            0% {
+                transform: scale(0);
+            }
+
+            60% {
+                transform: scale(1.15);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+
+        }
+
+
+        /* =====================================================
+           NOTIFICATION TITLE
+        ===================================================== */
+
+        .notification-title {
+            font-size: 27px;
+
+            font-weight: bold;
+
+            margin-bottom: 12px;
+
+            color: #111827;
+        }
+
+
+        .notification-text {
+            font-size: 16px;
+
+            color: #6b7280;
+
+            line-height: 1.6;
+
+            margin-bottom: 25px;
+        }
+
+
+        /* =====================================================
+           CLOSE BUTTON
+        ===================================================== */
+
+        .notification-close {
+            width: auto;
+
+            min-width: 160px;
+
+            padding: 13px 25px;
+
+            background: #2563eb;
+
+            border-radius: 10px;
+
+            font-size: 15px;
+        }
+
+
+        .notification-close:hover {
+            background: #1d4ed8;
+        }
+
+
+        /* =====================================================
+           NOTIFICATION LINE
+        ===================================================== */
+
+        .notification-line {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+
+            height: 7px;
+
+            background: #22c55e;
+        }
+
+
+        /* =====================================================
+           LOADING
+        ===================================================== */
+
+        .loading {
+            text-align: center;
+
+            padding: 20px;
+
+            color: #6b7280;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 600px) {
+
+            main {
+                margin: 25px auto;
+            }
+
+
+            .card {
+                padding: 18px;
+            }
+
+
+            .details {
+                grid-template-columns: 1fr;
+            }
+
+
+            header h1 {
+                font-size: 18px;
+            }
+
+
+            .notification-box {
+                padding: 30px 20px;
+            }
+
+
+            .notification-icon {
+                width: 85px;
+                height: 85px;
+
+                font-size: 45px;
+            }
+
+
+            .notification-title {
+                font-size: 22px;
+            }
+
+
+            .notification-text {
+                font-size: 15px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="container">
+
+        <h1>
+            📦 MadaShop
+        </h1>
+
+
+        <a href="index.html">
+            Accueil
+        </a>
+
+    </div>
+
+</header>
+
+
+<main>
+
+
+    <!-- =====================================================
+         SEARCH CARD
+    ====================================================== -->
+
+    <div
+        class="card"
+        id="searchCard"
+    >
+
+        <h2>
+            🔎 Suivre ma commande
+        </h2>
+
+
+        <div class="form-group">
+
+            <label for="orderId">
+                Numéro de commande
+            </label>
+
+
+            <input
+                type="number"
+                id="orderId"
+                placeholder="Ex: 15"
+                min="1"
+            >
+
+        </div>
+
+
+        <div class="form-group">
+
+            <label for="phone">
+                Numéro de téléphone
+            </label>
+
+
+            <input
+                type="text"
+                id="phone"
+                placeholder="Ex: 0341234567"
+                autocomplete="tel"
+            >
+
+        </div>
+
+
+        <button id="trackBtn">
+
+            🔍 Voir ma commande
+
+        </button>
+
+
+        <div
+            id="message"
+            class="message"
+        ></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ORDER CARD
+    ====================================================== -->
+
+    <div
+        class="card hidden"
+        id="orderCard"
+    >
+
+        <h2>
+            📦 Détails de la commande
+        </h2>
+
+
+        <!-- STATUS -->
+
+        <div
+            class="status-box"
+            id="statusBox"
+        >
+
+            <div
+                class="status-icon"
+                id="statusIcon"
+            >
+                🆕
+            </div>
+
+
+            <div
+                class="status-title"
+                id="statusTitle"
+            >
+                Nouvelle
+            </div>
+
+
+            <div
+                class="status-description"
+                id="statusDescription"
+            >
+                Votre commande vient d'être reçue.
+            </div>
+
+
+            <div
+                class="live-status"
+                id="liveStatus"
+            >
+
+                <span class="live-dot"></span>
+
+                Suivi en temps réel activé
+
+            </div>
+
+        </div>
+
+
+        <!-- DETAILS -->
+
+        <div class="details">
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Numéro de commande
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailOrderId"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Produit
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailProduct"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Prix unitaire
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailPrice"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Quantité
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailQuantity"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Total
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailTotal"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Date
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailDate"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <!-- PAYMENT METHOD -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Mode de paiement
+                </div>
+
+
+                <div
+                    class="detail-value payment-method"
+                    id="detailPaymentMethod"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <!-- PAYMENT STATUS -->
+
+            <div class="detail-item">
+
+                <div class="detail-label">
+                    Statut du paiement
+                </div>
+
+
+                <div
+                    class="detail-value"
+                    id="detailPaymentStatus"
+                >
+                    -
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- PAYMENT INFO -->
+
+        <div
+            class="payment-info-box"
+            id="paymentInfoBox"
+        >
+
+            <div
+                class="payment-info-title"
+                id="paymentInfoTitle"
+            >
+                💵 Paiement à la livraison
+            </div>
+
+
+            <div
+                class="payment-info-text"
+                id="paymentInfoText"
+            >
+                Vous paierez directement lors de la réception
+                de votre commande.
+            </div>
+
+        </div>
+
+
+        <div
+            class="updated"
+            id="updatedText"
+        >
+            Dernière mise à jour : -
+        </div>
+
+    </div>
+
+</main>
+
+
+<!-- =========================================================
+     NOTIFICATION POPUP
+========================================================= -->
+
+<div
+    class="notification-overlay"
+    id="notificationOverlay"
+>
+
+    <div class="notification-box">
+
+
+        <div
+            class="notification-line"
+            id="notificationLine"
+        ></div>
+
+
+        <div
+            class="notification-icon"
+            id="notificationIcon"
+        >
+            🎉
+        </div>
+
+
+        <div
+            class="notification-title"
+            id="notificationTitle"
+        >
+            Votre commande a été mise à jour !
+        </div>
+
+
+        <div
+            class="notification-text"
+            id="notificationText"
+        >
+            Le statut de votre commande a changé.
+        </div>
+
+
+        <button
+            class="notification-close"
+            id="notificationClose"
+        >
+            OK, compris
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+
+    // =========================================================
+    // CONFIGURATION
+    // =========================================================
+
+    const API_URL = "/api";
+
+
+    // =========================================================
+    // VARIABLES
+    // =========================================================
+
+    let currentOrder = null;
+
+    let socket = null;
+
+    let currentUserId = null;
+
+    let pollingInterval = null;
+
+    let reconnectTimer = null;
+
+    let isSearching = false;
+
+
+    // =========================================================
+    // URL PARAMETERS
+    // =========================================================
+
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const urlOrderId =
+        urlParams.get("orderId");
+
+
+    const urlUserId =
+        urlParams.get("userId");
+
+
+    const urlPhone =
+        urlParams.get("phone");
+
+
+    // =========================================================
+    // ELEMENTS
+    // =========================================================
+
+    const orderIdInput =
+        document.getElementById(
+            "orderId"
+        );
+
+
+    const phoneInput =
+        document.getElementById(
+            "phone"
+        );
+
+
+    const trackBtn =
+        document.getElementById(
+            "trackBtn"
+        );
+
+
+    const message =
+        document.getElementById(
+            "message"
+        );
+
+
+    const orderCard =
+        document.getElementById(
+            "orderCard"
+        );
+
+
+    const statusBox =
+        document.getElementById(
+            "statusBox"
+        );
+
+
+    const statusIcon =
+        document.getElementById(
+            "statusIcon"
+        );
+
+
+    const statusTitle =
+        document.getElementById(
+            "statusTitle"
+        );
+
+
+    const statusDescription =
+        document.getElementById(
+            "statusDescription"
+        );
+
+
+    const detailOrderId =
+        document.getElementById(
+            "detailOrderId"
+        );
+
+
+    const detailProduct =
+        document.getElementById(
+            "detailProduct"
+        );
+
+
+    const detailPrice =
+        document.getElementById(
+            "detailPrice"
+        );
+
+
+    const detailQuantity =
+        document.getElementById(
+            "detailQuantity"
+        );
+
+
+    const detailTotal =
+        document.getElementById(
+            "detailTotal"
+        );
+
+
+    const detailDate =
+        document.getElementById(
+            "detailDate"
+        );
+
+
+    const detailPaymentMethod =
+        document.getElementById(
+            "detailPaymentMethod"
+        );
+
+
+    const detailPaymentStatus =
+        document.getElementById(
+            "detailPaymentStatus"
+        );
+
+
+    const paymentInfoBox =
+        document.getElementById(
+            "paymentInfoBox"
+        );
+
+
+    const paymentInfoTitle =
+        document.getElementById(
+            "paymentInfoTitle"
+        );
+
+
+    const paymentInfoText =
+        document.getElementById(
+            "paymentInfoText"
+        );
+
+
+    const updatedText =
+        document.getElementById(
+            "updatedText"
+        );
+
+
+    const liveStatus =
+        document.getElementById(
+            "liveStatus"
+        );
+
+
+    // =========================================================
+    // NOTIFICATION ELEMENTS
+    // =========================================================
+
+    const notificationOverlay =
+        document.getElementById(
+            "notificationOverlay"
+        );
+
+
+    const notificationIcon =
+        document.getElementById(
+            "notificationIcon"
+        );
+
+
+    const notificationTitle =
+        document.getElementById(
+            "notificationTitle"
+        );
+
+
+    const notificationText =
+        document.getElementById(
+            "notificationText"
+        );
+
+
+    const notificationLine =
+        document.getElementById(
+            "notificationLine"
+        );
+
+
+    const notificationClose =
+        document.getElementById(
+            "notificationClose"
+        );
+
+
+    // =========================================================
+    // STATUS CONFIGURATION
+    // =========================================================
+
+    const STATUS_CONFIG = {
+
+        new: {
+
+            icon: "🆕",
+
+            title: "Nouvelle",
+
+            notificationTitle:
+                "Votre commande a été reçue !",
+
+            notificationText:
+                "Votre commande vient d'être reçue par le vendeur.",
+
+            color: "#2563eb",
+
+            background: "#dbeafe"
+
+        },
+
+
+        accepted: {
+
+            icon: "✅",
+
+            title: "Acceptée",
+
+            notificationTitle:
+                "Votre commande a été acceptée !",
+
+            notificationText:
+                "Le vendeur a accepté votre commande.",
+
+            color: "#16a34a",
+
+            background: "#dcfce7"
+
+        },
+
+
+        rejected: {
+
+            icon: "❌",
+
+            title: "Refusée",
+
+            notificationTitle:
+                "Votre commande a été refusée",
+
+            notificationText:
+                "Le vendeur a refusé votre commande.",
+
+            color: "#dc2626",
+
+            background: "#fee2e2"
+
+        },
+
+
+        processing: {
+
+            icon: "🔄",
+
+            title: "En préparation",
+
+            notificationTitle:
+                "Votre commande est en préparation !",
+
+            notificationText:
+                "Le vendeur prépare actuellement votre commande.",
+
+            color: "#f59e0b",
+
+            background: "#fef3c7"
+
+        },
+
+
+        completed: {
+
+            icon: "🏁",
+
+            title: "Terminée",
+
+            notificationTitle:
+                "Votre commande est terminée !",
+
+            notificationText:
+                "Votre commande a été finalisée avec succès.",
+
+            color: "#16a34a",
+
+            background: "#dcfce7"
+
+        },
+
+
+        cancelled: {
+
+            icon: "↩️",
+
+            title: "Annulée",
+
+            notificationTitle:
+                "Votre commande a été annulée",
+
+            notificationText:
+                "Cette commande a été annulée.",
+
+            color: "#6b7280",
+
+            background: "#e5e7eb"
+
+        }
+
+    };
+
+
+    // =========================================================
+    // PAYMENT CONFIGURATION
+    // =========================================================
+
+    const PAYMENT_STATUS_CONFIG = {
+
+        pending: {
+
+            icon: "🟡",
+
+            label: "En attente",
+
+            color: "#92400e",
+
+            background: "#fef3c7",
+
+            notificationTitle:
+                "Paiement en attente",
+
+            notificationText:
+                "Le paiement de votre commande est encore en attente."
+
+        },
+
+
+        paid: {
+
+            icon: "🟢",
+
+            label: "Payé",
+
+            color: "#166534",
+
+            background: "#dcfce7",
+
+            notificationTitle:
+                "Paiement confirmé !",
+
+            notificationText:
+                "Le vendeur a confirmé que votre commande est payée."
+
+        },
+
+
+        failed: {
+
+            icon: "🔴",
+
+            label: "Échec",
+
+            color: "#991b1b",
+
+            background: "#fee2e2",
+
+            notificationTitle:
+                "Paiement échoué",
+
+            notificationText:
+                "Le statut de votre paiement indique un échec."
+
+        }
+
+    };
+
+
+    // =========================================================
+    // INIT
+    // =========================================================
+
+    initializePage();
+
+
+    async function initializePage() {
+
+        /*
+            Si les paramètres sont présents,
+            on remplit automatiquement le formulaire.
+        */
+
+        if (urlOrderId) {
+
+            orderIdInput.value =
+                urlOrderId;
+
+        }
+
+
+        if (urlPhone) {
+
+            phoneInput.value =
+                urlPhone;
+
+        }
+
+
+        if (urlUserId) {
+
+            const id =
+                Number(
+                    urlUserId
+                );
+
+
+            if (
+                Number.isInteger(id) &&
+                id > 0
+            ) {
+
+                currentUserId =
+                    id;
+
+            }
+
+        }
+
+
+        /*
+            Si orderId + phone sont présents,
+            on lance automatiquement le suivi.
+        */
+
+        if (
+            urlOrderId &&
+            urlPhone
+        ) {
+
+            await trackOrder();
+
+        }
+
+    }
+
+
+    // =========================================================
+    // SHOW MESSAGE
+    // =========================================================
+
+    function showMessage(
+        text,
+        type = "error"
+    ) {
+
+        message.textContent =
+            text;
+
+
+        message.className =
+            "message " + type;
+
+    }
+
+
+    // =========================================================
+    // HIDE MESSAGE
+    // =========================================================
+
+    function hideMessage() {
+
+        message.textContent =
+            "";
+
+
+        message.className =
+            "message";
+
+    }
+
+
+    // =========================================================
+    // FORMAT PRICE
+    // =========================================================
+
+    function formatPrice(value) {
+
+        const number =
+            Number(value);
+
+
+        if (
+            Number.isNaN(number)
+        ) {
+
+            return "-";
+
+        }
+
+
+        return (
+            number.toLocaleString(
+                "fr-FR"
+            ) +
+            " Ar"
+        );
+
+    }
+
+
+    // =========================================================
+    // FORMAT DATE
+    // =========================================================
+
+    function formatDate(
+        dateValue
+    ) {
+
+        if (!dateValue) {
+
+            return "-";
+
+        }
+
+
+        const date =
+            new Date(
+                String(
+                    dateValue
+                ).replace(
+                    " ",
+                    "T"
+                )
+            );
+
+
+        if (
+            Number.isNaN(
+                date.getTime()
+            )
+        ) {
+
+            return dateValue;
+
+        }
+
+
+        return date.toLocaleString(
+            "fr-FR",
+            {
+                dateStyle: "medium",
+                timeStyle: "short"
+            }
+        );
+
+    }
+
+
+    // =========================================================
+    // STATUS DISPLAY
+    // =========================================================
+
+    function updateStatusDisplay(
+        status,
+        animate = false
+    ) {
+
+        const config =
+            STATUS_CONFIG[status] ||
+            {
+
+                icon: "📦",
+
+                title:
+                    status ||
+                    "Inconnu"
+
+            };
+
+
+        statusIcon.textContent =
+            config.icon;
+
+
+        statusTitle.textContent =
+            config.title;
+
+
+        statusDescription.textContent =
+            getStatusDescription(
+                status
+            );
+
+
+        /*
+            Status background
+        */
+
+        if (
+            config.background
+        ) {
+
+            statusBox.style.background =
+                config.background;
+
+        }
+
+
+        /*
+            Animation only when
+            status really changes.
+        */
+
+        if (animate) {
+
+            statusBox.classList.add(
+                "updated"
+            );
+
+
+            statusTitle.style.transform =
+                "scale(1.08)";
+
+
+            setTimeout(
+                () => {
+
+                    statusBox.classList.remove(
+                        "updated"
+                    );
+
+
+                    statusTitle.style.transform =
+                        "scale(1)";
+
+                },
+                350
+            );
+
+        }
+
+
+        updatedText.textContent =
+            "Dernière mise à jour : " +
+            new Date().toLocaleString(
+                "fr-FR"
+            );
+
+    }
+
+
+    // =========================================================
+    // STATUS DESCRIPTION
+    // =========================================================
+
+    function getStatusDescription(
+        status
+    ) {
+
+        const descriptions = {
+
+            new:
+                "Votre commande vient d'être reçue.",
+
+            accepted:
+                "Votre commande a été acceptée par le vendeur.",
+
+            rejected:
+                "Votre commande a été refusée par le vendeur.",
+
+            processing:
+                "Votre commande est actuellement en préparation.",
+
+            completed:
+                "Votre commande est terminée.",
+
+            cancelled:
+                "Votre commande a été annulée."
+
+        };
+
+
+        return (
+            descriptions[status] ||
+            "Le statut de votre commande a été mis à jour."
+        );
+
+    }
+
+
+    // =========================================================
+    // PAYMENT METHOD
+    // =========================================================
+
+    function getPaymentMethodHTML(
+        paymentMethod
+    ) {
+
+        if (
+            paymentMethod ===
+            "cash_on_delivery"
+        ) {
+
+            return "💵 Paiement à la livraison";
+
+        }
+
+
+        return (
+            paymentMethod ||
+            "-"
+        );
+
+    }
+
+
+    // =========================================================
+    // PAYMENT STATUS HTML
+    // =========================================================
+
+    function getPaymentStatusHTML(
+        paymentStatus
+    ) {
+
+        const config =
+            PAYMENT_STATUS_CONFIG[
+                paymentStatus
+            ];
+
+
+        if (!config) {
+
+            return `
+                <span class="payment-status payment-pending">
+                    🟡 En attente
+                </span>
+            `;
+
+        }
+
+
+        let className =
+            "payment-pending";
+
+
+        if (
+            paymentStatus ===
+            "paid"
+        ) {
+
+            className =
+                "payment-paid";
+
+        }
+
+
+        if (
+            paymentStatus ===
+            "failed"
+        ) {
+
+            className =
+                "payment-failed";
+
+        }
+
+
+        return `
+            <span class="payment-status ${className}">
+                ${config.icon}
+                ${config.label}
+            </span>
+        `;
+
+    }
+
+
+    // =========================================================
+    // PAYMENT DISPLAY
+    // =========================================================
+
+    function updatePaymentDisplay(
+        paymentMethod,
+        paymentStatus
+    ) {
+
+        detailPaymentMethod.textContent =
+            getPaymentMethodHTML(
+                paymentMethod
+            );
+
+
+        detailPaymentStatus.innerHTML =
+            getPaymentStatusHTML(
+                paymentStatus
+            );
+
+
+        /*
+            Payment information
+        */
+
+        if (
+            paymentMethod ===
+            "cash_on_delivery"
+        ) {
+
+            paymentInfoBox.style.display =
+                "block";
+
+
+            if (
+                paymentStatus ===
+                "paid"
+            ) {
+
+                paymentInfoTitle.textContent =
+                    "🟢 Paiement confirmé";
+
+
+                paymentInfoText.textContent =
+                    "Le vendeur a confirmé que le paiement de votre commande a été effectué.";
+
+            } else if (
+                paymentStatus ===
+                "failed"
+            ) {
+
+                paymentInfoTitle.textContent =
+                    "🔴 Paiement échoué";
+
+
+                paymentInfoText.textContent =
+                    "Le statut du paiement indique un échec. Veuillez contacter le vendeur si nécessaire.";
+
+            } else {
+
+                paymentInfoTitle.textContent =
+                    "💵 Paiement à la livraison";
+
+
+                paymentInfoText.textContent =
+                    "Vous paierez directement lors de la réception de votre commande.";
+
+            }
+
+        } else {
+
+            paymentInfoBox.style.display =
+                "none";
+
+        }
+
+    }
+
+
+    // =========================================================
+    // DISPLAY ORDER
+    // =========================================================
+
+    function displayOrder(
+        order,
+        animate = false
+    ) {
+
+        if (!order) {
+
+            return;
+
+        }
+
+
+        const oldStatus =
+            currentOrder
+                ? currentOrder.status
+                : null;
+
+
+        const oldPaymentStatus =
+            currentOrder
+                ? currentOrder.payment_status
+                : null;
+
+
+        currentOrder =
+            {
+                ...currentOrder,
+                ...order
+            };
+
+
+        /*
+            User ID
+        */
+
+        if (
+            currentOrder.user_id
+        ) {
+
+            const id =
+                Number(
+                    currentOrder.user_id
+                );
+
+
+            if (
+                Number.isInteger(id) &&
+                id > 0
+            ) {
+
+                currentUserId =
+                    id;
+
+            }
+
+        }
+
+
+        /*
+            Basic information
+        */
+
+        detailOrderId.textContent =
+            "#" +
+            (
+                currentOrder.id ||
+                "-"
+            );
+
+
+        detailProduct.textContent =
+            currentOrder.product_name ||
+            "-";
+
+
+        detailPrice.textContent =
+            formatPrice(
+                currentOrder.price
+            );
+
+
+        detailQuantity.textContent =
+            currentOrder.quantity ||
+            0;
+
+
+        detailTotal.textContent =
+            formatPrice(
+                currentOrder.total
+            );
+
+
+        detailDate.textContent =
+            formatDate(
+                currentOrder.created_at
+            );
+
+
+        /*
+            Status
+        */
+
+        updateStatusDisplay(
+            currentOrder.status,
+            animate &&
+            oldStatus !==
+            currentOrder.status
+        );
+
+
+        /*
+            Payment
+        */
+
+        updatePaymentDisplay(
+            currentOrder.payment_method,
+            currentOrder.payment_status
+        );
+
+
+        /*
+            Show order
+        */
+
+        orderCard.classList.remove(
+            "hidden"
+        );
+
+
+        /*
+            Notification for payment
+            only when it changed.
+        */
+
+        if (
+            animate &&
+            oldPaymentStatus !==
+            null &&
+            oldPaymentStatus !==
+            currentOrder.payment_status
+        ) {
+
+            showPaymentNotification(
+                currentOrder.payment_status
+            );
+
+        }
+
+    }
+
+
+    // =========================================================
+    // TRACK ORDER
+    // =========================================================
+
+    async function trackOrder() {
+
+        if (isSearching) {
+
+            return;
+
+        }
+
+
+        hideMessage();
+
+
+        const orderId =
+            orderIdInput.value.trim();
+
+
+        const phone =
+            phoneInput.value.trim();
+
+
+        /*
+            Validation
+        */
+
+        if (!orderId) {
+
+            showMessage(
+                "Veuillez entrer le numéro de commande."
+            );
+
+
+            return;
+
+        }
+
+
+        if (!phone) {
+
+            showMessage(
+                "Veuillez entrer votre numéro de téléphone."
+            );
+
+
+            return;
+
+        }
+
+
+        isSearching =
+            true;
+
+
+        trackBtn.disabled =
+            true;
+
+
+        trackBtn.textContent =
+            "⏳ Recherche...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/order/track/${encodeURIComponent(orderId)}?phone=${encodeURIComponent(phone)}`
+                );
+
+
+            let data;
+
+
+            try {
+
+                data =
+                    await response.json();
+
+            } catch (error) {
+
+                throw new Error(
+                    "Réponse invalide du serveur."
+                );
+
+            }
+
+
+            if (
+                !response.ok ||
+                !data.success
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Commande introuvable."
+                );
+
+            }
+
+
+            /*
+                Save current order
+            */
+
+            displayOrder(
+                data.order,
+                false
+            );
+
+
+            /*
+                Get user ID from order
+                if available.
+            */
+
+            if (
+                data.order &&
+                data.order.user_id
+            ) {
+
+                const id =
+                    Number(
+                        data.order.user_id
+                    );
+
+
+                if (
+                    Number.isInteger(id) &&
+                    id > 0
+                ) {
+
+                    currentUserId =
+                        id;
+
+                }
+
+            }
+
+
+            /*
+                If URL already has userId,
+                use it.
+            */
+
+            if (
+                urlUserId
+            ) {
+
+                const id =
+                    Number(
+                        urlUserId
+                    );
+
+
+                if (
+                    Number.isInteger(id) &&
+                    id > 0
+                ) {
+
+                    currentUserId =
+                        id;
+
+                }
+
+            }
+
+
+            /*
+                Start realtime
+                if user ID exists.
+            */
+
+            if (
+                currentUserId
+            ) {
+
+                startRealtime();
+
+            } else {
+
+                liveStatus.innerHTML =
+                    "ℹ️ Suivi automatique limité";
+
+
+                liveStatus.style.color =
+                    "#6b7280";
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "Track order error:",
+                error
+            );
+
+
+            orderCard.classList.add(
+                "hidden"
+            );
+
+
+            showMessage(
+                error.message ||
+                "Une erreur est survenue."
+            );
+
+
+        } finally {
+
+            isSearching =
+                false;
+
+
+            trackBtn.disabled =
+                false;
+
+
+            trackBtn.textContent =
+                "🔍 Voir ma commande";
+
+        }
+
+    }
+
+
+    // =========================================================
+    // START REALTIME
+    // =========================================================
+
+    function startRealtime() {
+
+        if (!currentUserId) {
+
+            return;
+
+        }
+
+
+        /*
+            WebSocket
+        */
+
+        connectWebSocket(
+            currentUserId
+        );
+
+
+        /*
+            Backup polling every 30 seconds.
+
+            Cela permet de récupérer les changements
+            même si WebSocket est temporairement indisponible.
+        */
+
+        startPolling();
+
+    }
+
+
+    // =========================================================
+    // POLLING
+    // =========================================================
+
+    function startPolling() {
+
+        if (pollingInterval) {
+
+            clearInterval(
+                pollingInterval
+            );
+
+        }
+
+
+        pollingInterval =
+            setInterval(
+                () => {
+
+                    if (
+                        currentOrder &&
+                        currentOrder.id &&
+                        phoneInput.value.trim()
+                    ) {
+
+                        refreshCurrentOrder();
+
+                    }
+
+                },
+                30000
+            );
+
+    }
+
+
+    // =========================================================
+    // REFRESH CURRENT ORDER
+    // =========================================================
+
+    async function refreshCurrentOrder() {
+
+        if (
+            !currentOrder ||
+            !currentOrder.id
+        ) {
+
+            return;
+
+        }
+
+
+        const phone =
+            phoneInput.value.trim();
+
+
+        if (!phone) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${API_URL}/order/track/${encodeURIComponent(currentOrder.id)}?phone=${encodeURIComponent(phone)}`
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (
+                !response.ok ||
+                !data.success ||
+                !data.order
+            ) {
+
+                return;
+
+            }
+
+
+            const newOrder =
+                data.order;
+
+
+            const statusChanged =
+                currentOrder.status !==
+                newOrder.status;
+
+
+            const paymentChanged =
+                currentOrder.payment_status !==
+                newOrder.payment_status;
+
+
+            if (
+                statusChanged ||
+                paymentChanged
+            ) {
+
+                const oldStatus =
+                    currentOrder.status;
+
+
+                const oldPaymentStatus =
+                    currentOrder.payment_status;
+
+
+                currentOrder =
+                    {
+                        ...currentOrder,
+                        ...newOrder
+                    };
+
+
+                displayOrder(
+                    newOrder,
+                    true
+                );
+
+
+                /*
+                    If status changed,
+                    show status notification.
+                */
+
+                if (
+                    statusChanged &&
+                    oldStatus !==
+                    newOrder.status
+                ) {
+
+                    showStatusNotification(
+                        newOrder.status
+                    );
+
+                }
+
+
+                /*
+                    Payment notification is handled
+                    inside displayOrder().
+                */
+
+                if (
+                    paymentChanged &&
+                    oldPaymentStatus ===
+                    newOrder.payment_status
+                ) {
+
+                    /*
+                        Nothing to do.
+                    */
+
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Refresh order error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    // =========================================================
+    // WEBSOCKET
+    // =========================================================
+
+    function connectWebSocket(
+        userId
+    ) {
+
+        if (!userId) {
+
+            return;
+
+        }
+
+
+        /*
+            Close old connection
+        */
+
+        if (socket) {
+
+            try {
+
+                socket.close();
+
+            } catch (error) {
+
+                console.log(
+                    error
+                );
+
+            }
+
+        }
+
+
+        /*
+            Clear old reconnect timer
+        */
+
+        if (reconnectTimer) {
+
+            clearTimeout(
+                reconnectTimer
+            );
+
+        }
+
+
+        /*
+            Protocol
+        */
+
+        const protocol =
+            window.location.protocol ===
+            "https:"
+                ? "wss:"
+                : "ws:";
+
+
+        const host =
+            window.location.host ||
+            "localhost:3000";
+
+
+        /*
+            IMPORTANT:
+
+            server.js uses:
+
+            /?userId=...
+
+            NOT:
+
+            /ws?userId=...
+        */
+
+        const wsUrl =
+            `${protocol}//${host}/?userId=${encodeURIComponent(userId)}`;
+
+
+        console.log(
+            "Connexion WebSocket :",
+            wsUrl
+        );
+
+
+        try {
+
+            socket =
+                new WebSocket(
+                    wsUrl
+                );
+
+
+            // =================================================
+            // OPEN
+            // =================================================
+
+            socket.addEventListener(
+                "open",
+                () => {
+
+                    console.log(
+                        "WebSocket connecté."
+                    );
+
+
+                    liveStatus.innerHTML = `
+
+                        <span class="live-dot"></span>
+
+                        Suivi en temps réel activé
+
+                    `;
+
+
+                    liveStatus.style.color =
+                        "#16a34a";
+
+                }
+            );
+
+
+            // =================================================
+            // MESSAGE
+            // =================================================
+
+            socket.addEventListener(
+                "message",
+                event => {
+
+                    try {
+
+                        const data =
+                            JSON.parse(
+                                event.data
+                            );
+
+
+                        console.log(
+                            "WebSocket message :",
+                            data
+                        );
+
+
+                        /*
+                            Connection
+                        */
+
+                        if (
+                            data.type ===
+                            "connection"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        /*
+                            ORDER STATUS
+                        */
+
+                        if (
+                            data.type ===
+                            "order_status_updated"
+                        ) {
+
+                            handleOrderStatusUpdate(
+                                data
+                            );
+
+                        }
+
+
+                        /*
+                            PAYMENT STATUS
+                        */
+
+                        if (
+                            data.type ===
+                            "payment_status_updated"
+                        ) {
+
+                            handlePaymentStatusUpdate(
+                                data
+                            );
+
+                        }
+
+                    } catch (error) {
+
+                        console.error(
+                            "WebSocket message error:",
+                            error
+                        );
+
+                    }
+
+                }
+            );
+
+
+            // =================================================
+            // CLOSE
+            // =================================================
+
+            socket.addEventListener(
+                "close",
+                () => {
+
+                    console.log(
+                        "WebSocket déconnecté."
+                    );
+
+
+                    liveStatus.innerHTML =
+                        "⚠️ Suivi temps réel déconnecté";
+
+
+                    liveStatus.style.color =
+                        "#dc2626";
+
+
+                    /*
+                        Reconnect after 5 sec
+                    */
+
+                    reconnectTimer =
+                        setTimeout(
+                            () => {
+
+                                if (
+                                    currentUserId &&
+                                    currentOrder
+                                ) {
+
+                                    connectWebSocket(
+                                        currentUserId
+                                    );
+
+                                }
+
+                            },
+                            5000
+                        );
+
+                }
+            );
+
+
+            // =================================================
+            // ERROR
+            // =================================================
+
+            socket.addEventListener(
+                "error",
+                error => {
+
+                    console.error(
+                        "WebSocket error :",
+                        error
+                    );
+
+
+                    liveStatus.innerHTML =
+                        "⚠️ Connexion temps réel indisponible";
+
+
+                    liveStatus.style.color =
+                        "#dc2626";
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Impossible de créer WebSocket :",
+                error
+            );
+
+
+            liveStatus.innerHTML =
+                "⚠️ Suivi automatique indisponible";
+
+
+            liveStatus.style.color =
+                "#dc2626";
+
+        }
+
+    }
+
+
+    // =========================================================
+    // ORDER STATUS UPDATE
+    // =========================================================
+
+    function handleOrderStatusUpdate(
+        data
+    ) {
+
+        const updatedOrder =
+            data.order;
+
+
+        if (
+            !updatedOrder ||
+            !currentOrder
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+            Verify order ID
+        */
+
+        if (
+            Number(
+                updatedOrder.id
+            ) !==
+            Number(
+                currentOrder.id
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const oldStatus =
+            currentOrder.status;
+
+
+        const newStatus =
+            updatedOrder.status;
+
+
+        /*
+            Ignore same status
+        */
+
+        if (
+            oldStatus ===
+            newStatus
+        ) {
+
+            return;
+
+        }
+
+
+        console.log(
+            `Commande #${currentOrder.id} : ${oldStatus} → ${newStatus}`
+        );
+
+
+        currentOrder =
+            {
+                ...currentOrder,
+                ...updatedOrder
+            };
+
+
+        /*
+            Update display
+        */
+
+        displayOrder(
+            currentOrder,
+            true
+        );
+
+
+        /*
+            Notification
+        */
+
+        showStatusNotification(
+            newStatus
+        );
+
+    }
+
+
+    // =========================================================
+    // PAYMENT STATUS UPDATE
+    // =========================================================
+
+    function handlePaymentStatusUpdate(
+        data
+    ) {
+
+        const updatedOrder =
+            data.order;
+
+
+        if (
+            !updatedOrder ||
+            !currentOrder
+        ) {
+
+            return;
+
+        }
+
+
+        /*
+            Verify order ID
+        */
+
+        if (
+            Number(
+                updatedOrder.id
+            ) !==
+            Number(
+                currentOrder.id
+            )
+        ) {
+
+            return;
+
+        }
+
+
+        const oldPaymentStatus =
+            currentOrder.payment_status;
+
+
+        const newPaymentStatus =
+            updatedOrder.payment_status;
+
+
+        /*
+            Ignore same status
+        */
+
+        if (
+            oldPaymentStatus ===
+            newPaymentStatus
+        ) {
+
+            return;
+
+        }
+
+
+        console.log(
+            `Paiement commande #${currentOrder.id} : ${oldPaymentStatus} → ${newPaymentStatus}`
+        );
+
+
+        currentOrder =
+            {
+                ...currentOrder,
+                ...updatedOrder
+            };
+
+
+        /*
+            Update payment display
+        */
+
+        updatePaymentDisplay(
+            currentOrder.payment_method,
+            currentOrder.payment_status
+        );
+
+
+        updatedText.textContent =
+            "Dernière mise à jour : " +
+            new Date().toLocaleString(
+                "fr-FR"
+            );
+
+
+        /*
+            Notification
+        */
+
+        showPaymentNotification(
+            newPaymentStatus
+        );
+
+    }
+
+
+    // =========================================================
+    // STATUS NOTIFICATION
+    // =========================================================
+
+    function showStatusNotification(
+        status
+    ) {
+
+        const config =
+            STATUS_CONFIG[status];
+
+
+        if (!config) {
+
+            return;
+
+        }
+
+
+        notificationIcon.textContent =
+            config.icon;
+
+
+        notificationTitle.textContent =
+            config.notificationTitle;
+
+
+        notificationText.textContent =
+            config.notificationText;
+
+
+        notificationLine.style.background =
+            config.color;
+
+
+        notificationIcon.style.background =
+            config.background;
+
+
+        notificationOverlay.classList.add(
+            "show"
+        );
+
+
+        document.body.style.overflow =
+            "hidden";
+
+
+        console.log(
+            "Notification statut :",
+            status
+        );
+
+    }
+
+
+    // =========================================================
+    // PAYMENT NOTIFICATION
+    // =========================================================
+
+    function showPaymentNotification(
+        paymentStatus
+    ) {
+
+        const config =
+            PAYMENT_STATUS_CONFIG[
+                paymentStatus
+            ];
+
+
+        if (!config) {
+
+            return;
+
+        }
+
+
+        notificationIcon.textContent =
+            config.icon;
+
+
+        notificationTitle.textContent =
+            config.notificationTitle;
+
+
+        notificationText.textContent =
+            config.notificationText;
+
+
+        notificationLine.style.background =
+            config.color;
+
+
+        notificationIcon.style.background =
+            config.background;
+
+
+        notificationOverlay.classList.add(
+            "show"
+        );
+
+
+        document.body.style.overflow =
+            "hidden";
+
+
+        console.log(
+            "Notification paiement :",
+            paymentStatus
+        );
+
+    }
+
+
+    // =========================================================
+    // CLOSE NOTIFICATION
+    // =========================================================
+
+    function closeNotification() {
+
+        notificationOverlay.classList.remove(
+            "show"
+        );
+
+
+        document.body.style.overflow =
+            "";
+
+    }
+
+
+    notificationClose.addEventListener(
+        "click",
+        closeNotification
+    );
+
+
+    // =========================================================
+    // CLICK OUTSIDE
+    // =========================================================
+
+    notificationOverlay.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                notificationOverlay
+            ) {
+
+                closeNotification();
+
+            }
+
+        }
+    );
+
+
+    // =========================================================
+    // ESC
+    // =========================================================
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeNotification();
+
+            }
+
+        }
+    );
+
+
+    // =========================================================
+    // TRACK BUTTON
+    // =========================================================
+
+    trackBtn.addEventListener(
+        "click",
+        trackOrder
+    );
+
+
+    // =========================================================
+    // ENTER KEY
+    // =========================================================
+
+    orderIdInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                trackOrder();
+
+            }
+
+        }
+    );
+
+
+    phoneInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Enter"
+            ) {
+
+                trackOrder();
+
+            }
+
+        }
+    );
+
+
+    // =========================================================
+    // CLEANUP
+    // =========================================================
+
+    window.addEventListener(
+        "beforeunload",
+        () => {
+
+            if (pollingInterval) {
+
+                clearInterval(
+                    pollingInterval
+                );
+
+            }
+
+
+            if (reconnectTimer) {
+
+                clearTimeout(
+                    reconnectTimer
+                );
+
+            }
+
+
+            if (socket) {
+
+                try {
+
+                    socket.close();
+
+                } catch (error) {
+
+                    console.log(
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+
+</script>
+
+</body>
+
+</html>

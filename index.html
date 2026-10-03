@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="mg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Votre boutique en ligne</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f7f8fa;
+            color: #222;
+        }
+
+        /* =========================
+           HEADER
+        ========================= */
+
+        header {
+            background: white;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 7%;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+            color: #1877f2;
+        }
+
+        .logo span {
+            color: #111;
+        }
+
+        nav {
+            display: flex;
+            gap: 30px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        nav a:hover {
+            color: #1877f2;
+        }
+
+        .seller-btn {
+            background: #1877f2;
+            color: white;
+            text-decoration: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .seller-btn:hover {
+            background: #0d65d8;
+        }
+
+        /* =========================
+           HERO
+        ========================= */
+
+        .hero {
+            min-height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 70px 7%;
+            background: linear-gradient(135deg, #eef5ff, #ffffff);
+        }
+
+        .hero-content {
+            max-width: 600px;
+        }
+
+        .hero-content h1 {
+            font-size: 52px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        .hero-content h1 span {
+            color: #1877f2;
+        }
+
+        .hero-content p {
+            font-size: 18px;
+            line-height: 1.7;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .primary-btn {
+            background: #1877f2;
+            color: white;
+            text-decoration: none;
+            padding: 15px 24px;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .secondary-btn {
+            background: white;
+            color: #1877f2;
+            border: 1px solid #1877f2;
+            text-decoration: none;
+            padding: 15px 24px;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .hero-image {
+            width: 400px;
+            height: 350px;
+            background: white;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 130px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+        }
+
+        /* =========================
+           FEATURES
+        ========================= */
+
+        .features {
+            padding: 70px 7%;
+            background: white;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .section-title h2 {
+            font-size: 34px;
+            margin-bottom: 10px;
+        }
+
+        .section-title p {
+            color: #777;
+        }
+
+        .feature-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .feature-card {
+            padding: 30px;
+            border: 1px solid #eee;
+            border-radius: 15px;
+            background: #fff;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+
+        .feature-icon {
+            font-size: 45px;
+            margin-bottom: 18px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #777;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           HOW IT WORKS
+        ========================= */
+
+        .how-it-works {
+            padding: 70px 7%;
+            background: #f7f8fa;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .step {
+            text-align: center;
+            padding: 25px;
+        }
+
+        .step-number {
+            width: 55px;
+            height: 55px;
+            background: #1877f2;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .step h3 {
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #777;
+            line-height: 1.6;
+        }
+
+        /* =========================
+           CTA
+        ========================= */
+
+        .cta {
+            padding: 80px 7%;
+            text-align: center;
+            background: #1877f2;
+            color: white;
+        }
+
+        .cta h2 {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .cta p {
+            font-size: 17px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .cta a {
+            display: inline-block;
+            background: white;
+            color: #1877f2;
+            padding: 14px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* =========================
+           FOOTER
+        ========================= */
+
+        footer {
+            background: #111;
+            color: white;
+            padding: 35px 7%;
+            text-align: center;
+        }
+
+        footer p {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 800px) {
+
+            header {
+                padding: 0 5%;
+            }
+
+            nav {
+                display: none;
+            }
+
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 60px 5%;
+            }
+
+            .hero-content h1 {
+                font-size: 38px;
+            }
+
+            .hero-content p {
+                font-size: 16px;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .hero-image {
+                width: 100%;
+                height: 250px;
+                margin-top: 40px;
+                font-size: 90px;
+            }
+
+            .feature-container,
+            .steps {
+                grid-template-columns: 1fr;
+            }
+
+            .cta h2 {
+                font-size: 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         HEADER
+    ========================= -->
+
+    <header>
+
+        <div class="logo">
+            Mada<span>Shop</span>
+        </div>
+
+        <nav>
+            <a href="#home">Accueil</a>
+            <a href="#features">Fonctionnalités</a>
+            <a href="#how">Comment ça marche</a>
+        </nav>
+
+        <a href="create-shop.html" class="seller-btn">
+            Créer ma boutique
+        </a>
+
+    </header>
+
+
+    <!-- =========================
+         HERO
+    ========================= -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <h1>
+                Transformez votre
+                <span>Facebook</span>
+                en boutique.
+            </h1>
+
+            <p>
+                Créez votre mini-boutique en ligne en quelques minutes,
+                présentez vos produits et recevez facilement les commandes
+                de vos clients.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="create-shop.html" class="primary-btn">
+                    Créer ma boutique
+                </a>
+
+                <a href="#features" class="secondary-btn">
+                    Découvrir MadaShop
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="hero-image">
+            🛍️
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         FEATURES
+    ========================= -->
+
+    <section class="features" id="features">
+
+        <div class="section-title">
+
+            <h2>
+                Tout ce qu'il vous faut
+            </h2>
+
+            <p>
+                Une solution simple pour gérer votre activité en ligne.
+            </p>
+
+        </div>
+
+
+        <div class="feature-container">
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    🏪
+                </div>
+
+                <h3>
+                    Votre propre boutique
+                </h3>
+
+                <p>
+                    Créez une page dédiée à votre activité avec vos
+                    produits, vos prix et vos informations.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    📦
+                </div>
+
+                <h3>
+                    Gérez vos commandes
+                </h3>
+
+                <p>
+                    Recevez et consultez facilement les commandes
+                    passées par vos clients.
+                </p>
+
+            </div>
+
+
+            <div class="feature-card">
+
+                <div class="feature-icon">
+                    📱
+                </div>
+
+                <h3>
+                    Partagez partout
+                </h3>
+
+                <p>
+                    Partagez votre boutique sur Facebook, WhatsApp
+                    et vos autres réseaux sociaux.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         HOW IT WORKS
+    ========================= -->
+
+    <section class="how-it-works" id="how">
+
+        <div class="section-title">
+
+            <h2>
+                Comment ça marche ?
+            </h2>
+
+            <p>
+                Trois étapes simples pour commencer à vendre.
+            </p>
+
+        </div>
+
+
+        <div class="steps">
+
+            <div class="step">
+
+                <div class="step-number">
+                    1
+                </div>
+
+                <h3>
+                    Créez votre boutique
+                </h3>
+
+                <p>
+                    Ajoutez le nom de votre boutique et vos informations.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <h3>
+                    Ajoutez vos produits
+                </h3>
+
+                <p>
+                    Ajoutez vos photos, descriptions, prix et stock.
+                </p>
+
+            </div>
+
+
+            <div class="step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <h3>
+                    Partagez votre lien
+                </h3>
+
+                <p>
+                    Envoyez votre boutique à vos clients sur Facebook
+                    et WhatsApp.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         CTA
+    ========================= -->
+
+    <section class="cta" id="seller">
+
+        <h2>
+            Prêt à créer votre boutique ?
+        </h2>
+
+        <p>
+            Commencez à présenter vos produits simplement.
+        </p>
+
+        <a href="#">
+            Commencer maintenant
+        </a>
+
+    </section>
+
+
+    <!-- =========================
+         FOOTER
+    ========================= -->
+
+    <footer>
+
+        <p>
+            © 2026 MadaShop — Tous droits réservés.
+        </p>
+
+    </footer>
+
+</body>
+</html>

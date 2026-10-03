@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Order Successful - MadaShop</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        button,
+        a {
+            font-family: inherit;
+        }
+
+        .page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 16px;
+        }
+
+        .success-card {
+            width: 100%;
+            max-width: 760px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 15px 45px rgba(15, 23, 42, 0.10);
+            overflow: hidden;
+        }
+
+        .success-header {
+            text-align: center;
+            padding: 42px 25px 32px;
+            background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+            border-bottom: 1px solid #dcfce7;
+        }
+
+        .success-icon {
+            width: 82px;
+            height: 82px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #16a34a;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            font-weight: bold;
+            box-shadow: 0 10px 25px rgba(22, 163, 74, 0.25);
+        }
+
+        .success-header h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #166534;
+        }
+
+        .success-header p {
+            color: #4b5563;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .content {
+            padding: 28px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px 10px;
+            color: #6b7280;
+        }
+
+        .spinner {
+            width: 35px;
+            height: 35px;
+            margin: 0 auto 14px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #16a34a;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-box {
+            display: none;
+            padding: 18px;
+            border-radius: 14px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #111827;
+        }
+
+        .order-main {
+            display: none;
+        }
+
+        .order-id-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 17px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 22px;
+        }
+
+        .order-id-label {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .order-id-value {
+            font-weight: 800;
+            color: #111827;
+            word-break: break-all;
+        }
+
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .order-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 18px;
+            background: #ffffff;
+        }
+
+        .product-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .product-image {
+            width: 76px;
+            height: 76px;
+            border-radius: 12px;
+            background: #f3f4f6;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .product-image.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            font-size: 26px;
+        }
+
+        .product-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .product-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .product-meta {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .product-total {
+            text-align: right;
+            font-weight: 800;
+            font-size: 16px;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .detail-box {
+            padding: 14px;
+            border-radius: 12px;
+            background: #f8fafc;
+            border: 1px solid #eef2f7;
+        }
+
+        .detail-label {
+            display: block;
+            color: #6b7280;
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .detail-value {
+            color: #111827;
+            font-weight: 700;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .status.new {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status.accepted {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status.processing {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .status.completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status.cancelled {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .status.unknown {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .payment-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .payment-status.paid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .payment-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .payment-status.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .payment-status.unknown {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+
+        .customer-box {
+            margin-top: 24px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+        }
+
+        .customer-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .customer-item strong {
+            display: block;
+            color: #111827;
+            margin-bottom: 4px;
+            font-size: 14px;
+        }
+
+        .customer-item span {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .payment-info {
+            margin-top: 22px;
+            padding: 18px;
+            border-radius: 16px;
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+        }
+
+        .payment-info h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #1e3a8a;
+        }
+
+        .payment-info p {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .multi-order-info {
+            display: none;
+            margin-bottom: 20px;
+            padding: 15px 17px;
+            border-radius: 14px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: 0.2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background: #16a34a;
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background: #15803d;
+        }
+
+        .btn-secondary {
+            background: #111827;
+            color: #ffffff;
+        }
+
+        .btn-secondary:hover {
+            background: #1f2937;
+        }
+
+        .btn-light {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        .btn-light:hover {
+            background: #e5e7eb;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 22px;
+            color: #9ca3af;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: min(360px, calc(100vw - 40px));
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e5e7eb;
+            padding: 15px 16px;
+            transform: translateX(420px);
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s ease;
+            z-index: 9999;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .notification-title {
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #111827;
+        }
+
+        .notification-message {
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .success-card {
+                min-height: 100vh;
+                border-radius: 0;
+            }
+
+            .success-header {
+                padding: 35px 20px 28px;
+            }
+
+            .success-header h1 {
+                font-size: 25px;
+            }
+
+            .content {
+                padding: 20px 16px;
+            }
+
+            .order-id-box {
+                align-items: flex-start;
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .product-row {
+                align-items: flex-start;
+            }
+
+            .product-image {
+                width: 65px;
+                height: 65px;
+            }
+
+            .product-total {
+                font-size: 14px;
+            }
+
+            .details-grid,
+            .customer-row,
+            .actions {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <div class="success-card">
+
+        <div class="success-header">
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <h1>Order Successful!</h1>
+
+            <p>
+                Thank you for your order. Your request has been received successfully.
+            </p>
+
+        </div>
+
+        <div class="content">
+
+            <div id="loadingBox" class="loading">
+                <div class="spinner"></div>
+                <p>Loading your order...</p>
+            </div>
+
+            <div id="errorBox" class="error-box"></div>
+
+            <div id="orderMain" class="order-main">
+
+                <div class="order-id-box">
+
+                    <div>
+                        <div class="order-id-label">
+                            Order ID
+                        </div>
+
+                        <div id="orderIdValue" class="order-id-value">
+                            -
+                        </div>
+                    </div>
+
+                    <div id="orderStatusContainer"></div>
+
+                </div>
+
+                <div id="multiOrderInfo" class="multi-order-info">
+                    Your cart contained multiple products. Each product has been registered as a separate order.
+                </div>
+
+                <h2 class="section-title">
+                    Order Details
+                </h2>
+
+                <div id="orderList" class="order-list"></div>
+
+                <div class="customer-box">
+
+                    <h2 class="section-title">
+                        Customer Information
+                    </h2>
+
+                    <div class="customer-row">
+
+                        <div class="customer-item">
+                            <strong>Name</strong>
+                            <span id="customerName">-</span>
+                        </div>
+
+                        <div class="customer-item">
+                            <strong>Phone</strong>
+                            <span id="customerPhone">-</span>
+                        </div>
+
+                        <div class="customer-item">
+                            <strong>Address</strong>
+                            <span id="customerAddress">-</span>
+                        </div>
+
+                        <div class="customer-item">
+                            <strong>Note</strong>
+                            <span id="customerNote">-</span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="payment-info">
+
+                    <h3>
+                        Payment Information
+                    </h3>
+
+                    <p id="paymentText">
+                        Your payment information will appear here.
+                    </p>
+
+                </div>
+
+                <div class="actions">
+
+                    <a
+                        id="trackButton"
+                        href="#"
+                        class="btn btn-primary"
+                    >
+                        📦 Track My Order
+                    </a>
+
+                    <a
+                        id="shopButton"
+                        href="#"
+                        class="btn btn-secondary"
+                    >
+                        🛍️ Continue Shopping
+                    </a>
+
+                    <a
+                        href="index.html"
+                        class="btn btn-light"
+                    >
+                        🏠 Home
+                    </a>
+
+                </div>
+
+                <div class="footer-note">
+                    You can use your Order ID and phone number to check your order status at any time.
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- Notification -->
+<div id="notification" class="notification">
+
+    <div id="notificationTitle" class="notification-title">
+        Order Update
+    </div>
+
+    <div id="notificationMessage" class="notification-message">
+        Your order has been updated.
+    </div>
+
+</div>
+
+<script>
+
+    const API_URL = "/api";
+
+    let currentOrder = null;
+    let currentOrders = [];
+    let currentUserId = null;
+    let currentPhone = "";
+
+    let ws = null;
+    let reconnectTimer = null;
+
+    let notificationTimer = null;
+
+    /*
+    ============================================================
+    BASIC HELPERS
+    ============================================================
+    */
+
+    function escapeHtml(value) {
+
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    function formatPrice(value) {
+
+        const number = Number(value) || 0;
+
+        return new Intl.NumberFormat("fr-FR").format(number) + " Ar";
+    }
+
+
+    function formatDate(value) {
+
+        if (!value) {
+            return "-";
+        }
+
+        try {
+
+            const date = new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return String(value);
+            }
+
+            return date.toLocaleString("fr-FR", {
+                dateStyle: "medium",
+                timeStyle: "short"
+            });
+
+        } catch (error) {
+
+            return String(value);
+
+        }
+    }
+
+
+    function statusLabel(status) {
+
+        const labels = {
+
+            new: "New",
+
+            accepted: "Accepted",
+
+            processing: "Processing",
+
+            completed: "Completed",
+
+            rejected: "Rejected",
+
+            cancelled: "Cancelled"
+
+        };
+
+        return labels[status] || status || "Unknown";
+    }
+
+
+    function paymentStatusLabel(status) {
+
+        const labels = {
+
+            pending: "Pending",
+
+            paid: "Paid",
+
+            failed: "Failed"
+
+        };
+
+        return labels[status] || status || "Unknown";
+    }
+
+
+    function paymentMethodLabel(method) {
+
+        if (method === "cash_on_delivery") {
+
+            return "Cash on Delivery";
+
+        }
+
+        return method || "Cash on Delivery";
+    }
+
+
+    /*
+    ============================================================
+    NOTIFICATION
+    ============================================================
+    */
+
+    function showNotification(title, message) {
+
+        const notification = document.getElementById("notification");
+        const notificationTitle = document.getElementById("notificationTitle");
+        const notificationMessage = document.getElementById("notificationMessage");
+
+        notificationTitle.textContent = title;
+        notificationMessage.textContent = message;
+
+        notification.classList.add("show");
+
+        clearTimeout(notificationTimer);
+
+        notificationTimer = setTimeout(() => {
+
+            notification.classList.remove("show");
+
+        }, 5000);
+
+    }
+
+
+    /*
+    ============================================================
+    URL + LOCAL STORAGE
+    ============================================================
+    */
+
+    function getUrlData() {
+
+        const params = new URLSearchParams(window.location.search);
+
+        return {
+
+            orderId: Number(params.get("orderId")) || null,
+
+            userId: Number(params.get("userId")) || null,
+
+            phone: params.get("phone") || ""
+
+        };
+
+    }
+
+
+    function getLastOrderData() {
+
+        try {
+
+            const raw = localStorage.getItem("madaShopLastOrder");
+
+            if (!raw) {
+                return null;
+            }
+
+            return JSON.parse(raw);
+
+        } catch (error) {
+
+            console.error("Unable to read madaShopLastOrder:", error);
+
+            return null;
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    FIND USER ID
+    ============================================================
+    */
+
+    function findUserIdFromOrder(order) {
+
+        if (!order) {
+            return null;
+        }
+
+        const possibleValues = [
+
+            order.user_id,
+
+            order.userId,
+
+            order.seller_id,
+
+            order.sellerId,
+
+            order.shop_user_id,
+
+            order.shopUserId
+
+        ];
+
+        for (const value of possibleValues) {
+
+            const id = Number(value);
+
+            if (Number.isFinite(id) && id > 0) {
+
+                return id;
+
+            }
+
+        }
+
+        return null;
+
+    }
+
+
+    /*
+    ============================================================
+    LOAD ORDER BY TRACKING
+    ============================================================
+    */
+
+    async function loadOrderByTracking(orderId, phone) {
+
+        const response = await fetch(
+            `${API_URL}/order/track/${encodeURIComponent(orderId)}?phone=${encodeURIComponent(phone)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Unable to find your order."
+            );
+
+        }
+
+        if (!data.order) {
+
+            throw new Error("Order information was not found.");
+
+        }
+
+        return data.order;
+
+    }
+
+
+    /*
+    ============================================================
+    LOAD ORDERS BY SELLER USER ID
+    ============================================================
+    */
+
+    async function loadOrdersByUser(userId) {
+
+        const response = await fetch(
+            `${API_URL}/orders/${encodeURIComponent(userId)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Unable to load your order."
+            );
+
+        }
+
+        if (!Array.isArray(data)) {
+
+            if (Array.isArray(data.orders)) {
+
+                return data.orders;
+
+            }
+
+            return [];
+
+        }
+
+        return data;
+
+    }
+
+
+    /*
+    ============================================================
+    NORMALIZE LAST ORDER DATA
+    ============================================================
+    */
+
+    function getSavedOrders(lastOrderData) {
+
+        if (!lastOrderData) {
+
+            return [];
+
+        }
+
+        if (Array.isArray(lastOrderData.orders)) {
+
+            return lastOrderData.orders.filter(Boolean);
+
+        }
+
+        if (lastOrderData.order) {
+
+            return [lastOrderData.order];
+
+        }
+
+        if (lastOrderData.orderId) {
+
+            return [
+
+                {
+
+                    id: Number(lastOrderData.orderId),
+
+                    user_id:
+                        Number(lastOrderData.userId) ||
+                        Number(lastOrderData.user_id) ||
+                        null,
+
+                    customer_name:
+                        lastOrderData.customerName ||
+                        "",
+
+                    phone:
+                        lastOrderData.phone ||
+                        "",
+
+                    address:
+                        lastOrderData.address ||
+                        "",
+
+                    note:
+                        lastOrderData.note ||
+                        "",
+
+                    status:
+                        lastOrderData.status ||
+                        "new",
+
+                    payment_method:
+                        lastOrderData.paymentMethod ||
+                        "cash_on_delivery",
+
+                    payment_status:
+                        lastOrderData.paymentStatus ||
+                        "pending"
+
+                }
+
+            ];
+
+        }
+
+        return [];
+
+    }
+
+
+    /*
+    ============================================================
+    LOAD ORDER INFORMATION
+    ============================================================
+    */
+
+    async function loadOrder() {
+
+        const urlData = getUrlData();
+
+        const lastOrderData = getLastOrderData();
+
+        let orderId = urlData.orderId;
+
+        let userId = urlData.userId;
+
+        let phone = urlData.phone;
+
+        const savedOrders = getSavedOrders(lastOrderData);
+
+
+        /*
+        If URL has no order ID, use saved last order.
+        */
+
+        if (!orderId && savedOrders.length > 0) {
+
+            orderId = Number(savedOrders[0].id) || null;
+
+        }
+
+
+        /*
+        If URL has no phone, use saved phone.
+        */
+
+        if (!phone && lastOrderData) {
+
+            phone =
+                lastOrderData.phone ||
+                lastOrderData.customerPhone ||
+                "";
+
+        }
+
+
+        /*
+        If URL has no userId, use saved data.
+        */
+
+        if (!userId && lastOrderData) {
+
+            userId =
+                Number(lastOrderData.userId) ||
+                Number(lastOrderData.user_id) ||
+                null;
+
+        }
+
+
+        /*
+        We need at least an order ID.
+        */
+
+        if (!orderId) {
+
+            throw new Error(
+                "Order ID was not found. Please return to the shop and place your order again."
+            );
+
+        }
+
+
+        let primaryOrder = null;
+
+
+        /*
+        --------------------------------------------------------
+        METHOD 1:
+        Track order using order ID + phone.
+        This is preferred because it does not require seller ID.
+        --------------------------------------------------------
+        */
+
+        if (phone) {
+
+            try {
+
+                primaryOrder = await loadOrderByTracking(
+                    orderId,
+                    phone
+                );
+
+            } catch (trackingError) {
+
+                console.warn(
+                    "Tracking API failed:",
+                    trackingError.message
+                );
+
+            }
+
+        }
+
+
+        /*
+        --------------------------------------------------------
+        METHOD 2:
+        If tracking failed, use seller user ID.
+        --------------------------------------------------------
+        */
+
+        if (!primaryOrder && userId) {
+
+            try {
+
+                const sellerOrders = await loadOrdersByUser(userId);
+
+                primaryOrder = sellerOrders.find(
+                    order => Number(order.id) === Number(orderId)
+                );
+
+                if (primaryOrder) {
+
+                    currentOrders = sellerOrders.filter(
+                        order =>
+                            Number(order.id) === Number(orderId)
+                    );
+
+                }
+
+            } catch (ordersError) {
+
+                console.warn(
+                    "Orders API failed:",
+                    ordersError.message
+                );
+
+            }
+
+        }
+
+
+        /*
+        --------------------------------------------------------
+        METHOD 3:
+        Use saved localStorage data as fallback.
+        --------------------------------------------------------
+        */
+
+        if (!primaryOrder && savedOrders.length > 0) {
+
+            primaryOrder = savedOrders.find(
+                order =>
+                    Number(order.id) === Number(orderId)
+            ) || savedOrders[0];
+
+        }
+
+
+        /*
+        Nothing found.
+        */
+
+        if (!primaryOrder) {
+
+            throw new Error(
+                "We could not find this order. Please check your Order ID and phone number."
+            );
+
+        }
+
+
+        /*
+        --------------------------------------------------------
+        Store primary order.
+        --------------------------------------------------------
+        */
+
+        currentOrder = primaryOrder;
+
+        currentUserId =
+            findUserIdFromOrder(primaryOrder) ||
+            userId ||
+            null;
+
+        currentPhone =
+            phone ||
+            primaryOrder.phone ||
+            primaryOrder.customer_phone ||
+            "";
+
+
+        /*
+        --------------------------------------------------------
+        Multiple orders from checkout.
+        If checkout saved several orders, use them.
+        --------------------------------------------------------
+        */
+
+        if (savedOrders.length > 1) {
+
+            const matchingSavedOrders = savedOrders.filter(
+                order => {
+
+                    const savedUserId =
+                        findUserIdFromOrder(order);
+
+                    if (
+                        currentUserId &&
+                        savedUserId &&
+                        Number(savedUserId) !== Number(currentUserId)
+                    ) {
+
+                        return false;
+
+                    }
+
+                    return true;
+
+                }
+            );
+
+            if (matchingSavedOrders.length > 0) {
+
+                currentOrders = matchingSavedOrders;
+
+            }
+
+        }
+
+
+        /*
+        If there are no saved multiple orders,
+        use the primary order.
+        */
+
+        if (currentOrders.length === 0) {
+
+            currentOrders = [primaryOrder];
+
+        }
+
+
+        /*
+        Remove duplicate order IDs.
+        */
+
+        const uniqueOrders = [];
+
+        const seenIds = new Set();
+
+        for (const order of currentOrders) {
+
+            const id = Number(order.id);
+
+            if (!id || seenIds.has(id)) {
+
+                continue;
+
+            }
+
+            seenIds.add(id);
+
+            uniqueOrders.push(order);
+
+        }
+
+        currentOrders = uniqueOrders;
+
+
+        /*
+        If primary order isn't in list, add it.
+        */
+
+        if (
+            !currentOrders.some(
+                order =>
+                    Number(order.id) === Number(primaryOrder.id)
+            )
+        ) {
+
+            currentOrders.unshift(primaryOrder);
+
+        }
+
+
+        /*
+        Update URL if useful information is missing.
+        */
+
+        updateUrl(primaryOrder);
+
+
+        /*
+        Display.
+        */
+
+        displayOrders();
+
+        document.getElementById("loadingBox").style.display = "none";
+
+        document.getElementById("orderMain").style.display = "block";
+
+
+        /*
+        Start realtime updates if seller ID is known.
+        */
+
+        if (currentUserId) {
+
+            connectWebSocket(currentUserId);
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    UPDATE URL
+    ============================================================
+    */
+
+    function updateUrl(order) {
+
+        const params = new URLSearchParams(window.location.search);
+
+        if (order && order.id) {
+
+            params.set(
+                "orderId",
+                String(order.id)
+            );
+
+        }
+
+        if (currentUserId) {
+
+            params.set(
+                "userId",
+                String(currentUserId)
+            );
+
+        }
+
+        if (currentPhone) {
+
+            params.set(
+                "phone",
+                currentPhone
+            );
+
+        }
+
+        const newUrl =
+            `${window.location.pathname}?${params.toString()}`;
+
+        window.history.replaceState(
+            {},
+            "",
+            newUrl
+        );
+
+    }
+
+
+    /*
+    ============================================================
+    DISPLAY ORDERS
+    ============================================================
+    */
+
+    function displayOrders() {
+
+        if (!currentOrders.length) {
+
+            return;
+
+        }
+
+        const primaryOrder =
+            currentOrders.find(
+                order =>
+                    Number(order.id) === Number(currentOrder.id)
+            ) ||
+            currentOrders[0];
+
+        currentOrder = primaryOrder;
+
+
+        /*
+        Order ID
+        */
+
+        document.getElementById("orderIdValue").textContent =
+            `#${primaryOrder.id}`;
+
+
+        /*
+        Primary status
+        */
+
+        const status =
+            primaryOrder.status || "new";
+
+        document.getElementById(
+            "orderStatusContainer"
+        ).innerHTML = `
+
+            <span class="status ${escapeHtml(status)}">
+
+                ${escapeHtml(statusLabel(status))}
+
+            </span>
+
+        `;
+
+
+        /*
+        Multiple order message
+        */
+
+        const multiOrderInfo =
+            document.getElementById("multiOrderInfo");
+
+        if (currentOrders.length > 1) {
+
+            multiOrderInfo.style.display = "block";
+
+            multiOrderInfo.textContent =
+                `Your cart contained ${currentOrders.length} products. ` +
+                `Each product has been registered as a separate order.`;
+
+        } else {
+
+            multiOrderInfo.style.display = "none";
+
+        }
+
+
+        /*
+        Order list
+        */
+
+        const orderList =
+            document.getElementById("orderList");
+
+        orderList.innerHTML = currentOrders
+            .map(renderOrderItem)
+            .join("");
+
+
+        /*
+        Customer information
+        */
+
+        document.getElementById("customerName").textContent =
+            primaryOrder.customer_name ||
+            primaryOrder.customerName ||
+            "-";
+
+
+        document.getElementById("customerPhone").textContent =
+            primaryOrder.phone ||
+            primaryOrder.customer_phone ||
+            currentPhone ||
+            "-";
+
+
+        document.getElementById("customerAddress").textContent =
+            primaryOrder.address ||
+            "-";
+
+
+        document.getElementById("customerNote").textContent =
+            primaryOrder.note ||
+            "-";
+
+
+        /*
+        Payment information
+        */
+
+        const paymentMethod =
+            primaryOrder.payment_method ||
+            primaryOrder.paymentMethod ||
+            "cash_on_delivery";
+
+        const paymentStatus =
+            primaryOrder.payment_status ||
+            primaryOrder.paymentStatus ||
+            "pending";
+
+        const paymentText =
+            document.getElementById("paymentText");
+
+        paymentText.innerHTML = `
+
+            <strong>
+                Payment method:
+            </strong>
+
+            ${escapeHtml(paymentMethodLabel(paymentMethod))}
+
+            <br>
+
+            <strong>
+                Payment status:
+            </strong>
+
+            <span class="payment-status ${escapeHtml(paymentStatus)}">
+
+                ${escapeHtml(paymentStatusLabel(paymentStatus))}
+
+            </span>
+
+            <br><br>
+
+            Since you selected Cash on Delivery,
+            please prepare the amount when your order is delivered.
+
+        `;
+
+
+        /*
+        Track button
+        */
+
+        const trackButton =
+            document.getElementById("trackButton");
+
+        const trackParams =
+            new URLSearchParams();
+
+        trackParams.set(
+            "orderId",
+            String(primaryOrder.id)
+        );
+
+        if (currentPhone) {
+
+            trackParams.set(
+                "phone",
+                currentPhone
+            );
+
+        }
+
+        if (currentUserId) {
+
+            trackParams.set(
+                "userId",
+                String(currentUserId)
+            );
+
+        }
+
+        trackButton.href =
+            `track-order.html?${trackParams.toString()}`;
+
+
+        /*
+        Shop button
+        */
+
+        const shopButton =
+            document.getElementById("shopButton");
+
+        if (currentUserId) {
+
+            shopButton.href =
+                `shop.html?userId=${encodeURIComponent(currentUserId)}`;
+
+        } else {
+
+            shopButton.href = "index.html";
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    RENDER ONE ORDER
+    ============================================================
+    */
+
+    function renderOrderItem(order) {
+
+        const productName =
+            order.product_name ||
+            order.productName ||
+            "Product";
+
+
+        const quantity =
+            Number(order.quantity) || 1;
+
+
+        const unitPrice =
+            Number(order.price) || 0;
+
+
+        const total =
+            Number(order.total) ||
+            unitPrice * quantity;
+
+
+        const image =
+            order.image ||
+            order.product_image ||
+            order.productImage ||
+            "";
+
+
+        const status =
+            order.status ||
+            "new";
+
+
+        const paymentStatus =
+            order.payment_status ||
+            order.paymentStatus ||
+            "pending";
+
+
+        const createdAt =
+            order.created_at ||
+            order.createdAt ||
+            "";
+
+
+        const imageHtml = image
+            ? `
+                <img
+                    class="product-image"
+                    src="${escapeHtml(image)}"
+                    alt="${escapeHtml(productName)}"
+                    onerror="this.style.display='none';"
+                >
+            `
+            : `
+                <div class="product-image empty">
+                    🛍️
+                </div>
+            `;
+
+
+        return `
+
+            <div class="order-item">
+
+                <div class="product-row">
+
+                    ${imageHtml}
+
+                    <div class="product-info">
+
+                        <div class="product-name">
+
+                            ${escapeHtml(productName)}
+
+                        </div>
+
+                        <div class="product-meta">
+
+                            Quantity: ${quantity}
+
+                            <br>
+
+                            Unit price: ${formatPrice(unitPrice)}
+
+                            ${
+                                createdAt
+                                ? `
+                                    <br>
+                                    Ordered: ${escapeHtml(formatDate(createdAt))}
+                                  `
+                                : ""
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="product-total">
+
+                        ${formatPrice(total)}
+
+                    </div>
+
+                </div>
+
+                <div class="details-grid">
+
+                    <div class="detail-box">
+
+                        <span class="detail-label">
+                            Order status
+                        </span>
+
+                        <span class="status ${escapeHtml(status)}">
+
+                            ${escapeHtml(statusLabel(status))}
+
+                        </span>
+
+                    </div>
+
+                    <div class="detail-box">
+
+                        <span class="detail-label">
+                            Payment status
+                        </span>
+
+                        <span class="payment-status ${escapeHtml(paymentStatus)}">
+
+                            ${escapeHtml(
+                                paymentStatusLabel(paymentStatus)
+                            )}
+
+                        </span>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+    ============================================================
+    WEBSOCKET
+    ============================================================
+    */
+
+    function connectWebSocket(userId) {
+
+        if (!userId) {
+
+            return;
+
+        }
+
+
+        /*
+        Close existing connection.
+        */
+
+        if (
+            ws &&
+            (
+                ws.readyState === WebSocket.OPEN ||
+                ws.readyState === WebSocket.CONNECTING
+            )
+        ) {
+
+            try {
+
+                ws.close();
+
+            } catch (error) {
+
+                console.warn(
+                    "WebSocket close error:",
+                    error
+                );
+
+            }
+
+        }
+
+
+        clearTimeout(reconnectTimer);
+
+
+        const protocol =
+            window.location.protocol === "https:"
+                ? "wss:"
+                : "ws:";
+
+
+        const host =
+            window.location.host;
+
+
+        /*
+        IMPORTANT:
+        Backend uses root:
+        /?userId=...
+        
+        NOT:
+        /ws?userId=...
+        */
+
+        const wsUrl =
+            `${protocol}//${host}/?userId=${encodeURIComponent(userId)}`;
+
+
+        try {
+
+            ws = new WebSocket(wsUrl);
+
+        } catch (error) {
+
+            console.error(
+                "WebSocket creation error:",
+                error
+            );
+
+            scheduleReconnect(userId);
+
+            return;
+
+        }
+
+
+        ws.onopen = function() {
+
+            console.log(
+                "MadaShop realtime connection connected."
+            );
+
+        };
+
+
+        ws.onmessage = async function(event) {
+
+            try {
+
+                const data =
+                    JSON.parse(event.data);
+
+
+                console.log(
+                    "Realtime event:",
+                    data
+                );
+
+
+                if (
+                    data.type === "order_status_updated"
+                ) {
+
+                    handleOrderStatusUpdate(data);
+
+                }
+
+
+                if (
+                    data.type === "payment_status_updated"
+                ) {
+
+                    handlePaymentStatusUpdate(data);
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "WebSocket message error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+        ws.onerror = function(error) {
+
+            console.warn(
+                "MadaShop WebSocket error:",
+                error
+            );
+
+        };
+
+
+        ws.onclose = function() {
+
+            console.log(
+                "MadaShop realtime connection closed."
+            );
+
+            scheduleReconnect(userId);
+
+        };
+
+    }
+
+
+    function scheduleReconnect(userId) {
+
+        clearTimeout(reconnectTimer);
+
+        reconnectTimer = setTimeout(() => {
+
+            connectWebSocket(userId);
+
+        }, 5000);
+
+    }
+
+
+    /*
+    ============================================================
+    HANDLE ORDER STATUS UPDATE
+    ============================================================
+    */
+
+    function handleOrderStatusUpdate(data) {
+
+        const updatedOrder =
+            data.order ||
+            data.data ||
+            null;
+
+
+        const orderId =
+            Number(
+                data.orderId ||
+                data.id ||
+                (updatedOrder && updatedOrder.id)
+            );
+
+
+        const newStatus =
+            data.status ||
+            (updatedOrder && updatedOrder.status) ||
+            "";
+
+
+        if (!orderId) {
+
+            return;
+
+        }
+
+
+        let changedOrder = null;
+
+
+        currentOrders = currentOrders.map(order => {
+
+            if (Number(order.id) !== orderId) {
+
+                return order;
+
+            }
+
+            const updated = {
+
+                ...order,
+
+                ...(updatedOrder || {}),
+
+                status:
+                    newStatus ||
+                    order.status
+
+            };
+
+            changedOrder = updated;
+
+            return updated;
+
+        });
+
+
+        if (changedOrder) {
+
+            currentOrder =
+                changedOrder.id === currentOrder.id
+                    ? changedOrder
+                    : currentOrder;
+
+
+            displayOrders();
+
+
+            showNotification(
+                "Order Status Updated",
+                `Order #${orderId} is now ${statusLabel(newStatus)}.`
+            );
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    HANDLE PAYMENT STATUS UPDATE
+    ============================================================
+    */
+
+    function handlePaymentStatusUpdate(data) {
+
+        const updatedOrder =
+            data.order ||
+            data.data ||
+            null;
+
+
+        const orderId =
+            Number(
+                data.orderId ||
+                data.id ||
+                (updatedOrder && updatedOrder.id)
+            );
+
+
+        const newPaymentStatus =
+            data.paymentStatus ||
+            data.payment_status ||
+            (updatedOrder && (
+                updatedOrder.payment_status ||
+                updatedOrder.paymentStatus
+            )) ||
+            "";
+
+
+        if (!orderId) {
+
+            return;
+
+        }
+
+
+        let changedOrder = null;
+
+
+        currentOrders = currentOrders.map(order => {
+
+            if (Number(order.id) !== orderId) {
+
+                return order;
+
+            }
+
+            const updated = {
+
+                ...order,
+
+                ...(updatedOrder || {}),
+
+                payment_status:
+                    newPaymentStatus ||
+                    order.payment_status
+
+            };
+
+            changedOrder = updated;
+
+            return updated;
+
+        });
+
+
+        if (changedOrder) {
+
+            currentOrder =
+                changedOrder.id === currentOrder.id
+                    ? changedOrder
+                    : currentOrder;
+
+
+            displayOrders();
+
+
+            showNotification(
+                "Payment Status Updated",
+                `Payment for Order #${orderId} is now ${paymentStatusLabel(newPaymentStatus)}.`
+            );
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    AUTO REFRESH
+    ============================================================
+    */
+
+    async function refreshOrderStatus() {
+
+        if (!currentOrder) {
+
+            return;
+
+        }
+
+
+        const orderId =
+            Number(currentOrder.id);
+
+
+        if (!orderId) {
+
+            return;
+
+        }
+
+
+        /*
+        Preferred:
+        order tracking using phone.
+        */
+
+        if (currentPhone) {
+
+            try {
+
+                const latest =
+                    await loadOrderByTracking(
+                        orderId,
+                        currentPhone
+                    );
+
+
+                currentOrder = latest;
+
+
+                const existingIndex =
+                    currentOrders.findIndex(
+                        order =>
+                            Number(order.id) === orderId
+                    );
+
+
+                if (existingIndex >= 0) {
+
+                    currentOrders[existingIndex] = latest;
+
+                } else {
+
+                    currentOrders.push(latest);
+
+                }
+
+
+                currentUserId =
+                    findUserIdFromOrder(latest) ||
+                    currentUserId;
+
+
+                displayOrders();
+
+                return;
+
+            } catch (error) {
+
+                console.warn(
+                    "Tracking refresh failed:",
+                    error.message
+                );
+
+            }
+
+        }
+
+
+        /*
+        Fallback:
+        seller orders endpoint.
+        */
+
+        if (currentUserId) {
+
+            try {
+
+                const orders =
+                    await loadOrdersByUser(
+                        currentUserId
+                    );
+
+
+                const latest =
+                    orders.find(
+                        order =>
+                            Number(order.id) === orderId
+                    );
+
+
+                if (latest) {
+
+                    currentOrder = latest;
+
+
+                    const existingIndex =
+                        currentOrders.findIndex(
+                            order =>
+                                Number(order.id) === orderId
+                        );
+
+
+                    if (existingIndex >= 0) {
+
+                        currentOrders[existingIndex] =
+                            latest;
+
+                    } else {
+
+                        currentOrders.push(latest);
+
+                    }
+
+
+                    displayOrders();
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Order refresh failed:",
+                    error.message
+                );
+
+            }
+
+        }
+
+    }
+
+
+    /*
+    ============================================================
+    ERROR DISPLAY
+    ============================================================
+    */
+
+    function showError(message) {
+
+        document.getElementById("loadingBox").style.display =
+            "none";
+
+
+        const errorBox =
+            document.getElementById("errorBox");
+
+
+        errorBox.textContent = message;
+
+
+        errorBox.style.display =
+            "block";
+
+    }
+
+
+    /*
+    ============================================================
+    INITIALIZATION
+    ============================================================
+    */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        async function() {
+
+            try {
+
+                await loadOrder();
+
+            } catch (error) {
+
+                console.error(
+                    "Order success page error:",
+                    error
+                );
+
+                showError(
+                    error.message ||
+                    "Unable to load your order information."
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+    ============================================================
+    POLLING
+    ============================================================
+    */
+
+    setInterval(() => {
+
+        refreshOrderStatus();
+
+    }, 30000);
+
+
+    /*
+    ============================================================
+    CLEANUP
+    ============================================================
+    */
+
+    window.addEventListener(
+        "beforeunload",
+        function() {
+
+            clearTimeout(reconnectTimer);
+
+            if (ws) {
+
+                try {
+
+                    ws.close();
+
+                } catch (error) {
+
+                    console.warn(
+                        "WebSocket cleanup error:",
+                        error
+                    );
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+</body>
+</html>

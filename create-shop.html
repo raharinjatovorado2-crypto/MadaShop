@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Paramètres boutique</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f5f6fa;
+            color: #222;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #222;
+        }
+
+        .subtitle {
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            background: #4f46e5;
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338ca;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+
+        .error {
+            display: none;
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            display: none;
+            background: #dcfce7;
+            color: #15803d;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .required {
+            color: red;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="dashboard.html" class="back-btn">
+        ← Retour au tableau de bord
+    </a>
+
+    <div class="card">
+
+        <h1>⚙️ Paramètres de la boutique</h1>
+
+        <p class="subtitle">
+            Modifiez les informations de votre boutique MadaShop.
+        </p>
+
+        <div id="loading" class="loading">
+            Chargement des informations de la boutique...
+        </div>
+
+        <div id="errorMessage" class="error"></div>
+
+        <div id="successMessage" class="success">
+            Les modifications ont été enregistrées avec succès.
+        </div>
+
+        <form id="shopForm" style="display:none;">
+
+            <!-- NOM DE LA BOUTIQUE -->
+            <div class="form-group">
+                <label for="shopName">
+                    Nom de la boutique <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="shopName"
+                    name="shopName"
+                    placeholder="Ex : Rado Shop"
+                    required
+                >
+            </div>
+
+            <!-- NOM DU VENDEUR -->
+            <div class="form-group">
+                <label for="sellerName">
+                    Nom du vendeur <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="sellerName"
+                    name="sellerName"
+                    placeholder="Votre nom"
+                    required
+                >
+            </div>
+
+            <!-- TELEPHONE -->
+            <div class="form-group">
+                <label for="phone">
+                    Numéro WhatsApp <span class="required">*</span>
+                </label>
+
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    placeholder="Ex : 034 00 000 00"
+                    required
+                >
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label for="email">
+                    Adresse email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Ex : exemple@gmail.com"
+                >
+            </div>
+
+            <!-- MESSENGER -->
+            <div class="form-group">
+                <label for="messenger">
+                    Facebook / Messenger
+                </label>
+
+                <input
+                    type="text"
+                    id="messenger"
+                    name="messenger"
+                    placeholder="https://m.me/votrepage"
+                >
+            </div>
+
+            <!-- CATEGORY -->
+            <div class="form-group">
+                <label for="category">
+                    Catégorie
+                </label>
+
+                <select id="category" name="category">
+                    <option value="">-- Sélectionnez une catégorie --</option>
+                    <option value="Mode">Mode</option>
+                    <option value="Beauté">Beauté</option>
+                    <option value="Électronique">Électronique</option>
+                    <option value="Maison">Maison</option>
+                    <option value="Alimentation">Alimentation</option>
+                    <option value="Autre">Autre</option>
+                </select>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <div class="form-group">
+                <label for="description">
+                    Description de la boutique
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Présentez votre boutique..."
+                ></textarea>
+            </div>
+
+            <button
+                type="submit"
+                class="btn"
+                id="saveBtn"
+            >
+                💾 Enregistrer les modifications
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* ============================================================
+       CONFIGURATION
+    ============================================================ */
+
+    const API = "http://localhost:3000";
+
+
+    /* ============================================================
+       VERIFICATION LOGIN
+    ============================================================ */
+
+    const loggedIn = localStorage.getItem("madaShopLoggedIn");
+
+    if (loggedIn !== "true") {
+        window.location.href = "login.html";
+    }
+
+
+    /* ============================================================
+       RECUPERATION USER
+    ============================================================ */
+
+    let user = null;
+
+    try {
+        user = JSON.parse(
+            localStorage.getItem("madaShopUser")
+        );
+    } catch (error) {
+        user = null;
+    }
+
+
+    if (!user || !user.id) {
+        window.location.href = "login.html";
+    }
+
+
+    /* ============================================================
+       ELEMENTS HTML
+    ============================================================ */
+
+    const loading = document.getElementById("loading");
+    const errorMessage = document.getElementById("errorMessage");
+    const successMessage = document.getElementById("successMessage");
+    const shopForm = document.getElementById("shopForm");
+    const saveBtn = document.getElementById("saveBtn");
+
+
+    /* ============================================================
+       VARIABLE POUR CONSERVER LES DONNEES EXISTANTES
+    ============================================================ */
+
+    let currentShop = {};
+
+
+    /* ============================================================
+       AFFICHER ERREUR
+    ============================================================ */
+
+    function showError(message) {
+
+        errorMessage.textContent = message;
+        errorMessage.style.display = "block";
+
+        successMessage.style.display = "none";
+    }
+
+
+    /* ============================================================
+       CACHER ERREUR
+    ============================================================ */
+
+    function hideError() {
+
+        errorMessage.style.display = "none";
+    }
+
+
+    /* ============================================================
+       CHARGER LES INFORMATIONS DE LA BOUTIQUE
+    ============================================================ */
+
+    async function loadShop() {
+
+        try {
+
+            loading.style.display = "block";
+            shopForm.style.display = "none";
+            hideError();
+
+
+            /*
+             * IMPORTANT :
+             * Le server.js utilise :
+             *
+             * GET /api/public/shop/:userId
+             *
+             * et non :
+             *
+             * GET /api/shop/:userId
+             */
+
+            const response = await fetch(
+                `${API}/api/public/shop/${user.id}`
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Impossible de charger les informations de la boutique."
+                );
+            }
+
+
+            /*
+             * Le server.js retourne :
+             *
+             * {
+             *   success: true,
+             *   shop: {...},
+             *   products: [...]
+             * }
+             */
+
+            const shop = data.shop || {};
+
+            currentShop = shop;
+
+
+            /* ====================================================
+               NOM DE LA BOUTIQUE
+            ==================================================== */
+
+            document.getElementById("shopName").value =
+                shop.shop_name ||
+                user.shopName ||
+                "";
+
+
+            /* ====================================================
+               NOM DU VENDEUR
+            ==================================================== */
+
+            document.getElementById("sellerName").value =
+                shop.seller_name ||
+                user.sellerName ||
+                "";
+
+
+            /* ====================================================
+               TELEPHONE
+            ==================================================== */
+
+            document.getElementById("phone").value =
+                shop.phone ||
+                shop.whatsapp ||
+                user.phone ||
+                "";
+
+
+            /* ====================================================
+               EMAIL
+               
+               L'email est enregistré dans la table users,
+               et non dans la table shops.
+               
+               On utilise donc la valeur de madaShopUser.
+            ==================================================== */
+
+            document.getElementById("email").value =
+                user.email ||
+                "";
+
+
+            /* ====================================================
+               MESSENGER
+               
+               Il n'existe pas de colonne Messenger dans shops.
+               On conserve donc cette donnée dans localStorage.
+            ==================================================== */
+
+            const messengerKey =
+                `madaShopMessenger_${user.id}`;
+
+            document.getElementById("messenger").value =
+                localStorage.getItem(messengerKey) ||
+                "";
+
+
+            /* ====================================================
+               CATEGORY
+               
+               Il n'existe pas de colonne category dans shops.
+               On conserve donc cette donnée dans localStorage.
+            ==================================================== */
+
+            const categoryKey =
+                `madaShopCategory_${user.id}`;
+
+            document.getElementById("category").value =
+                localStorage.getItem(categoryKey) ||
+                "";
+
+
+            /* ====================================================
+               DESCRIPTION
+            ==================================================== */
+
+            document.getElementById("description").value =
+                shop.description ||
+                "";
+
+
+            loading.style.display = "none";
+            shopForm.style.display = "block";
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Erreur chargement boutique :",
+                error
+            );
+
+            loading.style.display = "none";
+
+            showError(
+                error.message ||
+                "Impossible de charger les informations de la boutique."
+            );
+        }
+    }
+
+
+    /* ============================================================
+       ENREGISTRER LES MODIFICATIONS
+    ============================================================ */
+
+    shopForm.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        hideError();
+
+        successMessage.style.display = "none";
+
+
+        /* ========================================================
+           RECUPERATION DES VALEURS
+        ======================================================== */
+
+        const shopData = {
+
+            shopName:
+                document.getElementById("shopName").value.trim(),
+
+            sellerName:
+                document.getElementById("sellerName").value.trim(),
+
+            phone:
+                document.getElementById("phone").value.trim(),
+
+            email:
+                document.getElementById("email").value.trim(),
+
+            messenger:
+                document.getElementById("messenger").value.trim(),
+
+            category:
+                document.getElementById("category").value,
+
+            description:
+                document.getElementById("description").value.trim()
+        };
+
+
+        /* ========================================================
+           VERIFICATION
+        ======================================================== */
+
+        if (!shopData.shopName) {
+
+            showError(
+                "Veuillez entrer le nom de votre boutique."
+            );
+
+            return;
+        }
+
+
+        if (!shopData.sellerName) {
+
+            showError(
+                "Veuillez entrer votre nom."
+            );
+
+            return;
+        }
+
+
+        if (!shopData.phone) {
+
+            showError(
+                "Veuillez entrer votre numéro WhatsApp."
+            );
+
+            return;
+        }
+
+
+        /* ========================================================
+           DESACTIVER BOUTON
+        ======================================================== */
+
+        saveBtn.disabled = true;
+
+        saveBtn.textContent =
+            "⏳ Enregistrement...";
+
+
+        try {
+
+            /*
+             * Le server.js attend :
+             *
+             * sellerName
+             * shopName
+             * description
+             * phone
+             * whatsapp
+             * address
+             * logo
+             *
+             * On conserve address et logo existants.
+             */
+
+            const serverData = {
+
+                sellerName:
+                    shopData.sellerName,
+
+                shopName:
+                    shopData.shopName,
+
+                description:
+                    shopData.description,
+
+                phone:
+                    shopData.phone,
+
+                /*
+                 * Dans le server.js actuel,
+                 * whatsapp existe dans la table shops.
+                 *
+                 * Le formulaire utilise déjà le numéro WhatsApp
+                 * comme champ principal.
+                 */
+                whatsapp:
+                    shopData.phone,
+
+                /*
+                 * Ces données existent éventuellement déjà
+                 * dans la boutique.
+                 *
+                 * On ne les supprime pas.
+                 */
+                address:
+                    currentShop.address || "",
+
+                logo:
+                    currentShop.logo || ""
+            };
+
+
+            /* ====================================================
+               ENVOI AU SERVER
+            ==================================================== */
+
+            const response = await fetch(
+                `${API}/api/shop/${user.id}`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify(serverData)
+                }
+            );
+
+
+            const data = await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "Impossible d'enregistrer les modifications."
+                );
+            }
+
+
+            /* ====================================================
+               MESSENGER
+               
+               Comme le server.js actuel ne possède pas de colonne
+               Messenger, on conserve cette information localement.
+            ==================================================== */
+
+            localStorage.setItem(
+                `madaShopMessenger_${user.id}`,
+                shopData.messenger
+            );
+
+
+            /* ====================================================
+               CATEGORY
+               
+               Même principe : conservation locale.
+            ==================================================== */
+
+            localStorage.setItem(
+                `madaShopCategory_${user.id}`,
+                shopData.category
+            );
+
+
+            /* ====================================================
+               MISE A JOUR USER LOCALSTORAGE
+            ==================================================== */
+
+            const updatedUser = {
+
+                ...user,
+
+                shopName:
+                    shopData.shopName,
+
+                sellerName:
+                    shopData.sellerName,
+
+                phone:
+                    shopData.phone,
+
+                email:
+                    shopData.email
+            };
+
+
+            localStorage.setItem(
+                "madaShopUser",
+                JSON.stringify(updatedUser)
+            );
+
+
+            /* ====================================================
+               MESSAGE SUCCESS
+            ==================================================== */
+
+            successMessage.textContent =
+                "✅ Les modifications ont été enregistrées avec succès.";
+
+            successMessage.style.display = "block";
+
+
+            /* ====================================================
+               RESTAURER BOUTON
+            ==================================================== */
+
+            saveBtn.disabled = false;
+
+            saveBtn.textContent =
+                "💾 Enregistrer les modifications";
+
+
+            /*
+             * Mise à jour de currentShop
+             */
+            currentShop = {
+                ...currentShop,
+                shop_name:
+                    shopData.shopName,
+                seller_name:
+                    shopData.sellerName,
+                phone:
+                    shopData.phone,
+                whatsapp:
+                    shopData.phone,
+                description:
+                    shopData.description
+            };
+
+
+            /*
+             * Redirection après sauvegarde
+             */
+            setTimeout(function() {
+
+                window.location.href =
+                    "dashboard.html";
+
+            }, 1000);
+
+        }
+
+        catch (error) {
+
+            console.error(
+                "Erreur sauvegarde boutique :",
+                error
+            );
+
+            showError(
+                error.message ||
+                "Impossible d'enregistrer les modifications."
+            );
+
+
+            saveBtn.disabled = false;
+
+            saveBtn.textContent =
+                "💾 Enregistrer les modifications";
+        }
+
+    });
+
+
+    /* ============================================================
+       LANCER CHARGEMENT
+    ============================================================ */
+
+    loadShop();
+
+</script>
+
+</body>
+</html>

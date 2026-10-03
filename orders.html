@@ -1,0 +1,3522 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Commandes</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #16a34a;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --purple: #7c3aed;
+
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+
+            --sidebar: 250px;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar);
+            height: 100vh;
+            background: #111827;
+            color: white;
+            padding: 22px 14px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            padding: 0 12px 28px;
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            margin-bottom: 20px;
+        }
+
+        .brand h1 {
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand span {
+            color: #60a5fa;
+        }
+
+        .brand small {
+            display: block;
+            margin-top: 5px;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #d1d5db;
+            padding: 12px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .nav a:hover {
+            background: #1f2937;
+            color: white;
+        }
+
+        .nav a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .nav-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,.1);
+            padding-top: 15px;
+        }
+
+        .logout-side {
+            width: 100%;
+            border: 0;
+            background: #1f2937;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .logout-side:hover {
+            background: #374151;
+        }
+
+        /* =========================
+           MAIN
+        ========================= */
+
+        .main {
+            margin-left: var(--sidebar);
+            min-height: 100vh;
+        }
+
+        /* =========================
+           TOPBAR
+        ========================= */
+
+        .topbar {
+            height: 72px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .page-title h2 {
+            font-size: 22px;
+            margin-bottom: 3px;
+        }
+
+        .page-title p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 10px;
+            position: relative;
+            font-size: 18px;
+            transition: .2s;
+        }
+
+        .icon-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger);
+            color: white;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            border-radius: 20px;
+            font-size: 10px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid white;
+        }
+
+        .top-link {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 10px 14px;
+            border-radius: 9px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .top-link:hover {
+            background: #f3f4f6;
+        }
+
+        /* =========================
+           CONTENT
+        ========================= */
+
+        .content {
+            padding: 28px;
+            max-width: 1600px;
+            margin: auto;
+        }
+
+        /* =========================
+           CONNECTION
+        ========================= */
+
+        .connection {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 7px 11px;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .connection-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #9ca3af;
+        }
+
+        .connection.online .connection-dot {
+            background: var(--success);
+        }
+
+        .connection.offline .connection-dot {
+            background: var(--danger);
+        }
+
+        /* =========================
+           KPI
+        ========================= */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 19px;
+            box-shadow: 0 3px 12px rgba(0,0,0,.03);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 13px;
+        }
+
+        .stat-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+        }
+
+        .icon-orange {
+            background: #ffedd5;
+        }
+
+        .icon-purple {
+            background: #ede9fe;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+        }
+
+        .icon-red {
+            background: #fee2e2;
+        }
+
+        .stat-card h3 {
+            font-size: 27px;
+            margin-bottom: 4px;
+        }
+
+        .stat-card p {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        /* =========================
+           PAYMENT STATS
+        ========================= */
+
+        .section-title {
+            font-size: 17px;
+            margin: 25px 0 13px;
+        }
+
+        .payment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 25px;
+        }
+
+        .payment-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 18px;
+        }
+
+        .payment-card .label {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 7px;
+        }
+
+        .payment-card .value {
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .pending-value {
+            color: var(--warning);
+        }
+
+        .paid-value {
+            color: var(--success);
+        }
+
+        .failed-value {
+            color: var(--danger);
+        }
+
+        .total-value {
+            color: var(--primary);
+        }
+
+        /* =========================
+           TOOLBAR
+        ========================= */
+
+        .toolbar {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .toolbar-row {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr auto;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box span {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+        }
+
+        .search-box input,
+        .toolbar select {
+            width: 100%;
+            height: 44px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 0 13px;
+            background: white;
+            outline: none;
+            color: var(--text);
+        }
+
+        .search-box input {
+            padding-left: 39px;
+        }
+
+        .search-box input:focus,
+        .toolbar select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+        }
+
+        .refresh-btn {
+            height: 44px;
+            padding: 0 16px;
+            border: 0;
+            background: var(--primary);
+            color: white;
+            border-radius: 9px;
+            font-weight: 700;
+        }
+
+        .refresh-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* =========================
+           ORDERS
+        ========================= */
+
+        .orders-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0 12px;
+        }
+
+        .orders-header h3 {
+            font-size: 18px;
+        }
+
+        .orders-count {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .order-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 3px 12px rgba(0,0,0,.025);
+            transition: .2s;
+        }
+
+        .order-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 6px 20px rgba(0,0,0,.05);
+        }
+
+        .order-top {
+            padding: 15px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .order-id {
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .order-date {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .status-new {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-accepted {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-processing {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-cancelled {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .order-body {
+            padding: 18px;
+        }
+
+        .order-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .info-title {
+            color: #9ca3af;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            font-weight: 700;
+            margin-bottom: 7px;
+        }
+
+        .info-main {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .info-text {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .product-name {
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .price-line {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .order-total {
+            font-size: 21px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .quantity {
+            display: inline-block;
+            background: #f3f4f6;
+            padding: 3px 7px;
+            border-radius: 5px;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* =========================
+           PAYMENT BOX
+        ========================= */
+
+        .payment-box {
+            margin-top: 15px;
+            padding: 13px 15px;
+            background: #f9fafb;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .payment-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #dcfce7;
+        }
+
+        .payment-method {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .payment-status {
+            font-size: 11px;
+            margin-top: 3px;
+        }
+
+        .payment-pending {
+            color: var(--warning);
+        }
+
+        .payment-paid {
+            color: var(--success);
+        }
+
+        .payment-failed {
+            color: var(--danger);
+        }
+
+        .paid-btn {
+            border: 0;
+            background: var(--success);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .paid-btn:hover {
+            background: #15803d;
+        }
+
+        /* =========================
+           NOTE
+        ========================= */
+
+        .customer-note {
+            margin-top: 13px;
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #92400e;
+        }
+
+        /* =========================
+           ACTIONS
+        ========================= */
+
+        .order-actions {
+            border-top: 1px solid var(--border);
+            padding: 13px 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 7px;
+            flex-wrap: wrap;
+            background: #fcfcfd;
+        }
+
+        .action-btn {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 8px 12px;
+            border-radius: 7px;
+            font-size: 11px;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .action-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .action-blue {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .action-purple {
+            background: #f5f3ff;
+            border-color: #ddd6fe;
+            color: #6d28d9;
+        }
+
+        .action-green {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+
+        .action-red {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+
+        .action-gray {
+            background: #f9fafb;
+            color: #374151;
+        }
+
+        /* =========================
+           EMPTY / LOADING
+        ========================= */
+
+        .empty-state {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 55px 20px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 7px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 45px;
+            color: var(--muted);
+        }
+
+        .spinner {
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e5e7eb;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* =========================
+           TOAST
+        ========================= */
+
+        .toast-container {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 290px;
+            max-width: 380px;
+            background: #111827;
+            color: white;
+            padding: 13px 15px;
+            border-radius: 10px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.2);
+            font-size: 13px;
+            animation: toastIn .25s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* =========================
+           NOTIFICATION PANEL
+        ========================= */
+
+        .notification-panel {
+            position: fixed;
+            top: 82px;
+            right: 25px;
+            width: 340px;
+            max-width: calc(100vw - 30px);
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            box-shadow: 0 15px 40px rgba(0,0,0,.15);
+            z-index: 2500;
+            display: none;
+            overflow: hidden;
+        }
+
+        .notification-panel.show {
+            display: block;
+        }
+
+        .notification-head {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notification-head h3 {
+            font-size: 14px;
+        }
+
+        .clear-notifications {
+            border: 0;
+            background: none;
+            color: var(--primary);
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .notification-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 13px 15px;
+            border-bottom: 1px solid #f3f4f6;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: #f9fafb;
+        }
+
+        .notification-item strong {
+            font-size: 12px;
+        }
+
+        .notification-item p {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .notification-empty {
+            padding: 25px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        /* =========================
+           MOBILE HEADER
+        ========================= */
+
+        .mobile-header {
+            display: none;
+            height: 60px;
+            background: #111827;
+            color: white;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 15px;
+        }
+
+        .mobile-header h1 {
+            font-size: 19px;
+        }
+
+        .mobile-header span {
+            color: #60a5fa;
+        }
+
+        .menu-btn {
+            border: 0;
+            background: #1f2937;
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            z-index: 999;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================= */
+
+        @media (max-width: 1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .order-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .toolbar-row {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .refresh-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: .25s;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .topbar {
+                height: 65px;
+                padding: 0 15px;
+            }
+
+            .page-title h2 {
+                font-size: 18px;
+            }
+
+            .page-title p {
+                display: none;
+            }
+
+            .content {
+                padding: 18px 14px;
+            }
+
+            .top-link {
+                display: none;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .payment-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .toolbar-row {
+                grid-template-columns: 1fr;
+            }
+
+            .order-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .order-top {
+                align-items: flex-start;
+            }
+
+            .payment-box {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .paid-btn {
+                width: 100%;
+            }
+
+            .order-actions {
+                justify-content: stretch;
+            }
+
+            .action-btn {
+                flex: 1;
+                min-width: 110px;
+            }
+
+            .notification-panel {
+                right: 15px;
+                top: 72px;
+            }
+        }
+
+        @media (max-width: 430px) {
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            .stat-card h3 {
+                font-size: 22px;
+            }
+
+            .stat-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+
+            .payment-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .payment-card {
+                padding: 13px;
+            }
+
+            .payment-card .value {
+                font-size: 18px;
+            }
+
+            .order-body {
+                padding: 14px;
+            }
+
+            .order-top {
+                padding: 13px;
+            }
+
+            .order-actions {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         MOBILE HEADER
+    ========================== -->
+    <div class="mobile-header">
+        <h1>Mada<span>Shop</span></h1>
+        <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="brand">
+            <h1>Mada<span>Shop</span></h1>
+            <small>Espace vendeur</small>
+        </div>
+
+        <nav class="nav">
+
+            <a href="dashboard.html">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="orders.html" class="active">
+                <span class="nav-icon">📦</span>
+                <span>Commandes</span>
+            </a>
+
+            <a href="add-product.html">
+                <span class="nav-icon">➕</span>
+                <span>Ajouter produit</span>
+            </a>
+
+            <a id="shopLinkSide" href="#">
+                <span class="nav-icon">🏪</span>
+                <span>Ma boutique</span>
+            </a>
+
+            <a href="index.html">
+                <span class="nav-icon">🏠</span>
+                <span>Accueil</span>
+            </a>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <button class="logout-side" onclick="logout()">
+                🚪 Déconnexion
+            </button>
+        </div>
+
+    </aside>
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+    <main class="main">
+
+        <!-- TOPBAR -->
+        <header class="topbar">
+
+            <div class="page-title">
+                <h2>Commandes</h2>
+                <p>Gérez vos commandes et vos paiements</p>
+            </div>
+
+            <div class="top-actions">
+
+                <button
+                    class="icon-btn"
+                    id="notificationBtn"
+                    onclick="toggleNotifications()"
+                    title="Notifications"
+                >
+                    🔔
+                    <span
+                        class="notification-count"
+                        id="notificationCount"
+                    >
+                        0
+                    </span>
+                </button>
+
+                <a
+                    href="dashboard.html"
+                    class="top-link"
+                >
+                    📊 Dashboard
+                </a>
+
+                <a
+                    id="shopLinkTop"
+                    href="#"
+                    class="top-link"
+                >
+                    🏪 Boutique
+                </a>
+
+            </div>
+
+        </header>
+
+        <!-- NOTIFICATION PANEL -->
+        <div
+            class="notification-panel"
+            id="notificationPanel"
+        >
+
+            <div class="notification-head">
+                <h3>Notifications</h3>
+
+                <button
+                    class="clear-notifications"
+                    onclick="clearNotifications()"
+                >
+                    Tout effacer
+                </button>
+            </div>
+
+            <div
+                class="notification-list"
+                id="notificationList"
+            >
+                <div class="notification-empty">
+                    Aucune nouvelle notification
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CONTENT -->
+        <section class="content">
+
+            <!-- CONNECTION -->
+            <div
+                class="connection"
+                id="connectionStatus"
+            >
+                <span class="connection-dot"></span>
+                <span id="connectionText">
+                    Connexion...
+                </span>
+            </div>
+
+            <!-- =========================
+                 ORDER STATS
+            ========================== -->
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+                        <div>
+                            <h3 id="totalOrders">0</h3>
+                            <p>Total commandes</p>
+                        </div>
+
+                        <div class="stat-icon icon-blue">
+                            📦
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+                        <div>
+                            <h3 id="newOrders">0</h3>
+                            <p>Nouvelles</p>
+                        </div>
+
+                        <div class="stat-icon icon-orange">
+                            🔔
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+                        <div>
+                            <h3 id="processingOrders">0</h3>
+                            <p>En traitement</p>
+                        </div>
+
+                        <div class="stat-icon icon-purple">
+                            ⚙️
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+                        <div>
+                            <h3 id="completedOrders">0</h3>
+                            <p>Terminées</p>
+                        </div>
+
+                        <div class="stat-icon icon-green">
+                            ✅
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="stat-card">
+
+                    <div class="stat-top">
+                        <div>
+                            <h3 id="cancelledOrders">0</h3>
+                            <p>Annulées</p>
+                        </div>
+
+                        <div class="stat-icon icon-red">
+                            ❌
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+                 PAYMENT STATS
+            ========================== -->
+
+            <h3 class="section-title">
+                Paiements
+            </h3>
+
+            <div class="payment-grid">
+
+                <div class="payment-card">
+                    <div class="label">
+                        Paiements en attente
+                    </div>
+
+                    <div
+                        class="value pending-value"
+                        id="pendingPayments"
+                    >
+                        0
+                    </div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="label">
+                        Paiements reçus
+                    </div>
+
+                    <div
+                        class="value paid-value"
+                        id="paidPayments"
+                    >
+                        0
+                    </div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="label">
+                        Paiements échoués
+                    </div>
+
+                    <div
+                        class="value failed-value"
+                        id="failedPayments"
+                    >
+                        0
+                    </div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="label">
+                        Total payé
+                    </div>
+
+                    <div
+                        class="value total-value"
+                        id="totalPaid"
+                    >
+                        0 Ar
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- =========================
+                 FILTERS
+            ========================== -->
+
+            <div class="toolbar">
+
+                <div class="toolbar-row">
+
+                    <div class="search-box">
+
+                        <span>🔎</span>
+
+                        <input
+                            type="text"
+                            id="searchInput"
+                            placeholder="Rechercher client, téléphone, produit..."
+                            oninput="renderOrders()"
+                        >
+
+                    </div>
+
+                    <select
+                        id="statusFilter"
+                        onchange="renderOrders()"
+                    >
+                        <option value="all">
+                            Tous les statuts
+                        </option>
+
+                        <option value="new">
+                            Nouvelle
+                        </option>
+
+                        <option value="accepted">
+                            Acceptée
+                        </option>
+
+                        <option value="rejected">
+                            Refusée
+                        </option>
+
+                        <option value="processing">
+                            En traitement
+                        </option>
+
+                        <option value="completed">
+                            Terminée
+                        </option>
+
+                        <option value="cancelled">
+                            Annulée
+                        </option>
+                    </select>
+
+                    <select
+                        id="paymentFilter"
+                        onchange="renderOrders()"
+                    >
+                        <option value="all">
+                            Tous les paiements
+                        </option>
+
+                        <option value="pending">
+                            En attente
+                        </option>
+
+                        <option value="paid">
+                            Payé
+                        </option>
+
+                        <option value="failed">
+                            Échoué
+                        </option>
+                    </select>
+
+                    <button
+                        class="refresh-btn"
+                        onclick="loadOrders()"
+                    >
+                        ↻ Actualiser
+                    </button>
+
+                </div>
+
+            </div>
+
+            <!-- =========================
+                 ORDERS HEADER
+            ========================== -->
+
+            <div class="orders-header">
+
+                <h3>
+                    Liste des commandes
+                </h3>
+
+                <div
+                    class="orders-count"
+                    id="ordersCount"
+                >
+                    0 commande
+                </div>
+
+            </div>
+
+            <!-- =========================
+                 ORDERS LIST
+            ========================== -->
+
+            <div
+                class="orders-list"
+                id="ordersList"
+            >
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Chargement des commandes...
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- TOAST -->
+    <div
+        class="toast-container"
+        id="toastContainer"
+    ></div>
+
+
+<script>
+/* =========================================================
+   AUTH
+========================================================= */
+
+const user = JSON.parse(
+    localStorage.getItem("madaShopUser") || "null"
+);
+
+if (!user || !user.id) {
+
+    window.location.href = "login.html";
+
+}
+
+const userId = user.id;
+
+
+/* =========================================================
+   LINKS
+========================================================= */
+
+document.getElementById("shopLinkSide").href =
+    `shop.html?userId=${userId}`;
+
+document.getElementById("shopLinkTop").href =
+    `shop.html?userId=${userId}`;
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let orders = [];
+let socket = null;
+
+let notifications = [];
+
+let reconnectTimer = null;
+let isLoading = false;
+
+
+/* =========================================================
+   STATUS LABELS
+========================================================= */
+
+const STATUS_LABELS = {
+
+    new: "Nouvelle",
+
+    accepted: "Acceptée",
+
+    rejected: "Refusée",
+
+    processing: "En traitement",
+
+    completed: "Terminée",
+
+    cancelled: "Annulée"
+
+};
+
+
+/* =========================================================
+   PAYMENT LABELS
+========================================================= */
+
+const PAYMENT_LABELS = {
+
+    pending: "En attente",
+
+    paid: "Payé",
+
+    failed: "Échoué"
+
+};
+
+
+/* =========================================================
+   STATUS TRANSITIONS
+========================================================= */
+
+const STATUS_TRANSITIONS = {
+
+    new: [
+        "accepted",
+        "rejected",
+        "cancelled"
+    ],
+
+    accepted: [
+        "processing",
+        "cancelled"
+    ],
+
+    processing: [
+        "completed",
+        "cancelled"
+    ],
+
+    completed: [],
+
+    rejected: [],
+
+    cancelled: [
+        "new",
+        "accepted",
+        "processing"
+    ]
+
+};
+
+
+/* =========================================================
+   STOCK RESERVED STATUSES
+========================================================= */
+
+const STOCK_RESERVED_STATUSES = [
+    "new",
+    "accepted",
+    "processing",
+    "completed"
+];
+
+
+/* =========================================================
+   FORMAT MONEY
+========================================================= */
+
+function formatMoney(value) {
+
+    const number = Number(value || 0);
+
+    return new Intl.NumberFormat("fr-FR").format(number) + " Ar";
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(dateString) {
+
+    if (!dateString) {
+        return "-";
+    }
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+
+    return date.toLocaleString(
+        "fr-FR",
+        {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHtml(value) {
+
+    if (value === null || value === undefined) {
+        return "";
+    }
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* =========================================================
+   TOAST
+========================================================= */
+
+function showToast(
+    message,
+    type = "info"
+) {
+
+    const container =
+        document.getElementById("toastContainer");
+
+    const toast =
+        document.createElement("div");
+
+    toast.className =
+        `toast ${type}`;
+
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+
+        toast.remove();
+
+    }, 4000);
+
+}
+
+
+/* =========================================================
+   LOAD ORDERS
+========================================================= */
+
+async function loadOrders() {
+
+    if (isLoading) {
+        return;
+    }
+
+    isLoading = true;
+
+    try {
+
+        const response = await fetch(
+            `/api/orders/${userId}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Impossible de charger les commandes."
+            );
+
+        }
+
+        orders = Array.isArray(data)
+            ? data
+            : (
+                Array.isArray(data.orders)
+                    ? data.orders
+                    : []
+            );
+
+        updateStats();
+
+        renderOrders();
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Erreur lors du chargement.",
+            "error"
+        );
+
+        document.getElementById("ordersList").innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    ⚠️
+                </div>
+
+                <h3>
+                    Impossible de charger les commandes
+                </h3>
+
+                <p>
+                    Vérifiez que le serveur MadaShop fonctionne.
+                </p>
+
+            </div>
+
+        `;
+
+    } finally {
+
+        isLoading = false;
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE STATS
+========================================================= */
+
+function updateStats() {
+
+    const total =
+        orders.length;
+
+    const newCount =
+        orders.filter(
+            order => order.status === "new"
+        ).length;
+
+    const processing =
+        orders.filter(
+            order =>
+                order.status === "processing" ||
+                order.status === "accepted"
+        ).length;
+
+    const completed =
+        orders.filter(
+            order =>
+                order.status === "completed"
+        ).length;
+
+    const cancelled =
+        orders.filter(
+            order =>
+                order.status === "cancelled"
+        ).length;
+
+    const pendingPayments =
+        orders.filter(
+            order =>
+                order.payment_status === "pending"
+        ).length;
+
+    const paidPayments =
+        orders.filter(
+            order =>
+                order.payment_status === "paid"
+        ).length;
+
+    const failedPayments =
+        orders.filter(
+            order =>
+                order.payment_status === "failed"
+        ).length;
+
+    const totalPaid =
+        orders
+            .filter(
+                order =>
+                    order.payment_status === "paid"
+            )
+            .reduce(
+                (sum, order) =>
+                    sum + Number(order.total || 0),
+                0
+            );
+
+
+    document.getElementById(
+        "totalOrders"
+    ).textContent = total;
+
+
+    document.getElementById(
+        "newOrders"
+    ).textContent = newCount;
+
+
+    document.getElementById(
+        "processingOrders"
+    ).textContent = processing;
+
+
+    document.getElementById(
+        "completedOrders"
+    ).textContent = completed;
+
+
+    document.getElementById(
+        "cancelledOrders"
+    ).textContent = cancelled;
+
+
+    document.getElementById(
+        "pendingPayments"
+    ).textContent = pendingPayments;
+
+
+    document.getElementById(
+        "paidPayments"
+    ).textContent = paidPayments;
+
+
+    document.getElementById(
+        "failedPayments"
+    ).textContent = failedPayments;
+
+
+    document.getElementById(
+        "totalPaid"
+    ).textContent = formatMoney(totalPaid);
+
+}
+
+
+/* =========================================================
+   FILTER ORDERS
+========================================================= */
+
+function getFilteredOrders() {
+
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    const status =
+        document.getElementById(
+            "statusFilter"
+        ).value;
+
+    const payment =
+        document.getElementById(
+            "paymentFilter"
+        ).value;
+
+
+    return orders.filter(order => {
+
+        const customer =
+            String(
+                order.customer_name || ""
+            ).toLowerCase();
+
+        const phone =
+            String(
+                order.phone || ""
+            ).toLowerCase();
+
+        const product =
+            String(
+                order.product_name || ""
+            ).toLowerCase();
+
+        const matchesSearch =
+            !search ||
+            customer.includes(search) ||
+            phone.includes(search) ||
+            product.includes(search);
+
+
+        const matchesStatus =
+            status === "all" ||
+            order.status === status;
+
+
+        const matchesPayment =
+            payment === "all" ||
+            order.payment_status === payment;
+
+
+        return (
+            matchesSearch &&
+            matchesStatus &&
+            matchesPayment
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   RENDER ORDERS
+========================================================= */
+
+function renderOrders() {
+
+    const list =
+        document.getElementById(
+            "ordersList"
+        );
+
+    const filtered =
+        getFilteredOrders();
+
+
+    document.getElementById(
+        "ordersCount"
+    ).textContent =
+        `${filtered.length} commande${filtered.length > 1 ? "s" : ""}`;
+
+
+    if (filtered.length === 0) {
+
+        list.innerHTML = `
+
+            <div class="empty-state">
+
+                <div class="empty-icon">
+                    📦
+                </div>
+
+                <h3>
+                    Aucune commande trouvée
+                </h3>
+
+                <p>
+                    Modifiez vos filtres ou attendez une nouvelle commande.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    const sorted =
+        [...filtered].sort(
+            (a, b) =>
+                new Date(b.created_at || 0) -
+                new Date(a.created_at || 0)
+        );
+
+
+    list.innerHTML =
+        sorted
+            .map(order => createOrderCard(order))
+            .join("");
+
+}
+
+
+/* =========================================================
+   CREATE ORDER CARD
+========================================================= */
+
+function createOrderCard(order) {
+
+    const status =
+        order.status || "new";
+
+    const paymentStatus =
+        order.payment_status || "pending";
+
+
+    const statusLabel =
+        STATUS_LABELS[status] ||
+        status;
+
+
+    const paymentLabel =
+        PAYMENT_LABELS[paymentStatus] ||
+        paymentStatus;
+
+
+    const customerName =
+        escapeHtml(
+            order.customer_name ||
+            "Client"
+        );
+
+
+    const phone =
+        escapeHtml(
+            order.phone ||
+            "-"
+        );
+
+
+    const address =
+        escapeHtml(
+            order.address ||
+            "Adresse non renseignée"
+        );
+
+
+    const productName =
+        escapeHtml(
+            order.product_name ||
+            "Produit"
+        );
+
+
+    const note =
+        escapeHtml(
+            order.note ||
+            ""
+        );
+
+
+    const quantity =
+        Number(order.quantity || 1);
+
+
+    const price =
+        Number(order.price || 0);
+
+
+    const total =
+        Number(
+            order.total ||
+            price * quantity
+        );
+
+
+    const paymentMethod =
+        order.payment_method ===
+        "cash_on_delivery"
+            ? "Paiement à la livraison"
+            : escapeHtml(
+                order.payment_method ||
+                "Non spécifié"
+            );
+
+
+    return `
+
+        <article
+            class="order-card"
+            id="order-${order.id}"
+        >
+
+            <div class="order-top">
+
+                <div>
+
+                    <div class="order-id">
+                        Commande #${escapeHtml(order.id)}
+                    </div>
+
+                    <div class="order-date">
+                        ${formatDate(order.created_at)}
+                    </div>
+
+                </div>
+
+                <div>
+
+                    <span
+                        class="order-status status-${escapeHtml(status)}"
+                    >
+                        ${getStatusIcon(status)}
+                        ${escapeHtml(statusLabel)}
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <div class="order-body">
+
+                <div class="order-grid">
+
+                    <!-- CLIENT -->
+
+                    <div>
+
+                        <div class="info-title">
+                            Client
+                        </div>
+
+                        <div class="info-main">
+                            👤 ${customerName}
+                        </div>
+
+                        <div class="info-text">
+                            📞 ${phone}
+                        </div>
+
+                        <div class="info-text">
+                            📍 ${address}
+                        </div>
+
+                    </div>
+
+
+                    <!-- PRODUCT -->
+
+                    <div>
+
+                        <div class="info-title">
+                            Produit
+                        </div>
+
+                        <div class="product-name">
+                            ${productName}
+                        </div>
+
+                        <div class="price-line">
+                            ${formatMoney(price)} / unité
+                        </div>
+
+                        <span class="quantity">
+                            Quantité : ${quantity}
+                        </span>
+
+                    </div>
+
+
+                    <!-- TOTAL -->
+
+                    <div>
+
+                        <div class="info-title">
+                            Total
+                        </div>
+
+                        <div class="order-total">
+                            ${formatMoney(total)}
+                        </div>
+
+                        <div class="info-text">
+                            ${quantity} article${quantity > 1 ? "s" : ""}
+                        </div>
+
+                    </div>
+
+
+                    <!-- STATUS -->
+
+                    <div>
+
+                        <div class="info-title">
+                            Statut
+                        </div>
+
+                        <div class="info-main">
+                            ${escapeHtml(statusLabel)}
+                        </div>
+
+                        <div class="info-text">
+                            ${
+                                getStatusDescription(status)
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAYMENT -->
+
+                <div class="payment-box">
+
+                    <div class="payment-left">
+
+                        <div class="payment-icon">
+                            💳
+                        </div>
+
+                        <div>
+
+                            <div class="payment-method">
+                                ${paymentMethod}
+                            </div>
+
+                            <div
+                                class="payment-status payment-${escapeHtml(paymentStatus)}"
+                            >
+                                ${escapeHtml(paymentLabel)}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    ${
+                        paymentStatus === "pending"
+                            ? `
+                                <button
+                                    class="paid-btn"
+                                    onclick="markAsPaid(${Number(order.id)})"
+                                >
+                                    ✓ Marquer comme payé
+                                </button>
+                            `
+                            : ""
+                    }
+
+                </div>
+
+
+                ${
+                    note
+                        ? `
+                            <div class="customer-note">
+                                📝 <strong>Note client :</strong>
+                                ${note}
+                            </div>
+                        `
+                        : ""
+                }
+
+            </div>
+
+
+            <!-- ACTIONS -->
+
+            <div class="order-actions">
+
+                ${getActionButtons(order)}
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* =========================================================
+   STATUS ICON
+========================================================= */
+
+function getStatusIcon(status) {
+
+    const icons = {
+
+        new: "🔔",
+
+        accepted: "👍",
+
+        rejected: "🚫",
+
+        processing: "⚙️",
+
+        completed: "✅",
+
+        cancelled: "❌"
+
+    };
+
+    return icons[status] || "📦";
+
+}
+
+
+/* =========================================================
+   STATUS DESCRIPTION
+========================================================= */
+
+function getStatusDescription(status) {
+
+    const descriptions = {
+
+        new:
+            "Nouvelle commande à traiter.",
+
+        accepted:
+            "Commande acceptée.",
+
+        rejected:
+            "Commande refusée.",
+
+        processing:
+            "Commande en cours de préparation.",
+
+        completed:
+            "Commande terminée.",
+
+        cancelled:
+            "Commande annulée."
+
+    };
+
+    return descriptions[status] || "";
+
+}
+
+
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
+function getActionButtons(order) {
+
+    const status =
+        order.status || "new";
+
+    const transitions =
+        STATUS_TRANSITIONS[status] || [];
+
+
+    if (!transitions.length) {
+
+        return `
+            <span
+                style="
+                    color:#9ca3af;
+                    font-size:12px;
+                    padding:8px 0;
+                "
+            >
+                Aucune action disponible
+            </span>
+        `;
+
+    }
+
+
+    return transitions
+        .map(nextStatus =>
+            createActionButton(
+                order.id,
+                nextStatus
+            )
+        )
+        .join("");
+
+}
+
+
+/* =========================================================
+   CREATE ACTION BUTTON
+========================================================= */
+
+function createActionButton(
+    orderId,
+    nextStatus
+) {
+
+    let className =
+        "action-btn";
+
+    let icon = "";
+    let label = "";
+
+
+    switch (nextStatus) {
+
+        case "accepted":
+
+            className +=
+                " action-blue";
+
+            icon = "✓";
+            label = "Accepter";
+
+            break;
+
+
+        case "rejected":
+
+            className +=
+                " action-red";
+
+            icon = "✕";
+            label = "Refuser";
+
+            break;
+
+
+        case "processing":
+
+            className +=
+                " action-purple";
+
+            icon = "⚙";
+            label = "Traiter";
+
+            break;
+
+
+        case "completed":
+
+            className +=
+                " action-green";
+
+            icon = "✓";
+            label = "Terminer";
+
+            break;
+
+
+        case "cancelled":
+
+            className +=
+                " action-red";
+
+            icon = "✕";
+            label = "Annuler";
+
+            break;
+
+
+        case "new":
+
+            className +=
+                " action-gray";
+
+            icon = "↩";
+            label = "Réouvrir";
+
+            break;
+
+
+        default:
+
+            label =
+                STATUS_LABELS[nextStatus] ||
+                nextStatus;
+
+    }
+
+
+    return `
+
+        <button
+            class="${className}"
+            onclick="changeStatus(
+                ${Number(orderId)},
+                '${nextStatus}'
+            )"
+        >
+            ${icon} ${label}
+        </button>
+
+    `;
+
+}
+
+
+/* =========================================================
+   MARK AS PAID
+========================================================= */
+
+async function markAsPaid(orderId) {
+
+    const confirmed =
+        confirm(
+            "Confirmer que le paiement de cette commande a été reçu ?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/orders/${orderId}/payment`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        userId: userId,
+                        paymentStatus: "paid"
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Impossible de mettre à jour le paiement."
+            );
+
+        }
+
+
+        const order =
+            orders.find(
+                item =>
+                    Number(item.id) ===
+                    Number(orderId)
+            );
+
+
+        if (order) {
+
+            order.payment_status = "paid";
+
+        }
+
+
+        updateStats();
+
+        renderOrders();
+
+
+        showToast(
+            "Paiement marqué comme reçu.",
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Erreur lors de la mise à jour du paiement.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CHANGE STATUS
+========================================================= */
+
+async function changeStatus(
+    orderId,
+    newStatus
+) {
+
+    const order =
+        orders.find(
+            item =>
+                Number(item.id) ===
+                Number(orderId)
+        );
+
+
+    if (!order) {
+
+        showToast(
+            "Commande introuvable.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const oldStatus =
+        order.status;
+
+
+    if (
+        !STATUS_TRANSITIONS[oldStatus] ||
+        !STATUS_TRANSITIONS[oldStatus]
+            .includes(newStatus)
+    ) {
+
+        showToast(
+            "Cette transition n'est pas autorisée.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newStatus === "cancelled" ||
+        newStatus === "rejected"
+    ) {
+
+        const message =
+            newStatus === "cancelled"
+                ? "Voulez-vous vraiment annuler cette commande ? Le stock sera restauré automatiquement."
+                : "Voulez-vous vraiment refuser cette commande ?";
+
+        if (!confirm(message)) {
+            return;
+        }
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                `/api/orders/${orderId}/status`,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        userId: userId,
+                        status: newStatus
+                    })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.message ||
+                "Impossible de modifier le statut."
+            );
+
+        }
+
+
+        order.status =
+            newStatus;
+
+
+        updateStats();
+
+        renderOrders();
+
+
+        showToast(
+            `Commande #${orderId} : ${STATUS_LABELS[newStatus] || newStatus}`,
+            "success"
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Erreur lors de la modification du statut.",
+            "error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   NOTIFICATIONS
+========================================================= */
+
+function addNotification(order) {
+
+    notifications.unshift({
+
+        id: Date.now(),
+
+        orderId: order.id,
+
+        customer:
+            order.customer_name ||
+            "Client",
+
+        product:
+            order.product_name ||
+            "Produit",
+
+        quantity:
+            order.quantity ||
+            1,
+
+        total:
+            order.total ||
+            0,
+
+        date:
+            new Date()
+
+    });
+
+
+    if (notifications.length > 20) {
+
+        notifications =
+            notifications.slice(0, 20);
+
+    }
+
+
+    renderNotifications();
+
+}
+
+
+/* =========================================================
+   RENDER NOTIFICATIONS
+========================================================= */
+
+function renderNotifications() {
+
+    const list =
+        document.getElementById(
+            "notificationList"
+        );
+
+    const count =
+        document.getElementById(
+            "notificationCount"
+        );
+
+
+    if (!notifications.length) {
+
+        list.innerHTML = `
+
+            <div class="notification-empty">
+                Aucune nouvelle notification
+            </div>
+
+        `;
+
+        count.style.display = "none";
+
+        return;
+
+    }
+
+
+    count.textContent =
+        notifications.length;
+
+    count.style.display =
+        "flex";
+
+
+    list.innerHTML =
+        notifications
+            .map(notification => `
+
+                <div
+                    class="notification-item"
+                    onclick="goToOrder(
+                        ${Number(notification.orderId)}
+                    )"
+                >
+
+                    <strong>
+                        🛍️ Nouvelle commande #${escapeHtml(notification.orderId)}
+                    </strong>
+
+                    <p>
+                        ${escapeHtml(notification.customer)}
+                        a commandé
+                        ${escapeHtml(notification.product)}
+                        × ${escapeHtml(notification.quantity)}
+                        — ${formatMoney(notification.total)}
+                    </p>
+
+                </div>
+
+            `)
+            .join("");
+
+}
+
+
+/* =========================================================
+   GO TO ORDER
+========================================================= */
+
+function goToOrder(orderId) {
+
+    const panel =
+        document.getElementById(
+            "notificationPanel"
+        );
+
+    panel.classList.remove("show");
+
+
+    const element =
+        document.getElementById(
+            `order-${orderId}`
+        );
+
+
+    if (element) {
+
+        element.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+
+        element.style.boxShadow =
+            "0 0 0 3px rgba(37,99,235,.35)";
+
+
+        setTimeout(() => {
+
+            element.style.boxShadow = "";
+
+        }, 2500);
+
+    }
+
+}
+
+
+/* =========================================================
+   TOGGLE NOTIFICATIONS
+========================================================= */
+
+function toggleNotifications() {
+
+    const panel =
+        document.getElementById(
+            "notificationPanel"
+        );
+
+    panel.classList.toggle("show");
+
+}
+
+
+/* =========================================================
+   CLEAR NOTIFICATIONS
+========================================================= */
+
+function clearNotifications() {
+
+    notifications = [];
+
+    renderNotifications();
+
+}
+
+
+/* =========================================================
+   NOTIFICATION SOUND
+========================================================= */
+
+function playNotificationSound() {
+
+    try {
+
+        const AudioContext =
+            window.AudioContext ||
+            window.webkitAudioContext;
+
+        if (!AudioContext) {
+            return;
+        }
+
+
+        const audioContext =
+            new AudioContext();
+
+
+        const oscillator =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        oscillator.type =
+            "sine";
+
+        oscillator.frequency.setValueAtTime(
+            880,
+            audioContext.currentTime
+        );
+
+        oscillator.frequency.setValueAtTime(
+            1100,
+            audioContext.currentTime + 0.12
+        );
+
+
+        gain.gain.setValueAtTime(
+            0.001,
+            audioContext.currentTime
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.2,
+            audioContext.currentTime + 0.02
+        );
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime + 0.35
+        );
+
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioContext.destination
+        );
+
+
+        oscillator.start();
+
+        oscillator.stop(
+            audioContext.currentTime + 0.35
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Notification sound unavailable."
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   WEBSOCKET
+========================================================= */
+
+function connectWebSocket() {
+
+    if (
+        socket &&
+        (
+            socket.readyState ===
+                WebSocket.OPEN ||
+            socket.readyState ===
+                WebSocket.CONNECTING
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const protocol =
+        location.protocol === "https:"
+            ? "wss:"
+            : "ws:";
+
+
+    const wsUrl =
+        `${protocol}//${location.host}/?userId=${encodeURIComponent(userId)}`;
+
+
+    try {
+
+        socket =
+            new WebSocket(wsUrl);
+
+
+        socket.onopen = function() {
+
+            setConnectionStatus(
+                true
+            );
+
+            console.log(
+                "MadaShop WebSocket connected."
+            );
+
+        };
+
+
+        socket.onmessage = function(event) {
+
+            try {
+
+                const data =
+                    JSON.parse(event.data);
+
+
+                handleWebSocketMessage(
+                    data
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "WebSocket message error:",
+                    error
+                );
+
+            }
+
+        };
+
+
+        socket.onclose = function() {
+
+            setConnectionStatus(
+                false
+            );
+
+
+            clearTimeout(
+                reconnectTimer
+            );
+
+
+            reconnectTimer =
+                setTimeout(
+                    connectWebSocket,
+                    5000
+                );
+
+        };
+
+
+        socket.onerror = function(error) {
+
+            console.error(
+                "WebSocket error:",
+                error
+            );
+
+            setConnectionStatus(
+                false
+            );
+
+        };
+
+    } catch (error) {
+
+        console.error(
+            "WebSocket connection failed:",
+            error
+        );
+
+        setConnectionStatus(
+            false
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   HANDLE WEBSOCKET MESSAGE
+========================================================= */
+
+function handleWebSocketMessage(data) {
+
+    console.log(
+        "WebSocket:",
+        data
+    );
+
+
+    if (
+        data.type ===
+        "new_order"
+    ) {
+
+        const order =
+            data.order ||
+            data.data ||
+            data;
+
+
+        if (order) {
+
+            addNotification(
+                order
+            );
+
+            playNotificationSound();
+
+        }
+
+
+        loadOrders();
+
+
+        showToast(
+            "🔔 Nouvelle commande reçue !",
+            "info"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        data.type ===
+        "payment_status_updated"
+    ) {
+
+        const updated =
+            data.order ||
+            data.data;
+
+
+        if (updated) {
+
+            const existing =
+                orders.find(
+                    order =>
+                        Number(order.id) ===
+                        Number(updated.id)
+                );
+
+
+            if (existing) {
+
+                Object.assign(
+                    existing,
+                    updated
+                );
+
+            }
+
+        }
+
+
+        updateStats();
+
+        renderOrders();
+
+        return;
+
+    }
+
+
+    if (
+        data.type ===
+        "order_status_updated"
+    ) {
+
+        const updated =
+            data.order ||
+            data.data;
+
+
+        if (updated) {
+
+            const existing =
+                orders.find(
+                    order =>
+                        Number(order.id) ===
+                        Number(updated.id)
+                );
+
+
+            if (existing) {
+
+                Object.assign(
+                    existing,
+                    updated
+                );
+
+            }
+
+        }
+
+
+        updateStats();
+
+        renderOrders();
+
+        return;
+
+    }
+
+}
+
+
+/* =========================================================
+   CONNECTION STATUS
+========================================================= */
+
+function setConnectionStatus(
+    online
+) {
+
+    const element =
+        document.getElementById(
+            "connectionStatus"
+        );
+
+    const text =
+        document.getElementById(
+            "connectionText"
+        );
+
+
+    if (online) {
+
+        element.classList.add(
+            "online"
+        );
+
+        element.classList.remove(
+            "offline"
+        );
+
+        text.textContent =
+            "Temps réel connecté";
+
+    } else {
+
+        element.classList.add(
+            "offline"
+        );
+
+        element.classList.remove(
+            "online"
+        );
+
+        text.textContent =
+            "Connexion interrompue";
+
+    }
+
+}
+
+
+/* =========================================================
+   SIDEBAR MOBILE
+========================================================= */
+
+function toggleSidebar() {
+
+    const sidebar =
+        document.getElementById(
+            "sidebar"
+        );
+
+    const overlay =
+        document.getElementById(
+            "sidebarOverlay"
+        );
+
+
+    sidebar.classList.toggle(
+        "open"
+    );
+
+    overlay.classList.toggle(
+        "show"
+    );
+
+}
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logout() {
+
+    const confirmed =
+        confirm(
+            "Voulez-vous vraiment vous déconnecter ?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    if (socket) {
+
+        try {
+            socket.close();
+        } catch (error) {}
+
+    }
+
+
+    localStorage.removeItem(
+        "madaShopUser"
+    );
+
+
+    window.location.href =
+        "login.html";
+
+}
+
+
+/* =========================================================
+   CLOSE NOTIFICATION PANEL WHEN CLICK OUTSIDE
+========================================================= */
+
+document.addEventListener(
+    "click",
+    function(event) {
+
+        const panel =
+            document.getElementById(
+                "notificationPanel"
+            );
+
+        const button =
+            document.getElementById(
+                "notificationBtn"
+            );
+
+
+        if (
+            panel.classList.contains("show") &&
+            !panel.contains(event.target) &&
+            !button.contains(event.target)
+        ) {
+
+            panel.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   AUTO REFRESH
+========================================================= */
+
+setInterval(
+    function() {
+
+        loadOrders();
+
+    },
+    30000
+);
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+renderNotifications();
+
+loadOrders();
+
+connectWebSocket();
+
+</script>
+
+</body>
+</html>

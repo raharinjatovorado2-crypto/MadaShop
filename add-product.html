@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MadaShop - Ajouter un produit</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        /* ========================================
+           HEADER
+        ======================================== */
+
+        header {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header-btn {
+            border: none;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .header-btn:hover {
+            background: #dbeafe;
+        }
+
+        /* ========================================
+           MAIN
+        ======================================== */
+
+        main {
+            max-width: 900px;
+            margin: 35px auto;
+            padding: 0 20px 50px;
+        }
+
+        .page-title {
+            margin-bottom: 20px;
+        }
+
+        .page-title h1 {
+            font-size: 30px;
+            margin-bottom: 8px;
+        }
+
+        .page-title p {
+            color: #6b7280;
+            font-size: 15px;
+        }
+
+        /* ========================================
+           CARD
+        ======================================== */
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 28px;
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.07);
+            border: 1px solid #e5e7eb;
+        }
+
+        /* ========================================
+           FORM
+        ======================================== */
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .required {
+            color: #dc2626;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 9px;
+            font-size: 15px;
+            outline: none;
+            background: #ffffff;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .help-text {
+            margin-top: 6px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        /* ========================================
+           IMAGE
+        ======================================== */
+
+        .image-preview-wrapper {
+            margin-top: 12px;
+            display: none;
+        }
+
+        .image-preview-wrapper.show {
+            display: block;
+        }
+
+        .image-preview {
+            width: 180px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        /* ========================================
+           BUTTONS
+        ======================================== */
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 9px;
+            padding: 13px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #ffffff;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-primary:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        /* ========================================
+           MESSAGE
+        ======================================== */
+
+        .message {
+            display: none;
+            padding: 13px 15px;
+            border-radius: 9px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* ========================================
+           LOADING
+        ======================================== */
+
+        .loading {
+            text-align: center;
+            padding: 25px;
+            color: #6b7280;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        /* ========================================
+           EDIT MODE
+        ======================================== */
+
+        .edit-badge {
+            display: none;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 18px;
+        }
+
+        .edit-badge.show {
+            display: inline-block;
+        }
+
+        /* ========================================
+           RESPONSIVE
+        ======================================== */
+
+        @media (max-width: 700px) {
+
+            .header-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-actions {
+                justify-content: space-between;
+            }
+
+            main {
+                margin-top: 20px;
+                padding: 0 14px 40px;
+            }
+
+            .page-title h1 {
+                font-size: 25px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="header-inner">
+
+        <a href="dashboard.html" class="brand">
+            MadaShop
+        </a>
+
+        <div class="header-actions">
+
+            <a href="dashboard.html" class="header-btn">
+                Dashboard
+            </a>
+
+            <a href="#" id="shopButton" class="header-btn">
+                Ma boutique
+            </a>
+
+        </div>
+
+    </div>
+</header>
+
+
+<main>
+
+    <div class="page-title">
+
+        <h1 id="pageTitle">
+            Ajouter un produit
+        </h1>
+
+        <p id="pageSubtitle">
+            Ajoutez un nouveau produit à votre boutique.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div id="editBadge" class="edit-badge">
+            Mode modification
+        </div>
+
+
+        <div id="message" class="message"></div>
+
+        <div id="loading" class="loading">
+            Chargement du produit...
+        </div>
+
+
+        <form id="productForm">
+
+            <!-- PRODUCT NAME -->
+
+            <div class="form-group">
+
+                <label for="name">
+                    Nom du produit
+                    <span class="required">*</span>
+                </label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Ex : T-shirt homme"
+                    required
+                    maxlength="150"
+                >
+
+            </div>
+
+
+            <!-- CATEGORY -->
+
+            <div class="form-group">
+
+                <label for="category">
+                    Catégorie
+                    <span class="required">*</span>
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                    required
+                >
+
+                    <option value="Mode">
+                        Mode
+                    </option>
+
+                    <option value="Électronique">
+                        Électronique
+                    </option>
+
+                    <option value="Beauté">
+                        Beauté
+                    </option>
+
+                    <option value="Maison">
+                        Maison
+                    </option>
+
+                    <option value="Alimentation">
+                        Alimentation
+                    </option>
+
+                    <option value="Autres">
+                        Autres
+                    </option>
+
+                </select>
+
+                <div class="help-text">
+                    Choisissez la catégorie correspondant à votre produit.
+                </div>
+
+            </div>
+
+
+            <!-- PRICE + STOCK -->
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label for="price">
+                        Prix (Ar)
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        min="0"
+                        step="1"
+                        placeholder="Ex : 25000"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="stock">
+                        Stock
+                        <span class="required">*</span>
+                    </label>
+
+                    <input
+                        type="number"
+                        id="stock"
+                        name="stock"
+                        min="0"
+                        step="1"
+                        placeholder="Ex : 10"
+                        required
+                    >
+
+                    <div class="help-text">
+                        Quantité disponible.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="form-group">
+
+                <label for="description">
+                    Description
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    placeholder="Décrivez votre produit..."
+                    maxlength="2000"
+                ></textarea>
+
+            </div>
+
+
+            <!-- IMAGE -->
+
+            <div class="form-group">
+
+                <label for="image">
+                    Image du produit
+                </label>
+
+                <input
+                    type="file"
+                    id="imageFile"
+                    accept="image/*"
+                >
+
+                <div class="help-text">
+                    Choisissez une image JPG, PNG ou WebP.
+                </div>
+
+                <div
+                    id="imagePreviewWrapper"
+                    class="image-preview-wrapper"
+                >
+
+                    <img
+                        id="imagePreview"
+                        class="image-preview"
+                        alt="Aperçu du produit"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- HIDDEN IMAGE VALUE -->
+
+            <input
+                type="hidden"
+                id="image"
+                name="image"
+            >
+
+
+            <!-- BUTTONS -->
+
+            <div class="buttons">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="cancelButton"
+                >
+                    Annuler
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="submitButton"
+                >
+                    Ajouter le produit
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</main>
+
+
+<script>
+
+    // ========================================
+    // CONFIG
+    // ========================================
+
+    const API_URL = "/api";
+
+
+    // ========================================
+    // AUTHENTICATION
+    // ========================================
+
+    const savedUser =
+        localStorage.getItem("madaShopUser");
+
+    if (!savedUser) {
+
+        window.location.replace(
+            "login.html"
+        );
+
+    }
+
+    let madaShopUser = null;
+
+    try {
+
+        madaShopUser =
+            JSON.parse(savedUser);
+
+    } catch (error) {
+
+        localStorage.removeItem(
+            "madaShopUser"
+        );
+
+        localStorage.removeItem(
+            "madaShopLoggedIn"
+        );
+
+        window.location.replace(
+            "login.html"
+        );
+    }
+
+
+    const userId =
+        madaShopUser &&
+        madaShopUser.id
+            ? Number(madaShopUser.id)
+            : null;
+
+
+    if (
+        !madaShopUser ||
+        !userId ||
+        !Number.isInteger(userId) ||
+        userId <= 0
+    ) {
+
+        localStorage.removeItem(
+            "madaShopUser"
+        );
+
+        localStorage.removeItem(
+            "madaShopLoggedIn"
+        );
+
+        window.location.replace(
+            "login.html"
+        );
+    }
+
+
+    // ========================================
+    // ELEMENTS
+    // ========================================
+
+    const productForm =
+        document.getElementById(
+            "productForm"
+        );
+
+    const nameInput =
+        document.getElementById(
+            "name"
+        );
+
+    const categoryInput =
+        document.getElementById(
+            "category"
+        );
+
+    const priceInput =
+        document.getElementById(
+            "price"
+        );
+
+    const stockInput =
+        document.getElementById(
+            "stock"
+        );
+
+    const descriptionInput =
+        document.getElementById(
+            "description"
+        );
+
+    const imageFileInput =
+        document.getElementById(
+            "imageFile"
+        );
+
+    const imageInput =
+        document.getElementById(
+            "image"
+        );
+
+    const imagePreview =
+        document.getElementById(
+            "imagePreview"
+        );
+
+    const imagePreviewWrapper =
+        document.getElementById(
+            "imagePreviewWrapper"
+        );
+
+    const submitButton =
+        document.getElementById(
+            "submitButton"
+        );
+
+    const cancelButton =
+        document.getElementById(
+            "cancelButton"
+        );
+
+    const messageBox =
+        document.getElementById(
+            "message"
+        );
+
+    const loadingBox =
+        document.getElementById(
+            "loading"
+        );
+
+    const editBadge =
+        document.getElementById(
+            "editBadge"
+        );
+
+    const pageTitle =
+        document.getElementById(
+            "pageTitle"
+        );
+
+    const pageSubtitle =
+        document.getElementById(
+            "pageSubtitle"
+        );
+
+    const shopButton =
+        document.getElementById(
+            "shopButton"
+        );
+
+
+    // ========================================
+    // EDIT MODE
+    // ========================================
+
+    const urlParams =
+        new URLSearchParams(
+            window.location.search
+        );
+
+    const editId =
+        Number(
+            urlParams.get("edit")
+        );
+
+    const isEditMode =
+        Number.isInteger(editId) &&
+        editId > 0;
+
+
+    // ========================================
+    // SHOP BUTTON
+    // ========================================
+
+    shopButton.href =
+        "shop.html?userId=" +
+        encodeURIComponent(userId);
+
+
+    // ========================================
+    // MESSAGE
+    // ========================================
+
+    function showMessage(
+        message,
+        type
+    ) {
+
+        messageBox.textContent =
+            message;
+
+        messageBox.className =
+            "message show " +
+            type;
+    }
+
+
+    function hideMessage() {
+
+        messageBox.className =
+            "message";
+    }
+
+
+    // ========================================
+    // IMAGE PREVIEW
+    // ========================================
+
+    imageFileInput.addEventListener(
+        "change",
+        function () {
+
+            const file =
+                imageFileInput.files[0];
+
+            if (!file) {
+                return;
+            }
+
+            if (
+                !file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                showMessage(
+                    "Veuillez sélectionner une image valide.",
+                    "error"
+                );
+
+                imageFileInput.value = "";
+
+                return;
+            }
+
+            const reader =
+                new FileReader();
+
+            reader.onload =
+                function (event) {
+
+                    const imageData =
+                        event.target.result;
+
+                    imageInput.value =
+                        imageData;
+
+                    imagePreview.src =
+                        imageData;
+
+                    imagePreviewWrapper.classList.add(
+                        "show"
+                    );
+                };
+
+            reader.readAsDataURL(file);
+        }
+    );
+
+
+    // ========================================
+    // LOAD PRODUCT FOR EDIT
+    // ========================================
+
+    async function loadProduct() {
+
+        if (!isEditMode) {
+            return;
+        }
+
+        pageTitle.textContent =
+            "Modifier le produit";
+
+        pageSubtitle.textContent =
+            "Modifiez les informations de votre produit.";
+
+        submitButton.textContent =
+            "Enregistrer les modifications";
+
+        editBadge.classList.add(
+            "show"
+        );
+
+        loadingBox.classList.add(
+            "show"
+        );
+
+        productForm.style.display =
+            "none";
+
+        try {
+
+            const response =
+                await fetch(
+                    API_URL +
+                    "/product/" +
+                    encodeURIComponent(editId)
+                );
+
+            const data =
+                await response.json();
+
+            if (
+                !response.ok ||
+                !data.success ||
+                !data.product
+            ) {
+
+                throw new Error(
+                    data.message ||
+                    "Produit introuvable."
+                );
+            }
+
+            const product =
+                data.product;
+
+
+            // NAME
+
+            nameInput.value =
+                product.name || "";
+
+
+            // CATEGORY
+
+            const productCategory =
+                product.category || "Autres";
+
+            const categoryExists =
+                Array.from(
+                    categoryInput.options
+                ).some(
+                    function (option) {
+                        return (
+                            option.value ===
+                            productCategory
+                        );
+                    }
+                );
+
+            if (categoryExists) {
+
+                categoryInput.value =
+                    productCategory;
+
+            } else {
+
+                categoryInput.value =
+                    "Autres";
+            }
+
+
+            // PRICE
+
+            priceInput.value =
+                product.price ?? "";
+
+
+            // STOCK
+
+            stockInput.value =
+                product.stock ?? "";
+
+
+            // DESCRIPTION
+
+            descriptionInput.value =
+                product.description || "";
+
+
+            // IMAGE
+
+            if (product.image) {
+
+                imageInput.value =
+                    product.image;
+
+                imagePreview.src =
+                    product.image;
+
+                imagePreviewWrapper.classList.add(
+                    "show"
+                );
+            }
+
+
+            productForm.style.display =
+                "block";
+
+        } catch (error) {
+
+            showMessage(
+                error.message ||
+                "Impossible de charger le produit.",
+                "error"
+            );
+
+        } finally {
+
+            loadingBox.classList.remove(
+                "show"
+            );
+        }
+    }
+
+
+    // ========================================
+    // SUBMIT
+    // ========================================
+
+    productForm.addEventListener(
+        "submit",
+        async function (event) {
+
+            event.preventDefault();
+
+            hideMessage();
+
+            const name =
+                nameInput.value.trim();
+
+            const category =
+                categoryInput.value;
+
+            const price =
+                Number(priceInput.value);
+
+            const stock =
+                Number(stockInput.value);
+
+            const description =
+                descriptionInput.value.trim();
+
+            const image =
+                imageInput.value || "";
+
+
+            // VALIDATION
+
+            if (!name) {
+
+                showMessage(
+                    "Veuillez entrer le nom du produit.",
+                    "error"
+                );
+
+                nameInput.focus();
+
+                return;
+            }
+
+            if (!category) {
+
+                showMessage(
+                    "Veuillez choisir une catégorie.",
+                    "error"
+                );
+
+                categoryInput.focus();
+
+                return;
+            }
+
+            if (
+                !Number.isFinite(price) ||
+                price < 0
+            ) {
+
+                showMessage(
+                    "Veuillez entrer un prix valide.",
+                    "error"
+                );
+
+                priceInput.focus();
+
+                return;
+            }
+
+            if (
+                !Number.isInteger(stock) ||
+                stock < 0
+            ) {
+
+                showMessage(
+                    "Veuillez entrer un stock valide.",
+                    "error"
+                );
+
+                stockInput.focus();
+
+                return;
+            }
+
+
+            submitButton.disabled =
+                true;
+
+            submitButton.textContent =
+                isEditMode
+                    ? "Enregistrement..."
+                    : "Ajout en cours...";
+
+
+            try {
+
+                const payload = {
+                    userId: userId,
+                    name: name,
+                    description: description,
+                    category: category,
+                    price: price,
+                    stock: stock,
+                    image: image
+                };
+
+
+                let response;
+
+
+                // ========================================
+                // EDIT
+                // ========================================
+
+                if (isEditMode) {
+
+                    response =
+                        await fetch(
+                            API_URL +
+                            "/products/" +
+                            encodeURIComponent(editId),
+                            {
+                                method: "PUT",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+
+                }
+
+                // ========================================
+                // ADD
+                // ========================================
+
+                else {
+
+                    response =
+                        await fetch(
+                            API_URL +
+                            "/products",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        payload
+                                    )
+                            }
+                        );
+                }
+
+
+                const contentType =
+                    response.headers.get(
+                        "content-type"
+                    ) || "";
+
+
+                let data;
+
+                if (
+                    contentType.includes(
+                        "application/json"
+                    )
+                ) {
+
+                    data =
+                        await response.json();
+
+                } else {
+
+                    const text =
+                        await response.text();
+
+                    throw new Error(
+                        text ||
+                        "Réponse invalide du serveur."
+                    );
+                }
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Une erreur est survenue."
+                    );
+                }
+
+
+                showMessage(
+                    isEditMode
+                        ? "Produit modifié avec succès."
+                        : "Produit ajouté avec succès.",
+                    "success"
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        window.location.href =
+                            "shop.html?userId=" +
+                            encodeURIComponent(
+                                userId
+                            );
+
+                    },
+                    800
+                );
+
+
+            } catch (error) {
+
+                console.error(
+                    "Product save error:",
+                    error
+                );
+
+                showMessage(
+                    error.message ||
+                    "Impossible de sauvegarder le produit.",
+                    "error"
+                );
+
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    isEditMode
+                        ? "Enregistrer les modifications"
+                        : "Ajouter le produit";
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // CANCEL
+    // ========================================
+
+    cancelButton.addEventListener(
+        "click",
+        function () {
+
+            window.location.href =
+                "shop.html?userId=" +
+                encodeURIComponent(
+                    userId
+                );
+        }
+    );
+
+
+    // ========================================
+    // START
+    // ========================================
+
+    loadProduct();
+
+</script>
+
+</body>
+</html>
