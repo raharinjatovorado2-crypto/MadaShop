@@ -462,14 +462,60 @@ app.post(
 
         try {
 
-            const {
-                sellerName,
-                shopName,
-                phone,
-                email,
-                password
-            } = req.body;
+            /*
+            ----------------------------------------------------
+               NORMALIZE REGISTER DATA
+               This prevents SQLite from receiving undefined
+               or unsupported values.
+            ----------------------------------------------------
+            */
 
+            const sellerName =
+                req.body?.sellerName !== undefined &&
+                req.body?.sellerName !== null
+                    ? String(
+                        req.body.sellerName
+                    ).trim()
+                    : "";
+
+            const shopName =
+                req.body?.shopName !== undefined &&
+                req.body?.shopName !== null
+                    ? String(
+                        req.body.shopName
+                    ).trim()
+                    : "";
+
+            const phone =
+                req.body?.phone !== undefined &&
+                req.body?.phone !== null
+                    ? String(
+                        req.body.phone
+                    ).trim()
+                    : "";
+
+            const email =
+                req.body?.email !== undefined &&
+                req.body?.email !== null
+                    ? String(
+                        req.body.email
+                    ).trim()
+                    : "";
+
+            const password =
+                req.body?.password !== undefined &&
+                req.body?.password !== null
+                    ? String(
+                        req.body.password
+                    )
+                    : "";
+
+
+            /*
+            ----------------------------------------------------
+               VALIDATION
+            ----------------------------------------------------
+            */
 
             if (
                 !sellerName ||
@@ -491,13 +537,19 @@ app.post(
             }
 
 
+            /*
+            ----------------------------------------------------
+               CHECK EXISTING EMAIL
+            ----------------------------------------------------
+            */
+
             const existingUser =
                 db.prepare(`
                     SELECT id
                     FROM users
                     WHERE email = ?
                 `).get(
-                    email.trim()
+                    email
                 );
 
 
@@ -515,6 +567,12 @@ app.post(
             }
 
 
+            /*
+            ----------------------------------------------------
+               CREATE USER + SHOP
+            ----------------------------------------------------
+            */
+
             const createUser =
                 db.transaction(() => {
 
@@ -529,10 +587,10 @@ app.post(
                             )
                             VALUES (?, ?, ?, ?, ?)
                         `).run(
-                            sellerName.trim(),
-                            shopName.trim(),
-                            phone.trim(),
-                            email.trim(),
+                            sellerName,
+                            shopName,
+                            phone,
+                            email,
                             password
                         );
 
@@ -557,10 +615,10 @@ app.post(
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     `).run(
                         userId,
-                        sellerName.trim(),
-                        shopName.trim(),
+                        sellerName,
+                        shopName,
                         "",
-                        phone.trim(),
+                        phone,
                         "",
                         "",
                         ""
@@ -571,6 +629,12 @@ app.post(
 
                 });
 
+
+            /*
+            ----------------------------------------------------
+               GET CREATED USER
+            ----------------------------------------------------
+            */
 
             const user =
                 db.prepare(`
@@ -2668,7 +2732,7 @@ app.get(
 
             /* ==================================================
                SALES
-               
+
                Sales = completed orders only
             ================================================== */
 
@@ -2785,7 +2849,7 @@ app.get(
 
             /* ==================================================
                TOP PRODUCTS
-               
+
                Calculated from completed orders.
             ================================================== */
 
