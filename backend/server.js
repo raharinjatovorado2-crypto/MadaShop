@@ -1,4 +1,3 @@
-```javascript
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
@@ -8,37 +7,29 @@ const { WebSocketServer } = require("ws");
 
 const app = express();
 
-/*
-============================================================
-   PORT
-============================================================
-*/
-
 const PORT = process.env.PORT || 3000;
 
 const server = http.createServer(app);
 
-const db = new Database(
-    path.join(__dirname, "madashop.db")
-);
+const db = new Database(path.join(__dirname, "madashop.db"));
 
-
-/* ============================================================
+/* =========================================================
    MIDDLEWARE
-============================================================ */
+========================================================= */
 
 app.use(cors());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-app.use(express.json());
+/* =========================================================
+   STATIC FRONTEND
+========================================================= */
 
-app.use(express.urlencoded({
-    extended: true
-}));
+app.use(express.static(path.join(__dirname, "..")));
 
-
-/* ============================================================
+/* =========================================================
    CONSTANTS
-============================================================ */
+========================================================= */
 
 const PRODUCT_CATEGORIES = [
     "Mode",
@@ -68,42 +59,46 @@ const PAYMENT_STATUSES = [
     "failed"
 ];
 
+/*
+    Allowed order status transitions.
 
-/* ============================================================
-   ORDER STATUS TRANSITIONS
-============================================================ */
+    new
+      -> accepted
+      -> rejected
+      -> cancelled
+
+    accepted
+      -> processing
+      -> cancelled
+
+    processing
+      -> completed
+      -> cancelled
+
+    completed
+      -> nothing
+
+    rejected
+      -> nothing
+
+    cancelled
+      -> new
+      -> accepted
+      -> processing
+*/
 
 const ORDER_STATUS_TRANSITIONS = {
-
-    new: [
-        "accepted",
-        "rejected",
-        "cancelled"
-    ],
-
-    accepted: [
-        "processing",
-        "cancelled"
-    ],
-
-    processing: [
-        "completed",
-        "cancelled"
-    ],
-
+    new: ["accepted", "rejected", "cancelled"],
+    accepted: ["processing", "cancelled"],
+    processing: ["completed", "cancelled"],
     completed: [],
-
     rejected: [],
-
-    cancelled: [
-        "new",
-        "accepted",
-        "processing"
-    ]
-
+    cancelled: ["new", "accepted", "processing"]
 };
 
-
+/*
+    Stock is reserved while the order is in one of these statuses.
+*/
 const STOCK_RESERVED_STATUSES = [
     "new",
     "accepted",
@@ -111,42 +106,20 @@ const STOCK_RESERVED_STATUSES = [
     "completed"
 ];
 
-
-/* ============================================================
+/* =========================================================
    DATABASE HELPERS
-============================================================ */
+========================================================= */
 
-function columnExists(
-    tableName,
-    columnName
-) {
-
+function columnExists(tableName, columnName) {
     const columns = db
-        .prepare(
-            `PRAGMA table_info(${tableName})`
-        )
+        .prepare(`PRAGMA table_info(${tableName})`)
         .all();
 
-    return columns.some(
-        (column) =>
-            column.name === columnName
-    );
+    return columns.some(column => column.name === columnName);
 }
 
-
-function addColumnIfMissing(
-    tableName,
-    columnName,
-    definition
-) {
-
-    if (
-        !columnExists(
-            tableName,
-            columnName
-        )
-    ) {
-
+function addColumnIfMissing(tableName, columnName, definition) {
+    if (!columnExists(tableName, columnName)) {
         db.exec(`
             ALTER TABLE ${tableName}
             ADD COLUMN ${columnName} ${definition}
@@ -158,13 +131,11 @@ function addColumnIfMissing(
     }
 }
 
-
-/* ============================================================
-   CREATE TABLES
-============================================================ */
+/* =========================================================
+   DATABASE TABLES
+========================================================= */
 
 db.exec(`
-
     CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         seller_name TEXT NOT NULL,
@@ -178,14 +149,15 @@ db.exec(`
     CREATE TABLE IF NOT EXISTS shops (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL UNIQUE,
-        seller_name TEXT NOT NULL DEFAULT '',
+        seller_name TEXT NOT NULL,
         shop_name TEXT NOT NULL,
         description TEXT DEFAULT '',
         phone TEXT DEFAULT '',
         whatsapp TEXT DEFAULT '',
         address TEXT DEFAULT '',
         logo TEXT DEFAULT '',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS products (
@@ -193,45 +165,50 @@ db.exec(`
         user_id INTEGER NOT NULL,
         name TEXT NOT NULL,
         description TEXT DEFAULT '',
-        category TEXT DEFAULT 'Autres',
         price REAL NOT NULL,
         stock INTEGER NOT NULL DEFAULT 0,
         image TEXT DEFAULT '',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        category TEXT DEFAULT 'Autres',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
+        customer_name TEXT NOT NULL,
+        customer_phone TEXT NOT NULL,
+        customer_address TEXT NOT NULL,
         product_id INTEGER NOT NULL,
         product_name TEXT NOT NULL,
-        price REAL NOT NULL DEFAULT 0,
-        customer_name TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        address TEXT NOT NULL,
-        note TEXT DEFAULT '',
         quantity INTEGER NOT NULL,
+        price REAL NOT NULL DEFAULT 0,
         total REAL NOT NULL DEFAULT 0,
         status TEXT NOT NULL DEFAULT 'new',
-
         payment_method TEXT NOT NULL DEFAULT 'cash_on_delivery',
         payment_status TEXT NOT NULL DEFAULT 'pending',
-
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-
 `);
 
-
-/* ============================================================
+/* =========================================================
    MIGRATIONS
-============================================================ */
+========================================================= */
+
+/*
+   USERS
+*/
 
 addColumnIfMissing(
     "users",
     "seller_name",
     "TEXT NOT NULL DEFAULT ''"
 );
+
+/*
+   SHOPS
+*/
 
 addColumnIfMissing(
     "shops",
@@ -240,10 +217,60 @@ addColumnIfMissing(
 );
 
 addColumnIfMissing(
+    "shops",
+    "description",
+    "TEXT DEFAULT ''"
+);
+
+addColumnIfMissing(
+    "shops",
+    "phone",
+    "TEXT DEFAULT ''"
+);
+
+addColumnIfMissing(
+    "shops",
+    "whatsapp",
+    "TEXT DEFAULT ''"
+);
+
+addColumnIfMissing(
+    "shops",
+    "address",
+    "TEXT DEFAULT ''"
+);
+
+addColumnIfMissing(
+    "shops",
+    "logo",
+    "TEXT DEFAULT ''"
+);
+
+addColumnIfMissing(
+    "shops",
+    "created_at",
+    "DATETIME DEFAULT CURRENT_TIMESTAMP"
+);
+
+addColumnIfMissing(
+    "shops",
+    "updated_at",
+    "DATETIME DEFAULT CURRENT_TIMESTAMP"
+);
+
+/*
+   PRODUCTS
+*/
+
+addColumnIfMissing(
     "products",
     "category",
     "TEXT DEFAULT 'Autres'"
 );
+
+/*
+   ORDERS
+*/
 
 addColumnIfMissing(
     "orders",
@@ -269,1232 +296,972 @@ addColumnIfMissing(
     "TEXT NOT NULL DEFAULT 'pending'"
 );
 
+/* =========================================================
+   DATA REPAIR / BACKFILL
+========================================================= */
 
-/* ============================================================
-   REPAIR / BACKFILL DATA
-============================================================ */
+/*
+   Repair shops.seller_name from users when it is empty.
+*/
 
 db.prepare(`
     UPDATE shops
     SET seller_name = (
-        SELECT users.seller_name
+        SELECT seller_name
         FROM users
         WHERE users.id = shops.user_id
     )
-    WHERE seller_name IS NULL
-       OR seller_name = ''
+    WHERE
+        (shops.seller_name IS NULL OR TRIM(shops.seller_name) = '')
+        AND EXISTS (
+            SELECT 1
+            FROM users
+            WHERE users.id = shops.user_id
+        )
 `).run();
 
-
-/* ============================================================
-   REPAIR / BACKFILL MISSING SHOPS
-============================================================ */
-
 /*
-   This repairs old users who already have an account
-   but do not have a corresponding row inside "shops".
-
-   It does NOT create duplicate shops because we only insert
-   users whose user_id does not already exist in shops.
+   Repair products.category.
 */
-
-const repairMissingShops =
-    db.prepare(`
-        INSERT INTO shops (
-            user_id,
-            seller_name,
-            shop_name,
-            description,
-            phone,
-            whatsapp,
-            address,
-            logo
-        )
-        SELECT
-            users.id,
-            users.seller_name,
-            users.shop_name,
-            '',
-            users.phone,
-            '',
-            '',
-            ''
-        FROM users
-        LEFT JOIN shops
-            ON shops.user_id = users.id
-        WHERE shops.user_id IS NULL
-    `);
-
-const missingShopsResult =
-    repairMissingShops.run();
-
-console.log(
-    `Missing shops repaired: ${missingShopsResult.changes}`
-);
-
 
 db.prepare(`
     UPDATE products
     SET category = 'Autres'
     WHERE category IS NULL
-       OR category = ''
+       OR TRIM(category) = ''
 `).run();
 
+/*
+   Repair order price from product price when possible.
+*/
 
 db.prepare(`
     UPDATE orders
-    SET price = total / quantity
-    WHERE price = 0
-      AND quantity > 0
-      AND total > 0
+    SET price = (
+        SELECT price
+        FROM products
+        WHERE products.id = orders.product_id
+    )
+    WHERE
+        (price IS NULL OR price = 0)
+        AND EXISTS (
+            SELECT 1
+            FROM products
+            WHERE products.id = orders.product_id
+        )
 `).run();
 
+/*
+   Repair order total.
+*/
 
 db.prepare(`
     UPDATE orders
     SET total = price * quantity
-    WHERE total = 0
-      AND price > 0
-      AND quantity > 0
+    WHERE total IS NULL OR total = 0
 `).run();
 
+/*
+   Repair payment method.
+*/
 
 db.prepare(`
     UPDATE orders
     SET payment_method = 'cash_on_delivery'
     WHERE payment_method IS NULL
-       OR payment_method = ''
+       OR TRIM(payment_method) = ''
 `).run();
 
+/*
+   Repair payment status.
+*/
 
 db.prepare(`
     UPDATE orders
     SET payment_status = 'pending'
     WHERE payment_status IS NULL
-       OR payment_status = ''
+       OR TRIM(payment_status) = ''
 `).run();
 
+/* =========================================================
+   IMPORTANT SHOP BACKFILL
+========================================================= */
 
-/* ============================================================
-   VALIDATION HELPERS
-============================================================ */
+/*
+   This fixes old accounts that were created before the
+   automatic shop creation was added.
 
-function isValidCategory(category) {
+   Example:
 
-    return PRODUCT_CATEGORIES.includes(
-        category
-    );
-}
+   users:
+       id = 10
+       seller_name = Doudou
+       shop_name = Drou...
+       phone = ...
 
+   but shops:
+       no row for user_id = 10
 
-function isValidOrderStatus(status) {
+   The INSERT below automatically creates the missing shop.
 
-    return ORDER_STATUSES.includes(
-        status
-    );
-}
+   LEFT JOIN ensures we DON'T create duplicates for users
+   who already have a shop.
+*/
 
-
-function isValidPaymentMethod(
-    paymentMethod
-) {
-
-    return PAYMENT_METHODS.includes(
-        paymentMethod
-    );
-}
-
-
-function isValidPaymentStatus(
-    paymentStatus
-) {
-
-    return PAYMENT_STATUSES.includes(
-        paymentStatus
-    );
-}
-
-
-function normalizePhone(phone) {
-
-    if (
-        phone === undefined ||
-        phone === null
-    ) {
-
-        return "";
-
-    }
-
-    return String(phone)
-        .trim()
-        .replace(/\s+/g, "")
-        .replace(/-/g, "");
-}
-
-
-function phonesMatch(
-    phone1,
-    phone2
-) {
-
-    return normalizePhone(phone1) ===
-        normalizePhone(phone2);
-}
-
-
-function statusReservesStock(status) {
-
-    return STOCK_RESERVED_STATUSES.includes(
-        status
-    );
-}
-
-
-function isAllowedOrderTransition(
-    currentStatus,
-    newStatus
-) {
-
-    const allowedTransitions =
-        ORDER_STATUS_TRANSITIONS[
-            currentStatus
-        ] || [];
-
-    return allowedTransitions.includes(
-        newStatus
-    );
-}
-
-
-/* ============================================================
-   HOME / STATIC FILES
-============================================================ */
-
-app.get(
-    "/",
-    (req, res) => {
-
-        res.sendFile(
-            path.join(
-                __dirname,
-                "..",
-                "index.html"
-            )
-        );
-
-    }
-);
-
-
-app.use(
-    express.static(
-        path.join(
-            __dirname,
-            ".."
-        )
+const backfillShopsResult = db.prepare(`
+    INSERT INTO shops (
+        user_id,
+        seller_name,
+        shop_name,
+        description,
+        phone,
+        whatsapp,
+        address,
+        logo
     )
-);
+    SELECT
+        u.id,
+        u.seller_name,
+        u.shop_name,
+        '',
+        u.phone,
+        '',
+        '',
+        ''
+    FROM users u
+    LEFT JOIN shops s
+        ON s.user_id = u.id
+    WHERE s.user_id IS NULL
+`).run();
 
+if (backfillShopsResult.changes > 0) {
+    console.log(
+        `Backfilled ${backfillShopsResult.changes} missing shop(s).`
+    );
+} else {
+    console.log("Shop backfill complete. No missing shops found.");
+}
 
-/* ============================================================
+/* =========================================================
+   VALIDATION HELPERS
+========================================================= */
+
+function normalizeText(value) {
+    if (value === undefined || value === null) {
+        return "";
+    }
+
+    return String(value).trim();
+}
+
+function normalizeNumber(value, defaultValue = 0) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return defaultValue;
+    }
+
+    return number;
+}
+
+function normalizeInteger(value, defaultValue = 0) {
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return defaultValue;
+    }
+
+    return Math.trunc(number);
+}
+
+function isValidStatus(status) {
+    return ORDER_STATUSES.includes(status);
+}
+
+function isValidPaymentStatus(status) {
+    return PAYMENT_STATUSES.includes(status);
+}
+
+function isValidPaymentMethod(method) {
+    return PAYMENT_METHODS.includes(method);
+}
+
+function isStockReservedStatus(status) {
+    return STOCK_RESERVED_STATUSES.includes(status);
+}
+
+/* =========================================================
    REGISTER
-============================================================ */
+========================================================= */
 
-app.post(
-    "/api/register",
-    (req, res) => {
+app.post("/api/register", (req, res) => {
+    try {
+        const sellerName = normalizeText(req.body?.sellerName);
+        const shopName = normalizeText(req.body?.shopName);
+        const phone = normalizeText(req.body?.phone);
+        const email = normalizeText(req.body?.email).toLowerCase();
+        const password = normalizeText(req.body?.password);
 
-        try {
-
-            /*
-            ----------------------------------------------------
-               NORMALIZE REGISTER DATA
-            ----------------------------------------------------
-            */
-
-            const sellerName =
-                req.body?.sellerName !== undefined &&
-                req.body?.sellerName !== null
-                    ? String(
-                        req.body.sellerName
-                    ).trim()
-                    : "";
-
-            const shopName =
-                req.body?.shopName !== undefined &&
-                req.body?.shopName !== null
-                    ? String(
-                        req.body.shopName
-                    ).trim()
-                    : "";
-
-            const phone =
-                req.body?.phone !== undefined &&
-                req.body?.phone !== null
-                    ? String(
-                        req.body.phone
-                    ).trim()
-                    : "";
-
-            const email =
-                req.body?.email !== undefined &&
-                req.body?.email !== null
-                    ? String(
-                        req.body.email
-                    ).trim()
-                    : "";
-
-            const password =
-                req.body?.password !== undefined &&
-                req.body?.password !== null
-                    ? String(
-                        req.body.password
-                    )
-                    : "";
-
-
-            /*
-            ----------------------------------------------------
-               VALIDATION
-            ----------------------------------------------------
-            */
-
-            if (
-                !sellerName ||
-                !shopName ||
-                !phone ||
-                !email ||
-                !password
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Tous les champs sont obligatoires."
-
-                });
-
-            }
-
-
-            /*
-            ----------------------------------------------------
-               CHECK EXISTING EMAIL
-            ----------------------------------------------------
-            */
-
-            const existingUser =
-                db.prepare(`
-                    SELECT id
-                    FROM users
-                    WHERE email = ?
-                `).get(
-                    email
-                );
-
-
-            if (existingUser) {
-
-                return res.status(409).json({
-
-                    success: false,
-
-                    message:
-                        "Cet email est déjà utilisé."
-
-                });
-
-            }
-
-
-            /*
-            ----------------------------------------------------
-               CREATE USER + SHOP
-            ----------------------------------------------------
-            */
-
-            const createUser =
-                db.transaction(() => {
-
-                    const userResult =
-                        db.prepare(`
-                            INSERT INTO users (
-                                seller_name,
-                                shop_name,
-                                phone,
-                                email,
-                                password
-                            )
-                            VALUES (?, ?, ?, ?, ?)
-                        `).run(
-                            sellerName,
-                            shopName,
-                            phone,
-                            email,
-                            password
-                        );
-
-
-                    const userId =
-                        Number(
-                            userResult.lastInsertRowid
-                        );
-
-
-                    db.prepare(`
-                        INSERT INTO shops (
-                            user_id,
-                            seller_name,
-                            shop_name,
-                            description,
-                            phone,
-                            whatsapp,
-                            address,
-                            logo
-                        )
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    `).run(
-                        userId,
-                        sellerName,
-                        shopName,
-                        "",
-                        phone,
-                        "",
-                        "",
-                        ""
-                    );
-
-
-                    return userId;
-
-                });
-
-
-            /*
-            ----------------------------------------------------
-               IMPORTANT FIX
-               Execute the transaction first.
-            ----------------------------------------------------
-            */
-
-            const userId =
-                createUser();
-
-
-            /*
-            ----------------------------------------------------
-               GET CREATED USER
-            ----------------------------------------------------
-            */
-
-            const user =
-                db.prepare(`
-                    SELECT
-                        id,
-                        seller_name,
-                        shop_name,
-                        phone,
-                        email,
-                        created_at
-                    FROM users
-                    WHERE id = ?
-                `).get(
-                    userId
-                );
-
-
-            return res.status(201).json({
-
-                success: true,
-
-                message:
-                    "Compte créé avec succès.",
-
-                user
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Register error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
+        if (!sellerName) {
+            return res.status(400).json({
                 success: false,
-
-                message:
-                    "Erreur lors de la création du compte."
-
+                message: "Veuillez entrer votre nom."
             });
-
         }
 
-    }
-);
-
-
-/* ============================================================
-   LOGIN
-============================================================ */
-
-app.post(
-    "/api/login",
-    (req, res) => {
-
-        try {
-
-            const {
-                email,
-                password
-            } = req.body;
-
-
-            if (
-                !email ||
-                !password
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Email et mot de passe obligatoires."
-
-                });
-
-            }
-
-
-            const user =
-                db.prepare(`
-                    SELECT
-                        id,
-                        seller_name,
-                        shop_name,
-                        phone,
-                        email,
-                        password,
-                        created_at
-                    FROM users
-                    WHERE email = ?
-                `).get(
-                    String(email).trim()
-                );
-
-
-            if (
-                !user ||
-                user.password !== String(password)
-            ) {
-
-                return res.status(401).json({
-
-                    success: false,
-
-                    message:
-                        "Email ou mot de passe incorrect."
-
-                });
-
-            }
-
-
-            delete user.password;
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Connexion réussie.",
-
-                user
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Login error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
+        if (!shopName) {
+            return res.status(400).json({
                 success: false,
-
-                message:
-                    "Erreur lors de la connexion."
-
+                message: "Veuillez entrer le nom de votre boutique."
             });
-
         }
 
-    }
-);
+        if (!phone) {
+            return res.status(400).json({
+                success: false,
+                message: "Veuillez entrer votre numéro de téléphone."
+            });
+        }
 
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Veuillez entrer votre email."
+            });
+        }
 
-/* ============================================================
-   CREATE PRODUCT
-============================================================ */
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Veuillez entrer votre mot de passe."
+            });
+        }
 
-app.post(
-    "/api/products",
-    (req, res) => {
+        const existingUser = db
+            .prepare(`
+                SELECT id
+                FROM users
+                WHERE email = ?
+            `)
+            .get(email);
 
-        try {
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: "Cet email est déjà utilisé."
+            });
+        }
 
-            const {
-                userId,
-                name,
-                description,
-                category,
-                price,
-                stock,
-                image
-            } = req.body;
+        /*
+           Create user + shop in one transaction.
+        */
 
-
-            const numericUserId =
-                Number(userId);
-
-            const numericPrice =
-                Number(price);
-
-            const numericStock =
-                Number(stock);
-
-
-            if (
-                !numericUserId ||
-                !name ||
-                !Number.isFinite(
-                    numericPrice
-                ) ||
-                numericPrice < 0 ||
-                !Number.isInteger(
-                    numericStock
-                ) ||
-                numericStock < 0
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations produit invalides."
-
-                });
-
-            }
-
-
-            const productCategory =
-                category || "Autres";
-
-
-            if (
-                !isValidCategory(
-                    productCategory
+        const createUser = db.transaction(() => {
+            const userResult = db.prepare(`
+                INSERT INTO users (
+                    seller_name,
+                    shop_name,
+                    phone,
+                    email,
+                    password
                 )
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Catégorie invalide."
-
-                });
-
-            }
-
-
-            const result =
-                db.prepare(`
-                    INSERT INTO products (
-                        user_id,
-                        name,
-                        description,
-                        category,
-                        price,
-                        stock,
-                        image
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
-                `).run(
-                    numericUserId,
-                    String(name).trim(),
-                    description !== undefined &&
-                    description !== null
-                        ? String(description)
-                        : "",
-                    productCategory,
-                    numericPrice,
-                    numericStock,
-                    image !== undefined &&
-                    image !== null
-                        ? String(image)
-                        : ""
-                );
-
-
-            const product =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE id = ?
-                `).get(
-                    Number(
-                        result.lastInsertRowid
-                    )
-                );
-
-
-            return res.status(201).json({
-
-                success: true,
-
-                message:
-                    "Produit créé avec succès.",
-
-                product
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Create product error:",
-                error
+                VALUES (?, ?, ?, ?, ?)
+            `).run(
+                String(sellerName),
+                String(shopName),
+                String(phone),
+                String(email),
+                String(password)
             );
 
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors de la création du produit."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   GET SELLER PRODUCTS
-============================================================ */
-
-app.get(
-    "/api/products/:userId",
-    (req, res) => {
-
-        try {
-
-            const userId =
-                Number(req.params.userId);
-
-
-            if (!userId) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "User ID invalide."
-
-                });
-
-            }
-
-
-            const products =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE user_id = ?
-                    ORDER BY id DESC
-                `).all(
-                    userId
-                );
-
-
-            return res.json({
-
-                success: true,
-
-                products
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Get products error:",
-                error
+            const userId = Number(
+                userResult.lastInsertRowid
             );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du chargement des produits."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   GET PUBLIC PRODUCT
-============================================================ */
-
-app.get(
-    "/api/product/:id",
-    (req, res) => {
-
-        try {
-
-            const productId =
-                Number(req.params.id);
-
-
-            if (!productId) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Product ID invalide."
-
-                });
-
-            }
-
-
-            const product =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE id = ?
-                `).get(
-                    productId
-                );
-
-
-            if (!product) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Produit introuvable."
-
-                });
-
-            }
-
-
-            return res.json({
-
-                success: true,
-
-                product
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Get product error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du chargement du produit."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   UPDATE PRODUCT
-============================================================ */
-
-app.put(
-    "/api/products/:id",
-    (req, res) => {
-
-        try {
-
-            const productId =
-                Number(req.params.id);
-
-
-            const {
-                userId,
-                name,
-                description,
-                category,
-                price,
-                stock,
-                image
-            } = req.body;
-
-
-            const numericUserId =
-                Number(userId);
-
-            const numericPrice =
-                Number(price);
-
-            const numericStock =
-                Number(stock);
-
-
-            if (
-                !productId ||
-                !numericUserId ||
-                !name ||
-                !Number.isFinite(
-                    numericPrice
-                ) ||
-                numericPrice < 0 ||
-                !Number.isInteger(
-                    numericStock
-                ) ||
-                numericStock < 0
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations produit invalides."
-
-                });
-
-            }
-
-
-            const productCategory =
-                category || "Autres";
-
-
-            if (
-                !isValidCategory(
-                    productCategory
-                )
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Catégorie invalide."
-
-                });
-
-            }
-
-
-            const existing =
-                db.prepare(`
-                    SELECT id
-                    FROM products
-                    WHERE id = ?
-                      AND user_id = ?
-                `).get(
-                    productId,
-                    numericUserId
-                );
-
-
-            if (!existing) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Produit introuvable."
-
-                });
-
-            }
-
 
             db.prepare(`
-                UPDATE products
-                SET
-                    name = ?,
-                    description = ?,
-                    category = ?,
-                    price = ?,
-                    stock = ?,
-                    image = ?
-                WHERE id = ?
-                  AND user_id = ?
+                INSERT INTO shops (
+                    user_id,
+                    seller_name,
+                    shop_name,
+                    description,
+                    phone,
+                    whatsapp,
+                    address,
+                    logo
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             `).run(
-                String(name).trim(),
-                description !== undefined &&
-                description !== null
-                    ? String(description)
-                    : "",
-                productCategory,
-                numericPrice,
-                numericStock,
-                image !== undefined &&
-                image !== null
-                    ? String(image)
-                    : "",
-                productId,
-                numericUserId
+                Number(userId),
+                String(sellerName),
+                String(shopName),
+                "",
+                String(phone),
+                "",
+                "",
+                ""
             );
 
+            return userId;
+        });
 
-            const product =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE id = ?
-                `).get(
-                    productId
-                );
+        const userId = createUser();
 
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Produit mis à jour avec succès.",
-
-                product
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Update product error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors de la modification du produit."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   DELETE PRODUCT
-============================================================ */
-
-app.delete(
-    "/api/products/:id",
-    (req, res) => {
-
-        try {
-
-            const productId =
-                Number(req.params.id);
-
-            const userId =
-                Number(req.body.userId);
-
-
-            if (
-                !productId ||
-                !userId
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations invalides."
-
-                });
-
-            }
-
-
-            const result =
-                db.prepare(`
-                    DELETE FROM products
-                    WHERE id = ?
-                      AND user_id = ?
-                `).run(
-                    productId,
-                    userId
-                );
-
-
-            if (
-                result.changes === 0
-            ) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Produit introuvable."
-
-                });
-
-            }
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Produit supprimé avec succès."
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Delete product error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors de la suppression du produit."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   UPDATE SHOP
-============================================================ */
-
-app.put(
-    "/api/shop/:userId",
-    (req, res) => {
-
-        try {
-
-            const userId =
-                Number(req.params.userId);
-
-
-            const {
-                sellerName,
-                shopName,
-                description,
+        return res.json({
+            success: true,
+            message: "Compte créé avec succès.",
+            user: {
+                id: userId,
+                seller_name: sellerName,
+                shop_name: shopName,
                 phone,
-                whatsapp,
-                address,
-                logo
-            } = req.body;
-
-
-            if (!userId) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "User ID invalide."
-
-                });
-
+                email
             }
+        });
 
+    } catch (error) {
+        console.error(
+            "Register error:",
+            error
+        );
 
-            const existing =
-                db.prepare(`
-                    SELECT id
-                    FROM shops
-                    WHERE user_id = ?
-                `).get(
-                    userId
-                );
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la création du compte."
+        });
+    }
+});
 
+/* =========================================================
+   LOGIN
+========================================================= */
 
-            if (!existing) {
+app.post("/api/login", (req, res) => {
+    try {
+        const email = normalizeText(
+            req.body?.email
+        ).toLowerCase();
 
-                return res.status(404).json({
+        const password = normalizeText(
+            req.body?.password
+        );
 
-                    success: false,
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Email et mot de passe requis."
+            });
+        }
 
-                    message:
-                        "Boutique introuvable."
+        const user = db.prepare(`
+            SELECT
+                id,
+                seller_name,
+                shop_name,
+                phone,
+                email
+            FROM users
+            WHERE email = ?
+              AND password = ?
+        `).get(
+            String(email),
+            String(password)
+        );
 
-                });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Email ou mot de passe incorrect."
+            });
+        }
 
-            }
+        /*
+           Extra safety:
+           if an old account still has no shop,
+           create it automatically during login.
+        */
 
+        const existingShop = db.prepare(`
+            SELECT id
+            FROM shops
+            WHERE user_id = ?
+        `).get(Number(user.id));
 
+        if (!existingShop) {
+            db.prepare(`
+                INSERT INTO shops (
+                    user_id,
+                    seller_name,
+                    shop_name,
+                    description,
+                    phone,
+                    whatsapp,
+                    address,
+                    logo
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                Number(user.id),
+                String(user.seller_name || ""),
+                String(user.shop_name || ""),
+                "",
+                String(user.phone || ""),
+                "",
+                "",
+                ""
+            );
+
+            console.log(
+                `Created missing shop during login for user ${user.id}.`
+            );
+        }
+
+        return res.json({
+            success: true,
+            message: "Connexion réussie.",
+            user
+        });
+
+    } catch (error) {
+        console.error(
+            "Login error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la connexion."
+        });
+    }
+});
+
+/* =========================================================
+   CREATE PRODUCT
+========================================================= */
+
+app.post("/api/products", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.body?.userId
+        );
+
+        const name = normalizeText(
+            req.body?.name
+        );
+
+        const description = normalizeText(
+            req.body?.description
+        );
+
+        const price = normalizeNumber(
+            req.body?.price
+        );
+
+        const stock = normalizeInteger(
+            req.body?.stock
+        );
+
+        const image = normalizeText(
+            req.body?.image
+        );
+
+        let category = normalizeText(
+            req.body?.category
+        );
+
+        if (!category) {
+            category = "Autres";
+        }
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Nom du produit requis."
+            });
+        }
+
+        if (price < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Prix invalide."
+            });
+        }
+
+        if (stock < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Stock invalide."
+            });
+        }
+
+        if (!PRODUCT_CATEGORIES.includes(category)) {
+            category = "Autres";
+        }
+
+        const user = db.prepare(`
+            SELECT id
+            FROM users
+            WHERE id = ?
+        `).get(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur introuvable."
+            });
+        }
+
+        const result = db.prepare(`
+            INSERT INTO products (
+                user_id,
+                name,
+                description,
+                price,
+                stock,
+                image,
+                category
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `).run(
+            Number(userId),
+            String(name),
+            String(description),
+            Number(price),
+            Number(stock),
+            String(image),
+            String(category)
+        );
+
+        const product = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+        `).get(
+            Number(result.lastInsertRowid)
+        );
+
+        return res.json({
+            success: true,
+            message: "Produit ajouté avec succès.",
+            product
+        });
+
+    } catch (error) {
+        console.error(
+            "Create product error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de l'ajout du produit."
+        });
+    }
+});
+
+/* =========================================================
+   GET PRODUCTS BY USER
+========================================================= */
+
+app.get("/api/products/:userId", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.params.userId
+        );
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        const products = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE user_id = ?
+            ORDER BY id DESC
+        `).all(
+            Number(userId)
+        );
+
+        return res.json({
+            success: true,
+            products
+        });
+
+    } catch (error) {
+        console.error(
+            "Get products error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du chargement des produits."
+        });
+    }
+});
+
+/* =========================================================
+   GET SINGLE PRODUCT
+========================================================= */
+
+app.get("/api/product/:id", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        const product = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Produit introuvable."
+            });
+        }
+
+        return res.json({
+            success: true,
+            product
+        });
+
+    } catch (error) {
+        console.error(
+            "Get product error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du chargement du produit."
+        });
+    }
+});
+
+/* =========================================================
+   UPDATE PRODUCT
+========================================================= */
+
+app.put("/api/products/:id", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        const name = normalizeText(
+            req.body?.name
+        );
+
+        const description = normalizeText(
+            req.body?.description
+        );
+
+        const price = normalizeNumber(
+            req.body?.price
+        );
+
+        const stock = normalizeInteger(
+            req.body?.stock
+        );
+
+        const image = normalizeText(
+            req.body?.image
+        );
+
+        let category = normalizeText(
+            req.body?.category
+        );
+
+        if (!category) {
+            category = "Autres";
+        }
+
+        if (!PRODUCT_CATEGORIES.includes(category)) {
+            category = "Autres";
+        }
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Produit invalide."
+            });
+        }
+
+        if (!name) {
+            return res.status(400).json({
+                success: false,
+                message: "Nom du produit requis."
+            });
+        }
+
+        if (price < 0 || stock < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Prix ou stock invalide."
+            });
+        }
+
+        const existingProduct = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        if (!existingProduct) {
+            return res.status(404).json({
+                success: false,
+                message: "Produit introuvable."
+            });
+        }
+
+        db.prepare(`
+            UPDATE products
+            SET
+                name = ?,
+                description = ?,
+                price = ?,
+                stock = ?,
+                image = ?,
+                category = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `).run(
+            String(name),
+            String(description),
+            Number(price),
+            Number(stock),
+            String(image),
+            String(category),
+            Number(id)
+        );
+
+        const product = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        return res.json({
+            success: true,
+            message: "Produit modifié avec succès.",
+            product
+        });
+
+    } catch (error) {
+        console.error(
+            "Update product error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la modification du produit."
+        });
+    }
+});
+
+/* =========================================================
+   DELETE PRODUCT
+========================================================= */
+
+app.delete("/api/products/:id", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        const product = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Produit introuvable."
+            });
+        }
+
+        /*
+           Don't delete a product if it is referenced by orders.
+           This protects order history.
+        */
+
+        const existingOrder = db.prepare(`
+            SELECT id
+            FROM orders
+            WHERE product_id = ?
+            LIMIT 1
+        `).get(
+            Number(id)
+        );
+
+        if (existingOrder) {
+            return res.status(400).json({
+                success: false,
+                message: "Impossible de supprimer ce produit car il possède déjà des commandes."
+            });
+        }
+
+        db.prepare(`
+            DELETE FROM products
+            WHERE id = ?
+        `).run(
+            Number(id)
+        );
+
+        return res.json({
+            success: true,
+            message: "Produit supprimé avec succès."
+        });
+
+    } catch (error) {
+        console.error(
+            "Delete product error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la suppression du produit."
+        });
+    }
+});
+
+/* =========================================================
+   UPDATE SHOP
+========================================================= */
+
+app.put("/api/shop/:userId", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.params.userId
+        );
+
+        const sellerName = normalizeText(
+            req.body?.sellerName
+        );
+
+        const shopName = normalizeText(
+            req.body?.shopName
+        );
+
+        const description = normalizeText(
+            req.body?.description
+        );
+
+        const phone = normalizeText(
+            req.body?.phone
+        );
+
+        const whatsapp = normalizeText(
+            req.body?.whatsapp
+        );
+
+        const address = normalizeText(
+            req.body?.address
+        );
+
+        const logo = normalizeText(
+            req.body?.logo
+        );
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        const user = db.prepare(`
+            SELECT *
+            FROM users
+            WHERE id = ?
+        `).get(
+            Number(userId)
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur introuvable."
+            });
+        }
+
+        /*
+           If the shop doesn't exist, create it.
+           This is another protection for old accounts.
+        */
+
+        const existingShop = db.prepare(`
+            SELECT id
+            FROM shops
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
+        );
+
+        if (!existingShop) {
+            db.prepare(`
+                INSERT INTO shops (
+                    user_id,
+                    seller_name,
+                    shop_name,
+                    description,
+                    phone,
+                    whatsapp,
+                    address,
+                    logo
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                Number(userId),
+                String(
+                    sellerName ||
+                    user.seller_name ||
+                    ""
+                ),
+                String(
+                    shopName ||
+                    user.shop_name ||
+                    ""
+                ),
+                String(description),
+                String(
+                    phone ||
+                    user.phone ||
+                    ""
+                ),
+                String(whatsapp),
+                String(address),
+                String(logo)
+            );
+
+            console.log(
+                `Created missing shop during update for user ${userId}.`
+            );
+        } else {
             db.prepare(`
                 UPDATE shops
                 SET
@@ -1504,2285 +1271,1164 @@ app.put(
                     phone = ?,
                     whatsapp = ?,
                     address = ?,
-                    logo = ?
+                    logo = ?,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ?
             `).run(
-                sellerName !== undefined &&
-                sellerName !== null
-                    ? String(sellerName)
-                    : "",
-                shopName !== undefined &&
-                shopName !== null
-                    ? String(shopName)
-                    : "",
-                description !== undefined &&
-                description !== null
-                    ? String(description)
-                    : "",
-                phone !== undefined &&
-                phone !== null
-                    ? String(phone)
-                    : "",
-                whatsapp !== undefined &&
-                whatsapp !== null
-                    ? String(whatsapp)
-                    : "",
-                address !== undefined &&
-                address !== null
-                    ? String(address)
-                    : "",
-                logo !== undefined &&
-                logo !== null
-                    ? String(logo)
-                    : "",
-                userId
+                String(sellerName),
+                String(shopName),
+                String(description),
+                String(phone),
+                String(whatsapp),
+                String(address),
+                String(logo),
+                Number(userId)
             );
-
-
-            db.prepare(`
-                UPDATE users
-                SET
-                    seller_name = ?,
-                    shop_name = ?,
-                    phone = ?
-                WHERE id = ?
-            `).run(
-                sellerName !== undefined &&
-                sellerName !== null
-                    ? String(sellerName)
-                    : "",
-                shopName !== undefined &&
-                shopName !== null
-                    ? String(shopName)
-                    : "",
-                phone !== undefined &&
-                phone !== null
-                    ? String(phone)
-                    : "",
-                userId
-            );
-
-
-            const shop =
-                db.prepare(`
-                    SELECT *
-                    FROM shops
-                    WHERE user_id = ?
-                `).get(
-                    userId
-                );
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Boutique mise à jour avec succès.",
-
-                shop
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Update shop error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors de la mise à jour de la boutique."
-
-            });
-
         }
 
-    }
-);
-
-
-/* ============================================================
-   PUBLIC SHOP
-============================================================ */
-
-app.get(
-    "/api/public/shop/:userId",
-    (req, res) => {
-
-        try {
-
-            const userId =
-                Number(req.params.userId);
-
-
-            if (
-                !userId ||
-                !Number.isInteger(userId) ||
-                userId <= 0
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "User ID invalide."
-
-                });
-
-            }
-
-
-            let shop =
-                db.prepare(`
-                    SELECT *
-                    FROM shops
-                    WHERE user_id = ?
-                `).get(
-                    userId
-                );
-
-
-            /*
-            ----------------------------------------------------
-               EXTRA SAFETY REPAIR
-               If an old user somehow still has no shop,
-               create it automatically here.
-            ----------------------------------------------------
-            */
-
-            if (!shop) {
-
-                const user =
-                    db.prepare(`
-                        SELECT
-                            id,
-                            seller_name,
-                            shop_name,
-                            phone
-                        FROM users
-                        WHERE id = ?
-                    `).get(
-                        userId
-                    );
-
-
-                if (!user) {
-
-                    return res.status(404).json({
-
-                        success: false,
-
-                        message:
-                            "Utilisateur introuvable."
-
-                    });
-
-                }
-
-
-                db.prepare(`
-                    INSERT OR IGNORE INTO shops (
-                        user_id,
-                        seller_name,
-                        shop_name,
-                        description,
-                        phone,
-                        whatsapp,
-                        address,
-                        logo
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                `).run(
-                    Number(user.id),
-                    String(user.seller_name || ""),
-                    String(user.shop_name || ""),
-                    "",
-                    String(user.phone || ""),
-                    "",
-                    "",
-                    ""
-                );
-
-
-                shop =
-                    db.prepare(`
-                        SELECT *
-                        FROM shops
-                        WHERE user_id = ?
-                    `).get(
-                        userId
-                    );
-
-            }
-
-
-            if (!shop) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Boutique introuvable."
-
-                });
-
-            }
-
-
-            const products =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE user_id = ?
-                    ORDER BY id DESC
-                `).all(
-                    userId
-                );
-
-
-            return res.json({
-
-                success: true,
-
-                shop,
-
-                products
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Public shop error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du chargement de la boutique."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   CREATE ORDER
-============================================================ */
-
-app.post(
-    "/api/orders",
-    (req, res) => {
-
-        try {
-
-            const {
-                userId,
-                productId,
-                customerName,
-                phone,
-                address,
-                note,
-                quantity,
-                paymentMethod
-            } = req.body;
-
-
-            const numericUserId =
-                Number(userId);
-
-            const numericProductId =
-                Number(productId);
-
-            const numericQuantity =
-                Number(quantity);
-
-
-            if (
-                !numericUserId ||
-                !numericProductId ||
-                !customerName ||
-                !phone ||
-                !address ||
-                !Number.isInteger(
-                    numericQuantity
-                ) ||
-                numericQuantity <= 0
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations de commande invalides."
-
-                });
-
-            }
-
-
-            const selectedPaymentMethod =
-                paymentMethod ||
-                "cash_on_delivery";
-
-
-            if (
-                !isValidPaymentMethod(
-                    selectedPaymentMethod
-                )
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Mode de paiement invalide."
-
-                });
-
-            }
-
-
-            const product =
-                db.prepare(`
-                    SELECT *
-                    FROM products
-                    WHERE id = ?
-                      AND user_id = ?
-                `).get(
-                    numericProductId,
-                    numericUserId
-                );
-
-
-            if (!product) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Produit introuvable."
-
-                });
-
-            }
-
-
-            if (
-                product.stock <
-                numericQuantity
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Stock insuffisant."
-
-                });
-
-            }
-
-
-            const total =
-                Number(product.price) *
-                numericQuantity;
-
-
-            const createOrderTransaction =
-                db.transaction(() => {
-
-                    const stockResult =
-                        db.prepare(`
-                            UPDATE products
-                            SET stock = stock - ?
-                            WHERE id = ?
-                              AND user_id = ?
-                              AND stock >= ?
-                        `).run(
-                            numericQuantity,
-                            numericProductId,
-                            numericUserId,
-                            numericQuantity
-                        );
-
-
-                    if (
-                        stockResult.changes === 0
-                    ) {
-
-                        throw new Error(
-                            "Stock insuffisant."
-                        );
-
-                    }
-
-
-                    const result =
-                        db.prepare(`
-                            INSERT INTO orders (
-                                user_id,
-                                product_id,
-                                product_name,
-                                price,
-                                customer_name,
-                                phone,
-                                address,
-                                note,
-                                quantity,
-                                total,
-                                status,
-                                payment_method,
-                                payment_status
-                            )
-                            VALUES (
-                                ?, ?, ?, ?, ?, ?, ?, ?,
-                                ?, ?, ?, ?, ?
-                            )
-                        `).run(
-                            numericUserId,
-                            numericProductId,
-                            String(product.name),
-                            Number(product.price),
-                            String(customerName).trim(),
-                            normalizePhone(phone),
-                            String(address).trim(),
-                            note !== undefined &&
-                            note !== null
-                                ? String(note)
-                                : "",
-                            numericQuantity,
-                            total,
-                            "new",
-                            String(selectedPaymentMethod),
-                            "pending"
-                        );
-
-
-                    return Number(
-                        result.lastInsertRowid
-                    );
-
-                });
-
-
-            const orderId =
-                createOrderTransaction();
-
-
-            const order =
-                db.prepare(`
-                    SELECT
-                        id,
-                        user_id,
-                        product_id,
-                        product_name,
-                        price,
-                        customer_name,
-                        phone,
-                        address,
-                        note,
-                        quantity,
-                        total,
-                        status,
-                        payment_method,
-                        payment_status,
-                        created_at
-                    FROM orders
-                    WHERE id = ?
-                `).get(
-                    orderId
-                );
-
-
-            broadcastNewOrder(
-                numericUserId,
-                order
-            );
-
-
-            return res.status(201).json({
-
-                success: true,
-
-                message:
-                    "Order created successfully.",
-
-                order
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Create order error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    error.message ||
-                    "Erreur lors de la création de la commande."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   GET SELLER ORDERS
-============================================================ */
-
-app.get(
-    "/api/orders/:userId",
-    (req, res) => {
-
-        try {
-
-            const userId =
-                Number(req.params.userId);
-
-
-            if (!userId) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "User ID invalide."
-
-                });
-
-            }
-
-
-            const orders =
-                db.prepare(`
-                    SELECT
-                        id,
-                        user_id,
-                        product_id,
-                        product_name,
-                        price,
-                        customer_name,
-                        phone,
-                        address,
-                        note,
-                        quantity,
-                        total,
-                        status,
-                        payment_method,
-                        payment_status,
-                        created_at
-                    FROM orders
-                    WHERE user_id = ?
-                    ORDER BY id DESC
-                `).all(
-                    userId
-                );
-
-
-            return res.json({
-
-                success: true,
-
-                orders
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Get orders error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du chargement des commandes."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   PUBLIC ORDER TRACKING
-============================================================ */
-
-app.get(
-    "/api/order/track/:id",
-    (req, res) => {
-
-        try {
-
-            const orderId =
-                Number(req.params.id);
-
-            const phone =
-                req.query.phone;
-
-
-            if (!orderId) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Numéro de commande invalide."
-
-                });
-
-            }
-
-
-            if (!phone) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Numéro de téléphone obligatoire."
-
-                });
-
-            }
-
-
-            const order =
-                db.prepare(`
-                    SELECT
-                        id,
-                        product_id,
-                        product_name,
-                        price,
-                        quantity,
-                        total,
-                        status,
-                        payment_method,
-                        payment_status,
-                        created_at,
-                        phone
-                    FROM orders
-                    WHERE id = ?
-                `).get(
-                    orderId
-                );
-
-
-            if (!order) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Commande introuvable."
-
-                });
-
-            }
-
-
-            if (
-                !phonesMatch(
-                    order.phone,
-                    phone
-                )
-            ) {
-
-                return res.status(403).json({
-
-                    success: false,
-
-                    message:
-                        "Les informations ne correspondent pas à cette commande."
-
-                });
-
-            }
-
-
-            delete order.phone;
-
-
-            return res.json({
-
-                success: true,
-
-                order
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Track order error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du suivi de la commande."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   UPDATE ORDER STATUS
-============================================================ */
-
-app.put(
-    "/api/orders/:id/status",
-    (req, res) => {
-
-        try {
-
-            const orderId =
-                Number(req.params.id);
-
-            const {
-                userId,
-                status
-            } = req.body;
-
-
-            const numericUserId =
-                Number(userId);
-
-
-            if (
-                !orderId ||
-                !numericUserId ||
-                !isValidOrderStatus(status)
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations de statut invalides."
-
-                });
-
-            }
-
-
-            const order =
-                db.prepare(`
-                    SELECT *
-                    FROM orders
-                    WHERE id = ?
-                      AND user_id = ?
-                `).get(
-                    orderId,
-                    numericUserId
-                );
-
-
-            if (!order) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Commande introuvable."
-
-                });
-
-            }
-
-
-            if (
-                order.status === status
-            ) {
-
-                return res.json({
-
-                    success: true,
-
-                    message:
-                        "Le statut est déjà à jour.",
-
-                    order
-
-                });
-
-            }
-
-
-            if (
-                !isAllowedOrderTransition(
-                    order.status,
-                    status
-                )
-            ) {
-
-                return res.status(409).json({
-
-                    success: false,
-
-                    message:
-                        `Transition de statut interdite : ${order.status} → ${status}.`
-
-                });
-
-            }
-
-
-            const oldReservesStock =
-                statusReservesStock(
-                    order.status
-                );
-
-            const newReservesStock =
-                statusReservesStock(
-                    status
-                );
-
-
-            const updateOrderTransaction =
-                db.transaction(() => {
-
-                    if (
-                        oldReservesStock &&
-                        !newReservesStock
-                    ) {
-
-                        const stockResult =
-                            db.prepare(`
-                                UPDATE products
-                                SET stock = stock + ?
-                                WHERE id = ?
-                                  AND user_id = ?
-                            `).run(
-                                Number(order.quantity),
-                                Number(order.product_id),
-                                numericUserId
-                            );
-
-
-                        if (
-                            stockResult.changes === 0
-                        ) {
-
-                            throw new Error(
-                                "Produit introuvable pour restaurer le stock."
-                            );
-
-                        }
-
-                    }
-
-
-                    if (
-                        !oldReservesStock &&
-                        newReservesStock
-                    ) {
-
-                        const product =
-                            db.prepare(`
-                                SELECT *
-                                FROM products
-                                WHERE id = ?
-                                  AND user_id = ?
-                            `).get(
-                                Number(order.product_id),
-                                numericUserId
-                            );
-
-
-                        if (!product) {
-
-                            throw new Error(
-                                "Produit introuvable."
-                            );
-
-                        }
-
-
-                        if (
-                            product.stock <
-                            Number(order.quantity)
-                        ) {
-
-                            throw new Error(
-                                "Stock insuffisant pour réactiver cette commande."
-                            );
-
-                        }
-
-
-                        const stockResult =
-                            db.prepare(`
-                                UPDATE products
-                                SET stock = stock - ?
-                                WHERE id = ?
-                                  AND user_id = ?
-                                  AND stock >= ?
-                            `).run(
-                                Number(order.quantity),
-                                Number(order.product_id),
-                                numericUserId,
-                                Number(order.quantity)
-                            );
-
-
-                        if (
-                            stockResult.changes === 0
-                        ) {
-
-                            throw new Error(
-                                "Stock insuffisant."
-                            );
-
-                        }
-
-                    }
-
-
-                    const updateResult =
-                        db.prepare(`
-                            UPDATE orders
-                            SET status = ?
-                            WHERE id = ?
-                              AND user_id = ?
-                        `).run(
-                            String(status),
-                            orderId,
-                            numericUserId
-                        );
-
-
-                    if (
-                        updateResult.changes === 0
-                    ) {
-
-                        throw new Error(
-                            "La commande n'a pas pu être mise à jour."
-                        );
-
-                    }
-
-                });
-
-
-            updateOrderTransaction();
-
-
-            const updatedOrder =
-                db.prepare(`
-                    SELECT
-                        id,
-                        user_id,
-                        product_id,
-                        product_name,
-                        price,
-                        customer_name,
-                        phone,
-                        address,
-                        note,
-                        quantity,
-                        total,
-                        status,
-                        payment_method,
-                        payment_status,
-                        created_at
-                    FROM orders
-                    WHERE id = ?
-                `).get(
-                    orderId
-                );
-
-
-            broadcastOrderStatusUpdated(
-                numericUserId,
-                updatedOrder
-            );
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Order status updated successfully.",
-
-                order:
-                    updatedOrder
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Update order status error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    error.message ||
-                    "Erreur lors de la mise à jour du statut."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   UPDATE PAYMENT STATUS
-============================================================ */
-
-app.put(
-    "/api/orders/:id/payment",
-    (req, res) => {
-
-        try {
-
-            const orderId =
-                Number(req.params.id);
-
-            const {
-                userId,
-                paymentStatus
-            } = req.body;
-
-
-            const numericUserId =
-                Number(userId);
-
-
-            if (
-                !orderId ||
-                !numericUserId
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Informations invalides."
-
-                });
-
-            }
-
-
-            if (
-                !isValidPaymentStatus(
-                    paymentStatus
-                )
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "Statut de paiement invalide."
-
-                });
-
-            }
-
-
-            const order =
-                db.prepare(`
-                    SELECT *
-                    FROM orders
-                    WHERE id = ?
-                      AND user_id = ?
-                `).get(
-                    orderId,
-                    numericUserId
-                );
-
-
-            if (!order) {
-
-                return res.status(404).json({
-
-                    success: false,
-
-                    message:
-                        "Commande introuvable."
-
-                });
-
-            }
-
-
-            if (
-                order.payment_status ===
-                paymentStatus
-            ) {
-
-                return res.json({
-
-                    success: true,
-
-                    message:
-                        "Le statut de paiement est déjà à jour.",
-
-                    order
-
-                });
-
-            }
-
-
-            db.prepare(`
-                UPDATE orders
-                SET payment_status = ?
-                WHERE id = ?
-                  AND user_id = ?
-            `).run(
-                String(paymentStatus),
-                orderId,
-                numericUserId
-            );
-
-
-            const updatedOrder =
-                db.prepare(`
-                    SELECT
-                        id,
-                        user_id,
-                        product_id,
-                        product_name,
-                        price,
-                        customer_name,
-                        phone,
-                        address,
-                        note,
-                        quantity,
-                        total,
-                        status,
-                        payment_method,
-                        payment_status,
-                        created_at
-                    FROM orders
-                    WHERE id = ?
-                `).get(
-                    orderId
-                );
-
-
-            broadcastPaymentStatusUpdated(
-                numericUserId,
-                updatedOrder
-            );
-
-
-            return res.json({
-
-                success: true,
-
-                message:
-                    "Payment status updated successfully.",
-
-                order:
-                    updatedOrder
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Update payment status error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors de la mise à jour du paiement."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   ADVANCED DASHBOARD
-============================================================ */
-
-app.get(
-    "/api/dashboard/:userId",
-    (req, res) => {
-
-        try {
-
-            const userId =
-                Number(req.params.userId);
-
-
-            if (
-                !userId ||
-                !Number.isInteger(userId) ||
-                userId <= 0
-            ) {
-
-                return res.status(400).json({
-
-                    success: false,
-
-                    message:
-                        "User ID invalide."
-
-                });
-
-            }
-
-
-            const productsStats =
-                db.prepare(`
-                    SELECT
-
-                        COUNT(*) AS totalProducts,
-
-                        COALESCE(
-                            SUM(stock),
-                            0
-                        ) AS totalStock,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN stock <= 5
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS lowStockProducts,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN stock = 0
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS outOfStockProducts
-
-                    FROM products
-
-                    WHERE user_id = ?
-                `)
-                .get(userId);
-
-
-            const orderStats =
-                db.prepare(`
-                    SELECT
-
-                        COUNT(*) AS totalOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'new'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS newOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status IN (
-                                        'accepted',
-                                        'processing'
-                                    )
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS processingOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS completedOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'cancelled'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS cancelledOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'rejected'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS rejectedOrders
-
-                    FROM orders
-
-                    WHERE user_id = ?
-                `)
-                .get(userId);
-
-
-            const salesStats =
-                db.prepare(`
-                    SELECT
-
-                        COALESCE(
-                            SUM(total),
-                            0
-                        ) AS sales,
-
-                        COALESCE(
-                            SUM(quantity),
-                            0
-                        ) AS itemsSold
-
-                    FROM orders
-
-                    WHERE user_id = ?
-
-                      AND status = 'completed'
-                `)
-                .get(userId);
-
-
-            const paymentStats =
-                db.prepare(`
-                    SELECT
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN payment_status = 'paid'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS paidOrders,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN payment_status = 'pending'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS pendingPayments,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN payment_status = 'failed'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS failedPayments,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN payment_status = 'paid'
-                                    THEN total
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS paidAmount
-
-                    FROM orders
-
-                    WHERE user_id = ?
-                `)
-                .get(userId);
-
-
-            const lowStockProducts =
-                db.prepare(`
-                    SELECT
-                        id,
-                        name,
-                        category,
-                        price,
-                        stock,
-                        image
-
-                    FROM products
-
-                    WHERE user_id = ?
-
-                      AND stock <= 5
-
-                    ORDER BY
-                        stock ASC,
-                        id DESC
-
-                    LIMIT 10
-                `)
-                .all(userId);
-
-
-            const topProducts =
-                db.prepare(`
-                    SELECT
-
-                        product_id AS productId,
-
-                        product_name AS productName,
-
-                        COALESCE(
-                            SUM(quantity),
-                            0
-                        ) AS quantitySold,
-
-                        COALESCE(
-                            SUM(total),
-                            0
-                        ) AS revenue
-
-                    FROM orders
-
-                    WHERE user_id = ?
-
-                      AND status = 'completed'
-
-                    GROUP BY
-                        product_id,
-                        product_name
-
-                    ORDER BY
-                        quantitySold DESC,
-                        revenue DESC
-
-                    LIMIT 10
-                `)
-                .all(userId);
-
-
-            const recentOrders =
-                db.prepare(`
-                    SELECT
-
-                        id,
-                        product_id AS productId,
-                        product_name AS productName,
-                        customer_name AS customerName,
-                        quantity,
-                        price,
-                        total,
-                        status,
-                        payment_method AS paymentMethod,
-                        payment_status AS paymentStatus,
-                        created_at AS createdAt
-
-                    FROM orders
-
-                    WHERE user_id = ?
-
-                    ORDER BY
-                        id DESC
-
-                    LIMIT 8
-                `)
-                .all(userId);
-
-
-            const salesLast7Days =
-                db.prepare(`
-                    SELECT
-
-                        date(created_at) AS date,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN total
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS sales,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN quantity
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS itemsSold,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS orders
-
-                    FROM orders
-
-                    WHERE user_id = ?
-
-                      AND date(
-                          created_at
-                      ) >= date(
-                          'now',
-                          '-6 days'
-                      )
-
-                    GROUP BY
-                        date(created_at)
-
-                    ORDER BY
-                        date ASC
-                `)
-                .all(userId);
-
-
-            const todayStats =
-                db.prepare(`
-                    SELECT
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN total
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS sales,
-
-                        COALESCE(
-                            SUM(
-                                CASE
-                                    WHEN status = 'completed'
-                                    THEN 1
-                                    ELSE 0
-                                END
-                            ),
-                            0
-                        ) AS orders
-
-                    FROM orders
-
-                    WHERE user_id = ?
-
-                      AND date(
-                          created_at
-                      ) = date('now')
-                `)
-                .get(userId);
-
-
-            return res.json({
-
-                success: true,
-
-                stats: {
-
-                    products:
-                        Number(
-                            productsStats.totalProducts || 0
-                        ),
-
-                    orders:
-                        Number(
-                            orderStats.totalOrders || 0
-                        ),
-
-                    newOrders:
-                        Number(
-                            orderStats.newOrders || 0
-                        ),
-
-                    processingOrders:
-                        Number(
-                            orderStats.processingOrders || 0
-                        ),
-
-                    completedOrders:
-                        Number(
-                            orderStats.completedOrders || 0
-                        ),
-
-                    cancelledOrders:
-                        Number(
-                            orderStats.cancelledOrders || 0
-                        ),
-
-                    rejectedOrders:
-                        Number(
-                            orderStats.rejectedOrders || 0
-                        ),
-
-                    sales:
-                        Number(
-                            salesStats.sales || 0
-                        ),
-
-                    itemsSold:
-                        Number(
-                            salesStats.itemsSold || 0
-                        ),
-
-                    totalStock:
-                        Number(
-                            productsStats.totalStock || 0
-                        ),
-
-                    lowStockProducts:
-                        Number(
-                            productsStats.lowStockProducts || 0
-                        ),
-
-                    outOfStockProducts:
-                        Number(
-                            productsStats.outOfStockProducts || 0
-                        ),
-
-                    paidOrders:
-                        Number(
-                            paymentStats.paidOrders || 0
-                        ),
-
-                    pendingPayments:
-                        Number(
-                            paymentStats.pendingPayments || 0
-                        ),
-
-                    failedPayments:
-                        Number(
-                            paymentStats.failedPayments || 0
-                        ),
-
-                    paidAmount:
-                        Number(
-                            paymentStats.paidAmount || 0
-                        ),
-
-                    todaySales:
-                        Number(
-                            todayStats.sales || 0
-                        ),
-
-                    todayOrders:
-                        Number(
-                            todayStats.orders || 0
-                        )
-
-                },
-
-                lowStockProducts,
-
-                topProducts,
-
-                recentOrders,
-
-                salesLast7Days
-
-            });
-
-
-        } catch (error) {
-
-            console.error(
-                "Dashboard error:",
-                error
-            );
-
-
-            return res.status(500).json({
-
-                success: false,
-
-                message:
-                    "Erreur lors du chargement du dashboard."
-
-            });
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   WEBSOCKET
-============================================================ */
-
-const wss =
-    new WebSocketServer({
-        noServer: true
-    });
-
-
-const clients =
-    new Map();
-
-
-wss.on(
-    "connection",
-    (ws, userId) => {
-
-        const key =
-            String(userId);
-
-
-        clients.set(
-            key,
-            ws
+        /*
+           Keep users table synchronized.
+        */
+
+        db.prepare(`
+            UPDATE users
+            SET
+                seller_name = ?,
+                shop_name = ?,
+                phone = ?
+            WHERE id = ?
+        `).run(
+            String(sellerName),
+            String(shopName),
+            String(phone),
+            Number(userId)
         );
 
-
-        console.log(
-            `WebSocket client connected for user ${userId}.`
+        const shop = db.prepare(`
+            SELECT *
+            FROM shops
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
         );
 
-
-        ws.send(
-            JSON.stringify({
-
-                type:
-                    "connection",
-
-                message:
-                    "Connected successfully."
-
-            })
-        );
-
-
-        ws.on(
-            "close",
-            () => {
-
-                if (
-                    clients.get(key) === ws
-                ) {
-
-                    clients.delete(key);
-
-                }
-
-
-                console.log(
-                    `WebSocket client disconnected for user ${userId}.`
-                );
-
-            }
-        );
-
-
-        ws.on(
-            "error",
-            (error) => {
-
-                console.error(
-                    `WebSocket error for user ${userId}:`,
-                    error
-                );
-
-            }
-        );
-
-    }
-);
-
-
-/* ============================================================
-   BROADCAST NEW ORDER
-============================================================ */
-
-function broadcastNewOrder(
-    userId,
-    order
-) {
-
-    const ws =
-        clients.get(
-            String(userId)
-        );
-
-
-    if (!ws) {
-        return;
-    }
-
-
-    if (
-        ws.readyState !== 1
-    ) {
-        return;
-    }
-
-
-    const safeOrder = {
-
-        id:
-            order.id,
-
-        product_id:
-            order.product_id,
-
-        product_name:
-            order.product_name,
-
-        quantity:
-            order.quantity,
-
-        total:
-            order.total,
-
-        customer_name:
-            order.customer_name,
-
-        status:
-            order.status,
-
-        payment_method:
-            order.payment_method,
-
-        payment_status:
-            order.payment_status,
-
-        created_at:
-            order.created_at
-
-    };
-
-
-    ws.send(
-        JSON.stringify({
-
-            type:
-                "new_order",
-
-            order:
-                safeOrder
-
-        })
-    );
-
-
-    console.log(
-        `New order broadcasted: #${order.id} for user ${userId}`
-    );
-
-}
-
-
-/* ============================================================
-   BROADCAST ORDER STATUS UPDATED
-============================================================ */
-
-function broadcastOrderStatusUpdated(
-    userId,
-    order
-) {
-
-    const ws =
-        clients.get(
-            String(userId)
-        );
-
-
-    if (!ws) {
-        return;
-    }
-
-
-    if (
-        ws.readyState !== 1
-    ) {
-        return;
-    }
-
-
-    const safeOrder = {
-
-        id:
-            order.id,
-
-        product_id:
-            order.product_id,
-
-        product_name:
-            order.product_name,
-
-        quantity:
-            order.quantity,
-
-        total:
-            order.total,
-
-        status:
-            order.status,
-
-        payment_method:
-            order.payment_method,
-
-        payment_status:
-            order.payment_status,
-
-        created_at:
-            order.created_at
-
-    };
-
-
-    ws.send(
-        JSON.stringify({
-
-            type:
-                "order_status_updated",
-
-            order:
-                safeOrder
-
-        })
-    );
-
-
-    console.log(
-        `Order status update broadcasted: order #${order.id} -> ${order.status} for user ${userId}`
-    );
-
-}
-
-
-/* ============================================================
-   BROADCAST PAYMENT STATUS UPDATED
-============================================================ */
-
-function broadcastPaymentStatusUpdated(
-    userId,
-    order
-) {
-
-    const ws =
-        clients.get(
-            String(userId)
-        );
-
-
-    if (!ws) {
-        return;
-    }
-
-
-    if (
-        ws.readyState !== 1
-    ) {
-        return;
-    }
-
-
-    const safeOrder = {
-
-        id:
-            order.id,
-
-        product_id:
-            order.product_id,
-
-        product_name:
-            order.product_name,
-
-        quantity:
-            order.quantity,
-
-        total:
-            order.total,
-
-        status:
-            order.status,
-
-        payment_method:
-            order.payment_method,
-
-        payment_status:
-            order.payment_status,
-
-        created_at:
-            order.created_at
-
-    };
-
-
-    ws.send(
-        JSON.stringify({
-
-            type:
-                "payment_status_updated",
-
-            order:
-                safeOrder
-
-        })
-    );
-
-
-    console.log(
-        `Payment status update broadcasted: order #${order.id} -> ${order.payment_status} for user ${userId}`
-    );
-
-}
-
-
-/* ============================================================
-   WEBSOCKET UPGRADE
-============================================================ */
-
-server.on(
-    "upgrade",
-    (request, socket, head) => {
-
-        try {
-
-            const url =
-                new URL(
-                    request.url,
-                    `http://${request.headers.host}`
-                );
-
-
-            if (
-                url.pathname !== "/"
-            ) {
-
-                socket.destroy();
-
-                return;
-
-            }
-
-
-            const userId =
-                url.searchParams.get(
-                    "userId"
-                );
-
-
-            if (!userId) {
-
-                socket.destroy();
-
-                return;
-
-            }
-
-
-            wss.handleUpgrade(
-                request,
-                socket,
-                head,
-                (ws) => {
-
-                    wss.emit(
-                        "connection",
-                        ws,
-                        userId
-                    );
-
-                }
-            );
-
-        } catch (error) {
-
-            console.error(
-                "WebSocket upgrade error:",
-                error
-            );
-
-            socket.destroy();
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   404 API
-============================================================ */
-
-app.use(
-    "/api",
-    (req, res) => {
-
-        return res.status(404).json({
-
-            success: false,
-
-            message:
-                "API endpoint not found."
-
+        return res.json({
+            success: true,
+            message: "Boutique mise à jour avec succès.",
+            shop
         });
 
-    }
-);
-
-
-/* ============================================================
-   ERROR HANDLER
-============================================================ */
-
-app.use(
-    (error, req, res, next) => {
-
+    } catch (error) {
         console.error(
-            "Server error:",
+            "Update shop error:",
             error
         );
 
-
         return res.status(500).json({
-
             success: false,
+            message: "Erreur lors de la mise à jour de la boutique."
+        });
+    }
+});
 
-            message:
-                "Internal server error."
+/* =========================================================
+   PUBLIC SHOP
+========================================================= */
 
+app.get("/api/public/shop/:userId", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.params.userId
+        );
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        /*
+           First check if user exists.
+        */
+
+        const user = db.prepare(`
+            SELECT
+                id,
+                seller_name,
+                shop_name,
+                phone,
+                email
+            FROM users
+            WHERE id = ?
+        `).get(
+            Number(userId)
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur introuvable."
+            });
+        }
+
+        /*
+           Find shop.
+        */
+
+        let shop = db.prepare(`
+            SELECT *
+            FROM shops
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
+        );
+
+        /*
+           Extra protection:
+           if user exists but shop doesn't exist,
+           create the shop immediately.
+        */
+
+        if (!shop) {
+            console.log(
+                `Public shop: missing shop detected for user ${userId}. Creating it now...`
+            );
+
+            db.prepare(`
+                INSERT INTO shops (
+                    user_id,
+                    seller_name,
+                    shop_name,
+                    description,
+                    phone,
+                    whatsapp,
+                    address,
+                    logo
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                Number(user.id),
+                String(user.seller_name || ""),
+                String(user.shop_name || ""),
+                "",
+                String(user.phone || ""),
+                "",
+                "",
+                ""
+            );
+
+            shop = db.prepare(`
+                SELECT *
+                FROM shops
+                WHERE user_id = ?
+            `).get(
+                Number(userId)
+            );
+
+            console.log(
+                `Public shop: missing shop created for user ${userId}.`
+            );
+        }
+
+        const products = db.prepare(`
+            SELECT *
+            FROM products
+            WHERE user_id = ?
+            ORDER BY id DESC
+        `).all(
+            Number(userId)
+        );
+
+        return res.json({
+            success: true,
+            shop,
+            products
         });
 
+    } catch (error) {
+        console.error(
+            "Public shop error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du chargement de la boutique."
+        });
     }
-);
+});
 
+/* =========================================================
+   CREATE ORDER
+========================================================= */
 
-/* ============================================================
+app.post("/api/orders", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.body?.userId
+        );
+
+        const customerName = normalizeText(
+            req.body?.customerName
+        );
+
+        const customerPhone = normalizeText(
+            req.body?.customerPhone
+        );
+
+        const customerAddress = normalizeText(
+            req.body?.customerAddress
+        );
+
+        const productId = normalizeInteger(
+            req.body?.productId
+        );
+
+        const quantity = normalizeInteger(
+            req.body?.quantity,
+            1
+        );
+
+        let paymentMethod = normalizeText(
+            req.body?.paymentMethod
+        );
+
+        if (!paymentMethod) {
+            paymentMethod = "cash_on_delivery";
+        }
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Boutique invalide."
+            });
+        }
+
+        if (!customerName) {
+            return res.status(400).json({
+                success: false,
+                message: "Nom du client requis."
+            });
+        }
+
+        if (!customerPhone) {
+            return res.status(400).json({
+                success: false,
+                message: "Téléphone du client requis."
+            });
+        }
+
+        if (!customerAddress) {
+            return res.status(400).json({
+                success: false,
+                message: "Adresse du client requise."
+            });
+        }
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "Produit invalide."
+            });
+        }
+
+        if (quantity <= 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Quantité invalide."
+            });
+        }
+
+        if (!isValidPaymentMethod(paymentMethod)) {
+            return res.status(400).json({
+                success: false,
+                message: "Mode de paiement invalide."
+            });
+        }
+
+        /*
+           Transaction:
+           read product
+           check stock
+           decrease stock
+           create order
+        */
+
+        const createOrder = db.transaction(() => {
+            const product = db.prepare(`
+                SELECT *
+                FROM products
+                WHERE id = ?
+                  AND user_id = ?
+            `).get(
+                Number(productId),
+                Number(userId)
+            );
+
+            if (!product) {
+                throw new Error(
+                    "PRODUCT_NOT_FOUND"
+                );
+            }
+
+            if (Number(product.stock) < quantity) {
+                throw new Error(
+                    "INSUFFICIENT_STOCK"
+                );
+            }
+
+            const price = Number(
+                product.price
+            );
+
+            const total = price * quantity;
+
+            /*
+               Reserve/decrease stock.
+            */
+
+            db.prepare(`
+                UPDATE products
+                SET
+                    stock = stock - ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+                  AND stock >= ?
+            `).run(
+                Number(quantity),
+                Number(productId),
+                Number(quantity)
+            );
+
+            const result = db.prepare(`
+                INSERT INTO orders (
+                    user_id,
+                    customer_name,
+                    customer_phone,
+                    customer_address,
+                    product_id,
+                    product_name,
+                    quantity,
+                    price,
+                    total,
+                    status,
+                    payment_method,
+                    payment_status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                Number(userId),
+                String(customerName),
+                String(customerPhone),
+                String(customerAddress),
+                Number(productId),
+                String(product.name),
+                Number(quantity),
+                Number(price),
+                Number(total),
+                "new",
+                String(paymentMethod),
+                "pending"
+            );
+
+            return {
+                orderId: Number(
+                    result.lastInsertRowid
+                ),
+                productId: Number(productId),
+                productName: String(product.name),
+                quantity: Number(quantity),
+                price: Number(price),
+                total: Number(total)
+            };
+        });
+
+        let createdOrder;
+
+        try {
+            createdOrder = createOrder();
+        } catch (error) {
+            if (error.message === "PRODUCT_NOT_FOUND") {
+                return res.status(404).json({
+                    success: false,
+                    message: "Produit introuvable."
+                });
+            }
+
+            if (error.message === "INSUFFICIENT_STOCK") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Stock insuffisant."
+                });
+            }
+
+            throw error;
+        }
+
+        const order = db.prepare(`
+            SELECT *
+            FROM orders
+            WHERE id = ?
+        `).get(
+            Number(createdOrder.orderId)
+        );
+
+        broadcastToUser(
+            userId,
+            {
+                type: "new_order",
+                order
+            }
+        );
+
+        return res.json({
+            success: true,
+            message: "Commande créée avec succès.",
+            order
+        });
+
+    } catch (error) {
+        console.error(
+            "Create order error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la création de la commande."
+        });
+    }
+});
+
+/* =========================================================
+   GET ORDERS BY USER
+========================================================= */
+
+app.get("/api/orders/:userId", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.params.userId
+        );
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        const orders = db.prepare(`
+            SELECT *
+            FROM orders
+            WHERE user_id = ?
+            ORDER BY id DESC
+        `).all(
+            Number(userId)
+        );
+
+        return res.json({
+            success: true,
+            orders
+        });
+
+    } catch (error) {
+        console.error(
+            "Get orders error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du chargement des commandes."
+        });
+    }
+});
+
+/* =========================================================
+   TRACK ORDER
+========================================================= */
+
+app.get("/api/order/track/:id", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Commande invalide."
+            });
+        }
+
+        const order = db.prepare(`
+            SELECT *
+            FROM orders
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Commande introuvable."
+            });
+        }
+
+        return res.json({
+            success: true,
+            order
+        });
+
+    } catch (error) {
+        console.error(
+            "Track order error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du suivi de la commande."
+        });
+    }
+});
+
+/* =========================================================
+   UPDATE ORDER STATUS
+========================================================= */
+
+app.put("/api/orders/:id/status", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        const newStatus = normalizeText(
+            req.body?.status
+        );
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Commande invalide."
+            });
+        }
+
+        if (!isValidStatus(newStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: "Statut invalide."
+            });
+        }
+
+        const updateStatus = db.transaction(() => {
+            const order = db.prepare(`
+                SELECT *
+                FROM orders
+                WHERE id = ?
+            `).get(
+                Number(id)
+            );
+
+            if (!order) {
+                throw new Error(
+                    "ORDER_NOT_FOUND"
+                );
+            }
+
+            const currentStatus = order.status;
+
+            if (currentStatus === newStatus) {
+                return order;
+            }
+
+            const allowedTransitions =
+                ORDER_STATUS_TRANSITIONS[currentStatus] || [];
+
+            if (!allowedTransitions.includes(newStatus)) {
+                throw new Error(
+                    "INVALID_TRANSITION"
+                );
+            }
+
+            const wasReserved =
+                isStockReservedStatus(
+                    currentStatus
+                );
+
+            const willBeReserved =
+                isStockReservedStatus(
+                    newStatus
+                );
+
+            /*
+               If order becomes cancelled/rejected
+               from a reserved status, restore stock.
+            */
+
+            if (wasReserved && !willBeReserved) {
+                db.prepare(`
+                    UPDATE products
+                    SET
+                        stock = stock + ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `).run(
+                    Number(order.quantity),
+                    Number(order.product_id)
+                );
+            }
+
+            /*
+               If cancelled order is reopened,
+               reserve stock again.
+            */
+
+            if (!wasReserved && willBeReserved) {
+                const product = db.prepare(`
+                    SELECT *
+                    FROM products
+                    WHERE id = ?
+                `).get(
+                    Number(order.product_id)
+                );
+
+                if (!product) {
+                    throw new Error(
+                        "PRODUCT_NOT_FOUND"
+                    );
+                }
+
+                if (
+                    Number(product.stock) <
+                    Number(order.quantity)
+                ) {
+                    throw new Error(
+                        "INSUFFICIENT_STOCK"
+                    );
+                }
+
+                db.prepare(`
+                    UPDATE products
+                    SET
+                        stock = stock - ?,
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                      AND stock >= ?
+                `).run(
+                    Number(order.quantity),
+                    Number(order.product_id),
+                    Number(order.quantity)
+                );
+            }
+
+            db.prepare(`
+                UPDATE orders
+                SET
+                    status = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `).run(
+                String(newStatus),
+                Number(id)
+            );
+
+            return db.prepare(`
+                SELECT *
+                FROM orders
+                WHERE id = ?
+            `).get(
+                Number(id)
+            );
+        });
+
+        let order;
+
+        try {
+            order = updateStatus();
+        } catch (error) {
+            if (error.message === "ORDER_NOT_FOUND") {
+                return res.status(404).json({
+                    success: false,
+                    message: "Commande introuvable."
+                });
+            }
+
+            if (error.message === "INVALID_TRANSITION") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Transition de statut non autorisée."
+                });
+            }
+
+            if (error.message === "PRODUCT_NOT_FOUND") {
+                return res.status(404).json({
+                    success: false,
+                    message: "Produit introuvable."
+                });
+            }
+
+            if (error.message === "INSUFFICIENT_STOCK") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Stock insuffisant pour réactiver cette commande."
+                });
+            }
+
+            throw error;
+        }
+
+        broadcastToUser(
+            Number(order.user_id),
+            {
+                type: "order_status_update",
+                order
+            }
+        );
+
+        return res.json({
+            success: true,
+            message: "Statut de la commande mis à jour.",
+            order
+        });
+
+    } catch (error) {
+        console.error(
+            "Update order status error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la mise à jour du statut."
+        });
+    }
+});
+
+/* =========================================================
+   UPDATE PAYMENT STATUS
+========================================================= */
+
+app.put("/api/orders/:id/payment", (req, res) => {
+    try {
+        const id = normalizeInteger(
+            req.params.id
+        );
+
+        const paymentStatus = normalizeText(
+            req.body?.paymentStatus
+        );
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Commande invalide."
+            });
+        }
+
+        if (!isValidPaymentStatus(paymentStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: "Statut de paiement invalide."
+            });
+        }
+
+        const order = db.prepare(`
+            SELECT *
+            FROM orders
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Commande introuvable."
+            });
+        }
+
+        db.prepare(`
+            UPDATE orders
+            SET
+                payment_status = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `).run(
+            String(paymentStatus),
+            Number(id)
+        );
+
+        const updatedOrder = db.prepare(`
+            SELECT *
+            FROM orders
+            WHERE id = ?
+        `).get(
+            Number(id)
+        );
+
+        broadcastToUser(
+            Number(updatedOrder.user_id),
+            {
+                type: "payment_update",
+                order: updatedOrder
+            }
+        );
+
+        return res.json({
+            success: true,
+            message: "Statut du paiement mis à jour.",
+            order: updatedOrder
+        });
+
+    } catch (error) {
+        console.error(
+            "Update payment error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors de la mise à jour du paiement."
+        });
+    }
+});
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+
+app.get("/api/dashboard/:userId", (req, res) => {
+    try {
+        const userId = normalizeInteger(
+            req.params.userId
+        );
+
+        if (!userId) {
+            return res.status(400).json({
+                success: false,
+                message: "Utilisateur invalide."
+            });
+        }
+
+        const user = db.prepare(`
+            SELECT
+                id,
+                seller_name,
+                shop_name,
+                phone,
+                email
+            FROM users
+            WHERE id = ?
+        `).get(
+            Number(userId)
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "Utilisateur introuvable."
+            });
+        }
+
+        /*
+           Make sure the shop exists.
+        */
+
+        let shop = db.prepare(`
+            SELECT *
+            FROM shops
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
+        );
+
+        if (!shop) {
+            db.prepare(`
+                INSERT INTO shops (
+                    user_id,
+                    seller_name,
+                    shop_name,
+                    description,
+                    phone,
+                    whatsapp,
+                    address,
+                    logo
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            `).run(
+                Number(user.id),
+                String(user.seller_name || ""),
+                String(user.shop_name || ""),
+                "",
+                String(user.phone || ""),
+                "",
+                "",
+                ""
+            );
+
+            shop = db.prepare(`
+                SELECT *
+                FROM shops
+                WHERE user_id = ?
+            `).get(
+                Number(userId)
+            );
+        }
+
+        const productCount = db.prepare(`
+            SELECT COUNT(*) AS count
+            FROM products
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
+        );
+
+        const orderCount = db.prepare(`
+            SELECT COUNT(*) AS count
+            FROM orders
+            WHERE user_id = ?
+        `).get(
+            Number(userId)
+        );
+
+        const pendingOrders = db.prepare(`
+            SELECT COUNT(*) AS count
+            FROM orders
+            WHERE user_id = ?
+              AND status IN ('new', 'accepted', 'processing')
+        `).get(
+            Number(userId)
+        );
+
+        const completedOrders = db.prepare(`
+            SELECT COUNT(*) AS count
+            FROM orders
+            WHERE user_id = ?
+              AND status = 'completed'
+        `).get(
+            Number(userId)
+        );
+
+        const totalSales = db.prepare(`
+            SELECT COALESCE(SUM(total), 0) AS total
+            FROM orders
+            WHERE user_id = ?
+              AND status = 'completed'
+        `).get(
+            Number(userId)
+        );
+
+        return res.json({
+            success: true,
+            user,
+            shop,
+            stats: {
+                productCount: Number(
+                    productCount.count
+                ),
+                orderCount: Number(
+                    orderCount.count
+                ),
+                pendingOrders: Number(
+                    pendingOrders.count
+                ),
+                completedOrders: Number(
+                    completedOrders.count
+                ),
+                totalSales: Number(
+                    totalSales.total
+                )
+            }
+        });
+
+    } catch (error) {
+        console.error(
+            "Dashboard error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            message: "Erreur lors du chargement du dashboard."
+        });
+    }
+});
+
+/* =========================================================
+   WEBSOCKET
+========================================================= */
+
+const wss = new WebSocketServer({
+    server,
+    path: "/"
+});
+
+const clients = new Map();
+
+/*
+   clients:
+   userId => Set<WebSocket>
+*/
+
+wss.on("connection", (ws, request) => {
+    try {
+        const requestUrl = new URL(
+            request.url,
+            `http://${request.headers.host || "localhost"}`
+        );
+
+        const userId = normalizeInteger(
+            requestUrl.searchParams.get("userId")
+        );
+
+        if (!userId) {
+            ws.close();
+
+            return;
+        }
+
+        if (!clients.has(userId)) {
+            clients.set(
+                userId,
+                new Set()
+            );
+        }
+
+        clients
+            .get(userId)
+            .add(ws);
+
+        ws.send(
+            JSON.stringify({
+                type: "connected",
+                message: "WebSocket connected."
+            })
+        );
+
+        ws.on("close", () => {
+            const userClients =
+                clients.get(userId);
+
+            if (!userClients) {
+                return;
+            }
+
+            userClients.delete(ws);
+
+            if (userClients.size === 0) {
+                clients.delete(userId);
+            }
+        });
+
+        ws.on("error", error => {
+            console.error(
+                "WebSocket client error:",
+                error
+            );
+        });
+
+    } catch (error) {
+        console.error(
+            "WebSocket connection error:",
+            error
+        );
+
+        try {
+            ws.close();
+        } catch (_) {}
+    }
+});
+
+/* =========================================================
+   BROADCAST WEBSOCKET MESSAGE
+========================================================= */
+
+function broadcastToUser(userId, data) {
+    const userClients =
+        clients.get(
+            Number(userId)
+        );
+
+    if (!userClients) {
+        return;
+    }
+
+    const message = JSON.stringify(data);
+
+    for (const client of userClients) {
+        if (client.readyState === 1) {
+            try {
+                client.send(message);
+            } catch (error) {
+                console.error(
+                    "WebSocket send error:",
+                    error
+                );
+            }
+        }
+    }
+}
+
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
+
+app.get("/api/health", (req, res) => {
+    return res.json({
+        success: true,
+        message: "MadaShop API is running.",
+        time: new Date().toISOString()
+    });
+});
+
+/* =========================================================
+   API 404
+========================================================= */
+
+app.use("/api", (req, res) => {
+    return res.status(404).json({
+        success: false,
+        message: "API endpoint introuvable."
+    });
+});
+
+/* =========================================================
+   GENERAL ERROR HANDLER
+========================================================= */
+
+app.use((error, req, res, next) => {
+    console.error(
+        "Unhandled server error:",
+        error
+    );
+
+    if (res.headersSent) {
+        return next(error);
+    }
+
+    return res.status(500).json({
+        success: false,
+        message: "Une erreur interne est survenue."
+    });
+});
+
+/* =========================================================
    START SERVER
-============================================================ */
+========================================================= */
 
 server.listen(
     PORT,
     "0.0.0.0",
     () => {
-
         console.log(
             `MadaShop server running on port ${PORT}`
         );
 
         console.log(
-            "Payment method enabled: cash_on_delivery"
+            `Database: ${path.join(__dirname, "madashop.db")}`
         );
-
-        console.log(
-            "Payment statuses: pending, paid, failed"
-        );
-
-        console.log(
-            "Strict order status workflow enabled."
-        );
-
-        console.log(
-            "Advanced dashboard enabled."
-        );
-
     }
 );
-```
