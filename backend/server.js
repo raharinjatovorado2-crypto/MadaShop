@@ -11,9 +11,6 @@ const app = express();
 ============================================================
    PORT
 ============================================================
-   - En local: 3000
-   - En production: le hosting fournit process.env.PORT
-============================================================
 */
 
 const PORT = process.env.PORT || 3000;
@@ -465,8 +462,6 @@ app.post(
             /*
             ----------------------------------------------------
                NORMALIZE REGISTER DATA
-               This prevents SQLite from receiving undefined
-               or unsupported values.
             ----------------------------------------------------
             */
 
@@ -632,6 +627,17 @@ app.post(
 
             /*
             ----------------------------------------------------
+               IMPORTANT FIX
+               Execute the transaction first.
+            ----------------------------------------------------
+            */
+
+            const userId =
+                createUser();
+
+
+            /*
+            ----------------------------------------------------
                GET CREATED USER
             ----------------------------------------------------
             */
@@ -648,7 +654,7 @@ app.post(
                     FROM users
                     WHERE id = ?
                 `).get(
-                    createUser
+                    userId
                 );
 
 
@@ -733,13 +739,13 @@ app.post(
                     FROM users
                     WHERE email = ?
                 `).get(
-                    email.trim()
+                    String(email).trim()
                 );
 
 
             if (
                 !user ||
-                user.password !== password
+                user.password !== String(password)
             ) {
 
                 return res.status(401).json({
@@ -884,12 +890,18 @@ app.post(
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 `).run(
                     numericUserId,
-                    name.trim(),
-                    description || "",
+                    String(name).trim(),
+                    description !== undefined &&
+                    description !== null
+                        ? String(description)
+                        : "",
                     productCategory,
                     numericPrice,
                     numericStock,
-                    image || ""
+                    image !== undefined &&
+                    image !== null
+                        ? String(image)
+                        : ""
                 );
 
 
@@ -899,7 +911,9 @@ app.post(
                     FROM products
                     WHERE id = ?
                 `).get(
-                    result.lastInsertRowid
+                    Number(
+                        result.lastInsertRowid
+                    )
                 );
 
 
@@ -1214,12 +1228,18 @@ app.put(
                 WHERE id = ?
                   AND user_id = ?
             `).run(
-                name.trim(),
-                description || "",
+                String(name).trim(),
+                description !== undefined &&
+                description !== null
+                    ? String(description)
+                    : "",
                 productCategory,
                 numericPrice,
                 numericStock,
-                image || "",
+                image !== undefined &&
+                image !== null
+                    ? String(image)
+                    : "",
                 productId,
                 numericUserId
             );
@@ -1439,13 +1459,34 @@ app.put(
                     logo = ?
                 WHERE user_id = ?
             `).run(
-                sellerName || "",
-                shopName || "",
-                description || "",
-                phone || "",
-                whatsapp || "",
-                address || "",
-                logo || "",
+                sellerName !== undefined &&
+                sellerName !== null
+                    ? String(sellerName)
+                    : "",
+                shopName !== undefined &&
+                shopName !== null
+                    ? String(shopName)
+                    : "",
+                description !== undefined &&
+                description !== null
+                    ? String(description)
+                    : "",
+                phone !== undefined &&
+                phone !== null
+                    ? String(phone)
+                    : "",
+                whatsapp !== undefined &&
+                whatsapp !== null
+                    ? String(whatsapp)
+                    : "",
+                address !== undefined &&
+                address !== null
+                    ? String(address)
+                    : "",
+                logo !== undefined &&
+                logo !== null
+                    ? String(logo)
+                    : "",
                 userId
             );
 
@@ -1458,9 +1499,18 @@ app.put(
                     phone = ?
                 WHERE id = ?
             `).run(
-                sellerName || "",
-                shopName || "",
-                phone || "",
+                sellerName !== undefined &&
+                sellerName !== null
+                    ? String(sellerName)
+                    : "",
+                shopName !== undefined &&
+                shopName !== null
+                    ? String(shopName)
+                    : "",
+                phone !== undefined &&
+                phone !== null
+                    ? String(phone)
+                    : "",
                 userId
             );
 
@@ -1773,16 +1823,19 @@ app.post(
                         `).run(
                             numericUserId,
                             numericProductId,
-                            product.name,
+                            String(product.name),
                             Number(product.price),
-                            customerName.trim(),
+                            String(customerName).trim(),
                             normalizePhone(phone),
-                            address.trim(),
-                            note || "",
+                            String(address).trim(),
+                            note !== undefined &&
+                            note !== null
+                                ? String(note)
+                                : "",
                             numericQuantity,
                             total,
                             "new",
-                            selectedPaymentMethod,
+                            String(selectedPaymentMethod),
                             "pending"
                         );
 
@@ -2215,8 +2268,8 @@ app.put(
                                 WHERE id = ?
                                   AND user_id = ?
                             `).run(
-                                order.quantity,
-                                order.product_id,
+                                Number(order.quantity),
+                                Number(order.product_id),
                                 numericUserId
                             );
 
@@ -2246,7 +2299,7 @@ app.put(
                                 WHERE id = ?
                                   AND user_id = ?
                             `).get(
-                                order.product_id,
+                                Number(order.product_id),
                                 numericUserId
                             );
 
@@ -2262,7 +2315,7 @@ app.put(
 
                         if (
                             product.stock <
-                            order.quantity
+                            Number(order.quantity)
                         ) {
 
                             throw new Error(
@@ -2280,10 +2333,10 @@ app.put(
                                   AND user_id = ?
                                   AND stock >= ?
                             `).run(
-                                order.quantity,
-                                order.product_id,
+                                Number(order.quantity),
+                                Number(order.product_id),
                                 numericUserId,
-                                order.quantity
+                                Number(order.quantity)
                             );
 
 
@@ -2307,7 +2360,7 @@ app.put(
                             WHERE id = ?
                               AND user_id = ?
                         `).run(
-                            status,
+                            String(status),
                             orderId,
                             numericUserId
                         );
@@ -2506,7 +2559,7 @@ app.put(
                 WHERE id = ?
                   AND user_id = ?
             `).run(
-                paymentStatus,
+                String(paymentStatus),
                 orderId,
                 numericUserId
             );
@@ -2611,10 +2664,6 @@ app.get(
             }
 
 
-            /* ==================================================
-               BASIC PRODUCT STATISTICS
-            ================================================== */
-
             const productsStats =
                 db.prepare(`
                     SELECT
@@ -2654,10 +2703,6 @@ app.get(
                 `)
                 .get(userId);
 
-
-            /* ==================================================
-               ORDER STATISTICS
-            ================================================== */
 
             const orderStats =
                 db.prepare(`
@@ -2730,12 +2775,6 @@ app.get(
                 .get(userId);
 
 
-            /* ==================================================
-               SALES
-
-               Sales = completed orders only
-            ================================================== */
-
             const salesStats =
                 db.prepare(`
                     SELECT
@@ -2758,10 +2797,6 @@ app.get(
                 `)
                 .get(userId);
 
-
-            /* ==================================================
-               PAYMENT STATISTICS
-            ================================================== */
 
             const paymentStats =
                 db.prepare(`
@@ -2818,10 +2853,6 @@ app.get(
                 .get(userId);
 
 
-            /* ==================================================
-               LOW STOCK PRODUCTS
-            ================================================== */
-
             const lowStockProducts =
                 db.prepare(`
                     SELECT
@@ -2846,12 +2877,6 @@ app.get(
                 `)
                 .all(userId);
 
-
-            /* ==================================================
-               TOP PRODUCTS
-
-               Calculated from completed orders.
-            ================================================== */
 
             const topProducts =
                 db.prepare(`
@@ -2890,10 +2915,6 @@ app.get(
                 .all(userId);
 
 
-            /* ==================================================
-               RECENT ORDERS
-            ================================================== */
-
             const recentOrders =
                 db.prepare(`
                     SELECT
@@ -2921,10 +2942,6 @@ app.get(
                 `)
                 .all(userId);
 
-
-            /* ==================================================
-               SALES LAST 7 DAYS
-            ================================================== */
 
             const salesLast7Days =
                 db.prepare(`
@@ -2985,10 +3002,6 @@ app.get(
                 .all(userId);
 
 
-            /* ==================================================
-               TODAY SALES
-            ================================================== */
-
             const todayStats =
                 db.prepare(`
                     SELECT
@@ -3025,10 +3038,6 @@ app.get(
                 `)
                 .get(userId);
 
-
-            /* ==================================================
-               RETURN DASHBOARD
-            ================================================== */
 
             return res.json({
 
