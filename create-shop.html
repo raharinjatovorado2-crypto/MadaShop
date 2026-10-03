@@ -311,17 +311,28 @@
        CONFIGURATION
     ============================================================ */
 
-    const API = "http://localhost:3000";
+    /*
+     * MadaShop utilise le même domaine pour le frontend
+     * et le backend sur Render.
+     *
+     * On utilise donc /api au lieu de localhost:3000.
+     */
+
+    const API = "";
 
 
     /* ============================================================
        VERIFICATION LOGIN
     ============================================================ */
 
-    const loggedIn = localStorage.getItem("madaShopLoggedIn");
+    const loggedIn =
+        localStorage.getItem("madaShopLoggedIn");
 
     if (loggedIn !== "true") {
-        window.location.href = "login.html";
+
+        window.location.href =
+            "login.html";
+
     }
 
 
@@ -332,16 +343,23 @@
     let user = null;
 
     try {
+
         user = JSON.parse(
             localStorage.getItem("madaShopUser")
         );
+
     } catch (error) {
+
         user = null;
+
     }
 
 
     if (!user || !user.id) {
-        window.location.href = "login.html";
+
+        window.location.href =
+            "login.html";
+
     }
 
 
@@ -349,11 +367,20 @@
        ELEMENTS HTML
     ============================================================ */
 
-    const loading = document.getElementById("loading");
-    const errorMessage = document.getElementById("errorMessage");
-    const successMessage = document.getElementById("successMessage");
-    const shopForm = document.getElementById("shopForm");
-    const saveBtn = document.getElementById("saveBtn");
+    const loading =
+        document.getElementById("loading");
+
+    const errorMessage =
+        document.getElementById("errorMessage");
+
+    const successMessage =
+        document.getElementById("successMessage");
+
+    const shopForm =
+        document.getElementById("shopForm");
+
+    const saveBtn =
+        document.getElementById("saveBtn");
 
 
     /* ============================================================
@@ -369,10 +396,15 @@
 
     function showError(message) {
 
-        errorMessage.textContent = message;
-        errorMessage.style.display = "block";
+        errorMessage.textContent =
+            message;
 
-        successMessage.style.display = "none";
+        errorMessage.style.display =
+            "block";
+
+        successMessage.style.display =
+            "none";
+
     }
 
 
@@ -382,7 +414,9 @@
 
     function hideError() {
 
-        errorMessage.style.display = "none";
+        errorMessage.style.display =
+            "none";
+
     }
 
 
@@ -394,36 +428,41 @@
 
         try {
 
-            loading.style.display = "block";
-            shopForm.style.display = "none";
+            loading.style.display =
+                "block";
+
+            shopForm.style.display =
+                "none";
+
             hideError();
 
 
             /*
-             * IMPORTANT :
-             * Le server.js utilise :
+             * Endpoint backend :
              *
              * GET /api/public/shop/:userId
-             *
-             * et non :
-             *
-             * GET /api/shop/:userId
              */
 
-            const response = await fetch(
-                `${API}/api/public/shop/${user.id}`
-            );
+            const response =
+                await fetch(
+                    `${API}/api/public/shop/${user.id}`
+                );
 
 
-            const data = await response.json();
+            const data =
+                await response.json();
 
 
-            if (!response.ok || !data.success) {
+            if (
+                !response.ok ||
+                !data.success
+            ) {
 
                 throw new Error(
                     data.message ||
                     "Impossible de charger les informations de la boutique."
                 );
+
             }
 
 
@@ -437,16 +476,20 @@
              * }
              */
 
-            const shop = data.shop || {};
+            const shop =
+                data.shop || {};
 
-            currentShop = shop;
+            currentShop =
+                shop;
 
 
             /* ====================================================
                NOM DE LA BOUTIQUE
             ==================================================== */
 
-            document.getElementById("shopName").value =
+            document.getElementById(
+                "shopName"
+            ).value =
                 shop.shop_name ||
                 user.shopName ||
                 "";
@@ -456,7 +499,9 @@
                NOM DU VENDEUR
             ==================================================== */
 
-            document.getElementById("sellerName").value =
+            document.getElementById(
+                "sellerName"
+            ).value =
                 shop.seller_name ||
                 user.sellerName ||
                 "";
@@ -466,7 +511,9 @@
                TELEPHONE
             ==================================================== */
 
-            document.getElementById("phone").value =
+            document.getElementById(
+                "phone"
+            ).value =
                 shop.phone ||
                 shop.whatsapp ||
                 user.phone ||
@@ -475,59 +522,61 @@
 
             /* ====================================================
                EMAIL
-               
-               L'email est enregistré dans la table users,
-               et non dans la table shops.
-               
-               On utilise donc la valeur de madaShopUser.
             ==================================================== */
 
-            document.getElementById("email").value =
+            document.getElementById(
+                "email"
+            ).value =
                 user.email ||
                 "";
 
 
             /* ====================================================
                MESSENGER
-               
-               Il n'existe pas de colonne Messenger dans shops.
-               On conserve donc cette donnée dans localStorage.
             ==================================================== */
 
             const messengerKey =
                 `madaShopMessenger_${user.id}`;
 
-            document.getElementById("messenger").value =
-                localStorage.getItem(messengerKey) ||
-                "";
+            document.getElementById(
+                "messenger"
+            ).value =
+                localStorage.getItem(
+                    messengerKey
+                ) || "";
 
 
             /* ====================================================
                CATEGORY
-               
-               Il n'existe pas de colonne category dans shops.
-               On conserve donc cette donnée dans localStorage.
             ==================================================== */
 
             const categoryKey =
                 `madaShopCategory_${user.id}`;
 
-            document.getElementById("category").value =
-                localStorage.getItem(categoryKey) ||
-                "";
+            document.getElementById(
+                "category"
+            ).value =
+                localStorage.getItem(
+                    categoryKey
+                ) || "";
 
 
             /* ====================================================
                DESCRIPTION
             ==================================================== */
 
-            document.getElementById("description").value =
+            document.getElementById(
+                "description"
+            ).value =
                 shop.description ||
                 "";
 
 
-            loading.style.display = "none";
-            shopForm.style.display = "block";
+            loading.style.display =
+                "none";
+
+            shopForm.style.display =
+                "block";
 
         }
 
@@ -538,13 +587,16 @@
                 error
             );
 
-            loading.style.display = "none";
+            loading.style.display =
+                "none";
 
             showError(
                 error.message ||
                 "Impossible de charger les informations de la boutique."
             );
+
         }
+
     }
 
 
@@ -552,296 +604,341 @@
        ENREGISTRER LES MODIFICATIONS
     ============================================================ */
 
-    shopForm.addEventListener("submit", async function(event) {
+    shopForm.addEventListener(
+        "submit",
+        async function(event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        hideError();
+            hideError();
 
-        successMessage.style.display = "none";
-
-
-        /* ========================================================
-           RECUPERATION DES VALEURS
-        ======================================================== */
-
-        const shopData = {
-
-            shopName:
-                document.getElementById("shopName").value.trim(),
-
-            sellerName:
-                document.getElementById("sellerName").value.trim(),
-
-            phone:
-                document.getElementById("phone").value.trim(),
-
-            email:
-                document.getElementById("email").value.trim(),
-
-            messenger:
-                document.getElementById("messenger").value.trim(),
-
-            category:
-                document.getElementById("category").value,
-
-            description:
-                document.getElementById("description").value.trim()
-        };
+            successMessage.style.display =
+                "none";
 
 
-        /* ========================================================
-           VERIFICATION
-        ======================================================== */
+            /* ====================================================
+               RECUPERATION DES VALEURS
+            ==================================================== */
 
-        if (!shopData.shopName) {
-
-            showError(
-                "Veuillez entrer le nom de votre boutique."
-            );
-
-            return;
-        }
-
-
-        if (!shopData.sellerName) {
-
-            showError(
-                "Veuillez entrer votre nom."
-            );
-
-            return;
-        }
-
-
-        if (!shopData.phone) {
-
-            showError(
-                "Veuillez entrer votre numéro WhatsApp."
-            );
-
-            return;
-        }
-
-
-        /* ========================================================
-           DESACTIVER BOUTON
-        ======================================================== */
-
-        saveBtn.disabled = true;
-
-        saveBtn.textContent =
-            "⏳ Enregistrement...";
-
-
-        try {
-
-            /*
-             * Le server.js attend :
-             *
-             * sellerName
-             * shopName
-             * description
-             * phone
-             * whatsapp
-             * address
-             * logo
-             *
-             * On conserve address et logo existants.
-             */
-
-            const serverData = {
-
-                sellerName:
-                    shopData.sellerName,
+            const shopData = {
 
                 shopName:
-                    shopData.shopName,
+                    document
+                        .getElementById("shopName")
+                        .value
+                        .trim(),
 
-                description:
-                    shopData.description,
+                sellerName:
+                    document
+                        .getElementById("sellerName")
+                        .value
+                        .trim(),
 
                 phone:
-                    shopData.phone,
+                    document
+                        .getElementById("phone")
+                        .value
+                        .trim(),
 
-                /*
-                 * Dans le server.js actuel,
-                 * whatsapp existe dans la table shops.
-                 *
-                 * Le formulaire utilise déjà le numéro WhatsApp
-                 * comme champ principal.
-                 */
-                whatsapp:
-                    shopData.phone,
+                email:
+                    document
+                        .getElementById("email")
+                        .value
+                        .trim(),
 
-                /*
-                 * Ces données existent éventuellement déjà
-                 * dans la boutique.
-                 *
-                 * On ne les supprime pas.
-                 */
-                address:
-                    currentShop.address || "",
+                messenger:
+                    document
+                        .getElementById("messenger")
+                        .value
+                        .trim(),
 
-                logo:
-                    currentShop.logo || ""
+                category:
+                    document
+                        .getElementById("category")
+                        .value,
+
+                description:
+                    document
+                        .getElementById("description")
+                        .value
+                        .trim()
+
             };
 
 
             /* ====================================================
-               ENVOI AU SERVER
+               VERIFICATION
             ==================================================== */
 
-            const response = await fetch(
-                `${API}/api/shop/${user.id}`,
-                {
-                    method: "PUT",
+            if (!shopData.shopName) {
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify(serverData)
-                }
-            );
-
-
-            const data = await response.json();
-
-
-            if (!response.ok || !data.success) {
-
-                throw new Error(
-                    data.message ||
-                    "Impossible d'enregistrer les modifications."
+                showError(
+                    "Veuillez entrer le nom de votre boutique."
                 );
+
+                return;
+
+            }
+
+
+            if (!shopData.sellerName) {
+
+                showError(
+                    "Veuillez entrer votre nom."
+                );
+
+                return;
+
+            }
+
+
+            if (!shopData.phone) {
+
+                showError(
+                    "Veuillez entrer votre numéro WhatsApp."
+                );
+
+                return;
+
             }
 
 
             /* ====================================================
-               MESSENGER
-               
-               Comme le server.js actuel ne possède pas de colonne
-               Messenger, on conserve cette information localement.
+               DESACTIVER BOUTON
             ==================================================== */
 
-            localStorage.setItem(
-                `madaShopMessenger_${user.id}`,
-                shopData.messenger
-            );
-
-
-            /* ====================================================
-               CATEGORY
-               
-               Même principe : conservation locale.
-            ==================================================== */
-
-            localStorage.setItem(
-                `madaShopCategory_${user.id}`,
-                shopData.category
-            );
-
-
-            /* ====================================================
-               MISE A JOUR USER LOCALSTORAGE
-            ==================================================== */
-
-            const updatedUser = {
-
-                ...user,
-
-                shopName:
-                    shopData.shopName,
-
-                sellerName:
-                    shopData.sellerName,
-
-                phone:
-                    shopData.phone,
-
-                email:
-                    shopData.email
-            };
-
-
-            localStorage.setItem(
-                "madaShopUser",
-                JSON.stringify(updatedUser)
-            );
-
-
-            /* ====================================================
-               MESSAGE SUCCESS
-            ==================================================== */
-
-            successMessage.textContent =
-                "✅ Les modifications ont été enregistrées avec succès.";
-
-            successMessage.style.display = "block";
-
-
-            /* ====================================================
-               RESTAURER BOUTON
-            ==================================================== */
-
-            saveBtn.disabled = false;
+            saveBtn.disabled =
+                true;
 
             saveBtn.textContent =
-                "💾 Enregistrer les modifications";
+                "⏳ Enregistrement...";
 
 
-            /*
-             * Mise à jour de currentShop
-             */
-            currentShop = {
-                ...currentShop,
-                shop_name:
-                    shopData.shopName,
-                seller_name:
-                    shopData.sellerName,
-                phone:
-                    shopData.phone,
-                whatsapp:
-                    shopData.phone,
-                description:
-                    shopData.description
-            };
+            try {
+
+                /*
+                 * Le server.js attend :
+                 *
+                 * sellerName
+                 * shopName
+                 * description
+                 * phone
+                 * whatsapp
+                 * address
+                 * logo
+                 */
+
+                const serverData = {
+
+                    sellerName:
+                        shopData.sellerName,
+
+                    shopName:
+                        shopData.shopName,
+
+                    description:
+                        shopData.description,
+
+                    phone:
+                        shopData.phone,
+
+                    whatsapp:
+                        shopData.phone,
+
+                    address:
+                        currentShop.address ||
+                        "",
+
+                    logo:
+                        currentShop.logo ||
+                        ""
+
+                };
 
 
-            /*
-             * Redirection après sauvegarde
-             */
-            setTimeout(function() {
+                /* =================================================
+                   ENVOI AU SERVER
+                ================================================= */
 
-                window.location.href =
-                    "dashboard.html";
+                const response =
+                    await fetch(
+                        `${API}/api/shop/${user.id}`,
+                        {
 
-            }, 1000);
+                            method:
+                                "PUT",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json"
+
+                            },
+
+                            body:
+                                JSON.stringify(
+                                    serverData
+                                )
+
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (
+                    !response.ok ||
+                    !data.success
+                ) {
+
+                    throw new Error(
+                        data.message ||
+                        "Impossible d'enregistrer les modifications."
+                    );
+
+                }
+
+
+                /* =================================================
+                   MESSENGER
+                ================================================= */
+
+                localStorage.setItem(
+                    `madaShopMessenger_${user.id}`,
+                    shopData.messenger
+                );
+
+
+                /* =================================================
+                   CATEGORY
+                ================================================= */
+
+                localStorage.setItem(
+                    `madaShopCategory_${user.id}`,
+                    shopData.category
+                );
+
+
+                /* =================================================
+                   MISE A JOUR USER LOCALSTORAGE
+                ================================================= */
+
+                const updatedUser = {
+
+                    ...user,
+
+                    shopName:
+                        shopData.shopName,
+
+                    sellerName:
+                        shopData.sellerName,
+
+                    phone:
+                        shopData.phone,
+
+                    email:
+                        shopData.email
+
+                };
+
+
+                localStorage.setItem(
+                    "madaShopUser",
+                    JSON.stringify(
+                        updatedUser
+                    )
+                );
+
+
+                /* =================================================
+                   MESSAGE SUCCESS
+                ================================================= */
+
+                successMessage.textContent =
+                    "✅ Les modifications ont été enregistrées avec succès.";
+
+                successMessage.style.display =
+                    "block";
+
+
+                /* =================================================
+                   RESTAURER BOUTON
+                ================================================= */
+
+                saveBtn.disabled =
+                    false;
+
+                saveBtn.textContent =
+                    "💾 Enregistrer les modifications";
+
+
+                /* =================================================
+                   MISE A JOUR CURRENT SHOP
+                ================================================= */
+
+                currentShop = {
+
+                    ...currentShop,
+
+                    shop_name:
+                        shopData.shopName,
+
+                    seller_name:
+                        shopData.sellerName,
+
+                    phone:
+                        shopData.phone,
+
+                    whatsapp:
+                        shopData.phone,
+
+                    description:
+                        shopData.description
+
+                };
+
+
+                /* =================================================
+                   REDIRECTION
+                ================================================= */
+
+                setTimeout(
+                    function() {
+
+                        window.location.href =
+                            "dashboard.html";
+
+                    },
+                    1000
+                );
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "Erreur sauvegarde boutique :",
+                    error
+                );
+
+                showError(
+                    error.message ||
+                    "Impossible d'enregistrer les modifications."
+                );
+
+
+                saveBtn.disabled =
+                    false;
+
+                saveBtn.textContent =
+                    "💾 Enregistrer les modifications";
+
+            }
 
         }
-
-        catch (error) {
-
-            console.error(
-                "Erreur sauvegarde boutique :",
-                error
-            );
-
-            showError(
-                error.message ||
-                "Impossible d'enregistrer les modifications."
-            );
-
-
-            saveBtn.disabled = false;
-
-            saveBtn.textContent =
-                "💾 Enregistrer les modifications";
-        }
-
-    });
+    );
 
 
     /* ============================================================
